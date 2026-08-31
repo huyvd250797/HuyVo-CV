@@ -1,7 +1,9 @@
-import { profile } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 import { appVersion } from "@/data/version";
 
-export function Footer() {
+export function Footer({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+  const profile = profileData;
+
   return (
     <footer className="footer">
       <div className="container footer-inner">

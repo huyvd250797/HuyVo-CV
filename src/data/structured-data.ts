@@ -1,43 +1,50 @@
-import { profile } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 import { absoluteUrl, siteConfig } from "@/data/seo";
 
-type Project = (typeof profile.projects)[number];
+type Project = PortfolioProfile["projects"][number];
 
-const sameAs = [profile.social.linkedin, profile.social.github].filter((url) => url && url !== "#");
+export function personJsonLdFor(profile: PortfolioProfile = fallbackProfile) {
+  const sameAs = [profile.social.linkedin, profile.social.github].filter((url) => url && url !== "#");
 
-export const personJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  name: profile.name,
-  jobTitle: profile.role,
-  description: profile.description,
-  email: `mailto:${profile.email}`,
-  url: siteConfig.url,
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Ho Chi Minh City",
-    addressCountry: "VN",
-  },
-  knowsAbout: [
-    ...profile.specialties,
-    ...profile.skillGroups.flatMap((group) => group.skills),
-  ],
-  sameAs,
-};
-
-export const websiteJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: siteConfig.name,
-  url: siteConfig.url,
-  description: siteConfig.description,
-  author: {
+  return {
+    "@context": "https://schema.org",
     "@type": "Person",
     name: profile.name,
-  },
-};
+    jobTitle: profile.role,
+    description: profile.description,
+    email: `mailto:${profile.email}`,
+    url: siteConfig.url,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Ho Chi Minh City",
+      addressCountry: "VN",
+    },
+    knowsAbout: [
+      ...profile.specialties,
+      ...profile.skillGroups.flatMap((group) => group.skills),
+    ],
+    sameAs,
+  };
+}
 
-export function projectJsonLd(project: Project) {
+export function websiteJsonLdFor(profile: PortfolioProfile = fallbackProfile) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteConfig.name,
+    url: siteConfig.url,
+    description: siteConfig.description,
+    author: {
+      "@type": "Person",
+      name: profile.name,
+    },
+  };
+}
+
+export const personJsonLd = personJsonLdFor();
+export const websiteJsonLd = websiteJsonLdFor();
+
+export function projectJsonLd(project: Project, profile: PortfolioProfile = fallbackProfile) {
   return {
     "@context": "https://schema.org",
     "@type": "CreativeWork",

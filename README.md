@@ -1,42 +1,60 @@
-# HuyVo Portfolio — V0.9.0 Portfolio CMS / Admin
+# HuyVo Portfolio — V0.9.1 Real CMS / Supabase Admin
 
 Professional personal portfolio built with Next.js, TypeScript and CSS, ready for Vercel deployment.
 
-## V0.9.0 highlights
-- Existing portfolio foundation, professional CV, project portfolio, case studies, resume PDF support, contact page, Animation/UX and SEO/Performance upgrades.
-- Added `/admin` Portfolio CMS / Admin Lite.
-- Added client-side password gate for the admin screen.
-- Added browser draft saving with `localStorage`.
-- Added editing screens for Profile, Experience, Projects, Skills, Education, Certifications, Contact and Social links.
-- Added project case-study editor for context, problem, process, solution, result and lessons learned.
-- Added export tools to copy generated `src/data/profile.ts` or download a JSON draft.
-- Admin route is marked `noindex, nofollow`.
-- Central version source updated to `V0.9.0` in `src/data/version.ts`.
+## V0.9.1 highlights
+- Existing portfolio foundation, professional CV, project portfolio, case studies, resume PDF support, contact page, Animation/UX, SEO/Performance and Admin UI.
+- Upgraded `/admin` from Admin Lite to Real CMS mode.
+- Added Supabase-backed profile storage through a protected Next.js API route.
+- Public portfolio pages now read live profile data from Supabase when configured.
+- `/resume`, `/contact`, `/projects/[slug]` and sitemap can use live Supabase data.
+- Added fallback to `src/data/profile.ts` when Supabase is not configured or the profile record does not exist.
+- Added `Save live` action in `/admin` to write profile data to Supabase.
+- Added `Load live` action to reload the current Supabase/source profile.
+- Added browser draft saving and export tools as backup options.
+- Added Supabase schema at `supabase/schema.sql`.
+- Central version source updated to `V0.9.1` in `src/data/version.ts`.
 
-## Important admin note
-V0.9.0 is **Admin Lite**. It does not include a database yet.
-
-Edits made at `/admin` are saved only in the current browser. To publish changes:
-
-1. Open `/admin`.
-2. Edit your profile data.
-3. Click **Copy profile.ts**.
-4. Replace the content of `src/data/profile.ts` with the copied code.
-5. Commit/redeploy to Vercel.
-
-For production, set this Vercel environment variable:
+## Supabase setup
+1. Create a Supabase project.
+2. Open Supabase SQL Editor.
+3. Run the SQL inside `supabase/schema.sql`.
+4. Add these Vercel environment variables:
 
 ```bash
-NEXT_PUBLIC_ADMIN_PASSWORD=your-password
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ADMIN_PASSWORD=your-admin-password
 ```
 
-If this is not set, the local fallback password is:
+Optional variables:
 
 ```bash
-huyvo-admin
+SUPABASE_PORTFOLIO_TABLE=portfolio_profiles
+SUPABASE_PORTFOLIO_ID=default
+PORTFOLIO_REVALIDATE_SECONDS=60
 ```
 
-This is only a simple client-side gate. A future CMS/database version should use real server-side authentication.
+Important: never expose `SUPABASE_SERVICE_ROLE_KEY` in client code. Keep it only as a server-side Vercel environment variable.
+
+## How publishing works in V0.9.1
+```text
+/admin
+↓
+Unlock admin
+↓
+Edit Profile / Experience / Projects / Skills / Contact
+↓
+Click Save live
+↓
+Next.js API writes to Supabase
+↓
+Portfolio / Resume / Project pages read live data
+```
+
+If Supabase is not configured, the website safely falls back to `src/data/profile.ts`.
 
 ## Run locally
 ```bash
@@ -51,6 +69,12 @@ Admin route:
 http://localhost:3000/admin
 ```
 
+Local fallback admin password:
+
+```bash
+huyvo-admin
+```
+
 ## Production check
 ```bash
 npm run build
@@ -59,23 +83,5 @@ npm run build
 ## Deploy to Vercel
 Import the repository/project into Vercel. Keep the framework preset as Next.js and leave Output Directory at its default value.
 
-Recommended environment variables:
-
-```bash
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
-NEXT_PUBLIC_ADMIN_PASSWORD=your-password
-```
-
-If `NEXT_PUBLIC_SITE_URL` is not set, the app falls back to `https://huyvo-portfolio.vercel.app` for sitemap, robots, OpenGraph and canonical URLs.
-
-## Customize your information manually
-You can still edit `src/data/profile.ts` directly.
-
-Important fields to replace before publishing:
-- `email`
-- `contact.methods`
-- `social.linkedin`
-- `social.github`
-- education/certifications if you want them displayed
-
-The contact form uses `mailto:`, so messages are sent through the visitor's email app instead of a backend API.
+## Manual fallback
+You can still edit `src/data/profile.ts` directly, or use `/admin` → Export Backup → Copy `profile.ts` if you want to commit profile changes into source code.

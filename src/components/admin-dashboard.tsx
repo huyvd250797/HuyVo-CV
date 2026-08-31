@@ -5,6 +5,7 @@ import { profile, type ProjectCategory } from "@/data/profile";
 import { appVersion } from "@/data/version";
 
 type AdminTab = "profile" | "experience" | "projects" | "skills" | "credentials" | "export";
+type CmsSource = "supabase" | "source";
 
 type HighlightDraft = { label: string; value: string };
 type ExperienceDraft = {
@@ -73,8 +74,8 @@ type AdminProfileDraft = {
   social: { linkedin: string; github: string };
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v090";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v090";
+const storageKey = "huyvo-portfolio-admin-draft-v091";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v091";
 const fallbackPassword = "huyvo-admin";
 
 const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
@@ -83,7 +84,7 @@ const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
   { id: "projects", label: "Projects", description: "Portfolio cards and case study content." },
   { id: "skills", label: "Skills", description: "Skill groups used across portfolio and resume." },
   { id: "credentials", label: "Credentials", description: "Education, certifications and contact channels." },
-  { id: "export", label: "Export", description: "Copy the generated profile config back into the source." },
+  { id: "export", label: "Export", description: "Backup profile.ts and JSON when you still want a code copy." },
 ];
 
 function splitLines(value: string) {
@@ -291,8 +292,17 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>("profile");
   const [draft, setDraft] = useState<AdminProfileDraft>(() => createDraftFromProfile());
   const [message, setMessage] = useState("Ready");
+  const [cmsSource, setCmsSource] = useState<CmsSource>("source");
+  const [cmsReason, setCmsReason] = useState("Source fallback is active until Supabase is configured or live data is saved.");
+  const [cmsUpdatedAt, setCmsUpdatedAt] = useState<string | null>(null);
+  const [supabaseConfigured, setSupabaseConfigured] = useState(false);
+  const [canWriteLive, setCanWriteLive] = useState(false);
+  const [cmsTable, setCmsTable] = useState("portfolio_profiles");
+  const [cmsRecordId, setCmsRecordId] = useState("default");
+  const [livePassword, setLivePassword] = useState("");
+  const [loadingLive, setLoadingLive] = useState(false);
+  const [savingLive, setSavingLive] = useState(false);
 
-  const expectedPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || fallbackPassword;
   const generatedSource = useMemo(() => buildProfileSource(draft), [draft]);
   const activeTabInfo = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
 
@@ -312,15 +322,34 @@ export function AdminDashboard() {
     }
   }, []);
 
-  function handleUnlock(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    if (unlocked) {
+      void loadLiveProfile();
+    }
+  }, [unlocked]);
+
+  async function handleUnlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (password.trim() === expectedPassword) {
+
+    try {
+      const response = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: password.trim() }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Wrong admin password.");
+      }
+
       setUnlocked(true);
+      setLivePassword(password.trim());
       window.sessionStorage.setItem(sessionKey, "true");
       setMessage("Admin unlocked");
-      return;
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Wrong admin password.");
     }
-    setMessage("Wrong password. Check NEXT_PUBLIC_ADMIN_PASSWORD or use the local fallback.");
   }
 
   function saveDraft() {
@@ -332,6 +361,68 @@ export function AdminDashboard() {
     window.localStorage.removeItem(storageKey);
     setDraft(createDraftFromProfile());
     setMessage("Draft reset to source data");
+  }
+
+  async function loadLiveProfile() {
+    setLoadingLive(true);
+    try {
+      const response = await fetch("/api/admin/profile", { cache: "no-store" });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Could not load CMS profile.");
+      }
+
+      setDraft(result.profile as AdminProfileDraft);
+      setCmsSource(result.source as CmsSource);
+      setCmsReason(result.reason || (result.source === "supabase" ? "Loaded live profile from Supabase." : "Using source fallback profile."));
+      setCmsUpdatedAt(result.updatedAt ?? null);
+      setSupabaseConfigured(Boolean(result.supabaseConfigured));
+      setCanWriteLive(Boolean(result.canWrite));
+      setCmsTable(result.table || "portfolio_profiles");
+      setCmsRecordId(result.recordId || "default");
+      setMessage(result.source === "supabase" ? "Loaded live Supabase profile" : "Loaded source fallback profile");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not load live profile");
+    } finally {
+      setLoadingLive(false);
+    }
+  }
+
+  async function saveLiveProfile() {
+    const passwordToUse = livePassword || password;
+
+    if (!passwordToUse) {
+      setMessage("Enter admin password before saving to Supabase");
+      return;
+    }
+
+    setSavingLive(true);
+    try {
+      const response = await fetch("/api/admin/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": passwordToUse,
+        },
+        body: JSON.stringify({ profile: draft }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Save to Supabase failed.");
+      }
+
+      window.localStorage.setItem(storageKey, JSON.stringify(draft, null, 2));
+      setCmsSource("supabase");
+      setCmsReason("Saved live profile to Supabase. Public pages have been revalidated.");
+      setCmsUpdatedAt(new Date().toISOString());
+      setMessage("Saved to Supabase and revalidated portfolio pages");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Save to Supabase failed");
+    } finally {
+      setSavingLive(false);
+    }
   }
 
   async function copyProfileSource() {
@@ -417,11 +508,11 @@ export function AdminDashboard() {
       <main className="admin-page admin-login-page">
         <div className="admin-login-card">
           <a className="admin-back" href="/">← Back to portfolio</a>
-          <div className="admin-badge">{appVersion.label} · Admin Lite</div>
+          <div className="admin-badge">{appVersion.label} · Real CMS</div>
           <h1>Portfolio CMS / Admin</h1>
           <p>
-            This first CMS version protects the editor screen with a simple client-side password and saves drafts in your browser.
-            It does not change the live website until you copy the exported config back into <code>src/data/profile.ts</code> and redeploy.
+            This version connects the editor to Supabase through a protected Next.js API route.
+            When Supabase is configured, clicking <strong>Save live</strong> updates the portfolio, resume and case-study data without editing code.
           </p>
           <form onSubmit={handleUnlock} className="admin-login-form">
             <label>
@@ -436,7 +527,7 @@ export function AdminDashboard() {
             </label>
             <button type="submit">Unlock admin</button>
           </form>
-          <small>Set <code>NEXT_PUBLIC_ADMIN_PASSWORD</code> on Vercel. Local fallback: <code>{fallbackPassword}</code>.</small>
+          <small>Set <code>ADMIN_PASSWORD</code> on Vercel for server-side protection. Local fallback: <code>{fallbackPassword}</code>.</small>
           <div className="admin-message">{message}</div>
         </div>
       </main>
@@ -452,15 +543,42 @@ export function AdminDashboard() {
           <p>{appVersion.label} · {appVersion.name}</p>
         </div>
         <div className="admin-actions">
+          <label className="admin-live-password">
+            <span>Save password</span>
+            <input
+              type="password"
+              value={livePassword}
+              placeholder="ADMIN_PASSWORD"
+              onChange={(event) => setLivePassword(event.target.value)}
+            />
+          </label>
+          <button type="button" onClick={loadLiveProfile} disabled={loadingLive}>{loadingLive ? "Loading..." : "Load live"}</button>
           <button type="button" onClick={saveDraft}>Save draft</button>
-          <button type="button" onClick={downloadJson}>Download JSON</button>
-          <button type="button" className="primary" onClick={copyProfileSource}>Copy profile.ts</button>
+          <button type="button" className="primary" onClick={saveLiveProfile} disabled={savingLive}>{savingLive ? "Saving..." : "Save live"}</button>
         </div>
       </header>
 
       <div className="admin-status">
         <span>{message}</span>
         <button type="button" onClick={resetDraft}>Reset to source data</button>
+      </div>
+
+      <div className="admin-cms-status">
+        <div>
+          <span>CMS source</span>
+          <strong>{cmsSource === "supabase" ? "Supabase live" : "Source fallback"}</strong>
+          <p>{cmsReason}</p>
+        </div>
+        <div>
+          <span>Supabase</span>
+          <strong>{supabaseConfigured ? "Configured" : "Not configured"}</strong>
+          <p>Table: <code>{cmsTable}</code> · Record: <code>{cmsRecordId}</code> · Write: {canWriteLive ? "ready" : "missing service role"}</p>
+        </div>
+        <div>
+          <span>Last update</span>
+          <strong>{cmsUpdatedAt ? new Date(cmsUpdatedAt).toLocaleString() : "Not saved yet"}</strong>
+          <p>Public pages fall back to <code>src/data/profile.ts</code> when Supabase is unavailable.</p>
+        </div>
       </div>
 
       <div className="admin-layout">
@@ -672,9 +790,10 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export config" description="This CMS Lite version edits a browser draft. Copy this code into src/data/profile.ts and redeploy to publish it.">
+            <AdminSection title="Export backup" description="V0.9.1 saves live data to Supabase. Export is still available as a backup or for manual source fallback updates.">
               <div className="admin-export-actions">
-                <button type="button" className="primary" onClick={copyProfileSource}>Copy profile.ts</button>
+                <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
+                <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>
                 <button type="button" onClick={downloadJson}>Download JSON</button>
                 <button type="button" onClick={saveDraft}>Save browser draft</button>
               </div>

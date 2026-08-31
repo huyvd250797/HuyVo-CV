@@ -2,20 +2,19 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { profile } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 
-const initialForm = {
-  name: "",
-  email: "",
-  topic: profile.contact.preferredTopics[0] ?? "General message",
-  message: "",
-};
-
-export function ContactForm() {
-  const [form, setForm] = useState(initialForm);
+export function ContactForm({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+  const profile = profileData;
+  const [form, setForm] = useState(() => ({
+    name: "",
+    email: "",
+    topic: profile.contact.preferredTopics[0] ?? "General message",
+    message: "",
+  }));
   const [submitted, setSubmitted] = useState(false);
 
-  function updateField(field: keyof typeof initialForm, value: string) {
+  function updateField(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
     if (submitted) setSubmitted(false);
   }

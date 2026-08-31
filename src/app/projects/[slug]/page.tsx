@@ -2,16 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/footer";
 import { JsonLd } from "@/components/json-ld";
-import { profile } from "@/data/profile";
 import { absoluteUrl } from "@/data/seo";
 import { breadcrumbJsonLd, projectJsonLd } from "@/data/structured-data";
+import { readPortfolioProfile } from "@/lib/portfolio-cms";
 
-export function generateStaticParams() {
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const { profile } = await readPortfolioProfile();
   return profile.projects.map((project) => ({ slug: project.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const { profile } = await readPortfolioProfile();
   const project = profile.projects.find((item) => item.slug === slug);
 
   return project
@@ -38,6 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProjectCaseStudy({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const { profile } = await readPortfolioProfile();
   const project = profile.projects.find((item) => item.slug === slug);
   if (!project) {
     notFound();
@@ -52,7 +57,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
 
   return (
     <main id="top" className="case-study-page">
-      <JsonLd data={[projectJsonLd(project), breadcrumb]} />
+      <JsonLd data={[projectJsonLd(project, profile), breadcrumb]} />
       <div className="case-nav container">
         <Link href="/#projects" className="case-back">← Back to projects</Link>
         <span>{profile.shortName}<i>.</i></span>
@@ -132,7 +137,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
           <div className="case-next"><Link href="/#projects">Explore other projects ↗</Link></div>
         </div>
       </section>
-      <Footer />
+      <Footer profileData={profile} />
     </main>
   );
 }

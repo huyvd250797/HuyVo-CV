@@ -738,7 +738,7 @@ html[data-active-section="contact"] .nav-cta {
   margin: 0 0 34px;
 }
 
-/* V0.9.0 — Portfolio CMS / Admin */
+/* V0.9.1 — Real CMS / Supabase Admin */
 .admin-page {
   min-height: 100vh;
   background:
@@ -1187,5 +1187,85 @@ html[data-active-section="contact"] .nav-cta {
   .admin-card-head {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+/* V0.9.1 — Real CMS / Supabase Admin */
+.admin-cms-status {
+  max-width: 1440px;
+  margin: 0 auto 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-cms-status > div {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 86%, var(--surface-2));
+  padding: 16px;
+}
+
+.admin-cms-status span,
+.admin-live-password span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.admin-cms-status strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 18px;
+  letter-spacing: -.025em;
+}
+
+.admin-cms-status p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.admin-cms-status code {
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.admin-live-password {
+  min-width: 210px;
+  display: grid;
+  gap: 7px;
+}
+
+.admin-live-password input {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 11px 13px;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+.admin-live-password input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.admin-actions button:disabled,
+.admin-export-actions button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+  transform: none;
+}
+
+@media (max-width: 1120px) {
+  .admin-cms-status {
+    grid-template-columns: 1fr;
   }
 }

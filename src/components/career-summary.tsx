@@ -1,6 +1,8 @@
-import { profile } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 
-export function CareerSummary() {
+export function CareerSummary({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+  const profile = profileData;
+
   return (
     <section className="section career-summary" id="summary">
       <div className="container">

@@ -3,6 +3,7 @@ import { Contact } from "@/components/contact";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { profile } from "@/data/profile";
+import { readPortfolioProfile } from "@/lib/portfolio-cms";
 
 export const metadata: Metadata = {
   title: `Contact | ${profile.name}`,
@@ -15,13 +16,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { profile: portfolio } = await readPortfolioProfile();
+
   return (
     <main id="top">
-      <Header />
+      <Header profileData={portfolio} />
       <div className="contact-page-spacer" />
-      <Contact />
-      <Footer />
+      <Contact profileData={portfolio} />
+      <Footer profileData={portfolio} />
     </main>
   );
 }

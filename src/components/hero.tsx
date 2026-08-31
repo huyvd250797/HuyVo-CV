@@ -1,7 +1,9 @@
-import { profile } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 import { appVersion } from "@/data/version";
 
-export function Hero() {
+export function Hero({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+  const profile = profileData;
+
   return (
     <section className="hero section" id="top">
       <div className="container hero-grid">

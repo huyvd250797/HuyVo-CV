@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
-import { profile } from "@/data/profile";
 import { absoluteUrl } from "@/data/seo";
+import { readPortfolioProfile } from "@/lib/portfolio-cms";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const { profile } = await readPortfolioProfile();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "monthly", priority: 1 },

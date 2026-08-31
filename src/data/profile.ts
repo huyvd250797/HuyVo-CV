@@ -272,3 +272,5 @@ export const profile = {
   },
   social: { linkedin: "#", github: "#" },
 } as const;
+
+export type PortfolioProfile = typeof profile;

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ResumePrintButton } from "@/components/resume-print-button";
 import { profile } from "@/data/profile";
 import { appVersion } from "@/data/version";
+import { readPortfolioProfile } from "@/lib/portfolio-cms";
 
 export const metadata: Metadata = {
   title: `Resume | ${profile.name}`,
@@ -15,7 +16,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ResumePage() {
+export default async function ResumePage() {
+  const { profile } = await readPortfolioProfile();
+
   return (
     <main id="top" className="resume-page">
       <div className="resume-toolbar container">
