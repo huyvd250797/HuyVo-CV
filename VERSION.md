@@ -1,21 +1,26 @@
 # HuyVo Portfolio Version
 
-## V0.7.0 — Animation & UX
+## V0.8.0 — SEO & Performance
 
-Current version: **V0.7.0**
+Current version: **V0.8.0**
 
 ### Added
-- Scroll reveal animation system via `src/components/scroll-ux.tsx`.
-- Header scroll progress bar.
-- Active section state for navbar items.
-- Micro-interactions for cards, buttons, filter chips, profile card and contact cards.
-- Project result count for filter feedback.
-- Accessibility-safe reduced-motion fallback.
+- Global metadata base, title template, canonical URL, keywords, OpenGraph and Twitter metadata.
+- `src/data/seo.ts` for reusable SEO configuration and absolute URL generation.
+- JSON-LD structured data for the homepage and project case studies.
+- Dynamic `sitemap.xml` with homepage, resume, contact and all project case-study pages.
+- Dynamic `robots.txt` with sitemap reference.
+- Web app manifest for install/share metadata.
+- Dynamic OpenGraph image route.
+- SVG favicon and app icon assets.
+- Security/performance headers through `next.config.ts`.
+- 404 page for moved or invalid routes.
 
 ### Changed
-- `package.json` version updated to `0.7.0`.
+- `package.json` version updated to `0.8.0`.
 - UI version source updated in `src/data/version.ts`.
-- Home page UX polished without adding extra dependencies.
+- Contact copy no longer hard-codes a previous version number.
+- Project case-study metadata now includes canonical URLs and social preview metadata.
 
 ### Version consistency
-UI version is sourced from `src/data/version.ts` and package version is `0.7.0`.
+UI version is sourced from `src/data/version.ts` and package version is `0.8.0`.

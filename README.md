@@ -1,16 +1,20 @@
-# HuyVo Portfolio — V0.7.0 Animation & UX
+# HuyVo Portfolio — V0.8.0 SEO & Performance
 
 Professional personal portfolio built with Next.js, TypeScript and CSS, ready for Vercel deployment.
 
-## V0.7.0 highlights
-- Existing portfolio foundation, professional CV, project portfolio, case studies, resume PDF support and contact page.
-- New scroll-reveal animation system using IntersectionObserver.
-- Scroll progress indicator under the fixed header.
-- Active section state for the navbar while scrolling.
-- Improved button, card, project, contact and profile-card micro-interactions.
-- Better project filter UX with live result count.
-- Respects `prefers-reduced-motion` for accessibility.
-- Central version source at `src/data/version.ts` updated to `V0.7.0`.
+## V0.8.0 highlights
+- Existing portfolio foundation, professional CV, project portfolio, case studies, resume PDF support, contact page and Animation/UX upgrades.
+- Central version source updated to `V0.8.0` in `src/data/version.ts`.
+- SEO metadata upgraded in `src/app/layout.tsx`.
+- Added `src/data/seo.ts` for canonical URL, title, description and keywords.
+- Added structured data JSON-LD for Person, WebSite, Project Case Study and Breadcrumbs.
+- Added `sitemap.xml` via `src/app/sitemap.ts`.
+- Added `robots.txt` via `src/app/robots.ts`.
+- Added `manifest.webmanifest` via `src/app/manifest.ts`.
+- Added dynamic OpenGraph image via `src/app/opengraph-image.tsx`.
+- Added SVG favicon/app icons in `public/`.
+- Added security/performance response headers in `next.config.ts`.
+- Added a polished 404 page.
 
 ## Run locally
 ```bash
@@ -27,6 +31,14 @@ npm run build
 ## Deploy to Vercel
 Import the repository/project into Vercel. Keep the framework preset as Next.js and leave Output Directory at its default value.
 
+Recommended environment variable before publishing:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+```
+
+If you do not set it, the app falls back to `https://huyvo-portfolio.vercel.app` for sitemap, robots, OpenGraph and canonical URLs.
+
 ## Customize your information
 Edit `src/data/profile.ts`.
 
@@ -37,4 +49,4 @@ Important fields to replace before publishing:
 - `social.github`
 - education/certifications if you want them displayed
 
-The contact form uses `mailto:` in V0.7.0, so messages are sent through the visitor's email app instead of a backend API.
+The contact form uses `mailto:`, so messages are sent through the visitor's email app instead of a backend API.

@@ -7,6 +7,12 @@ import { appVersion } from "@/data/version";
 export const metadata: Metadata = {
   title: `Resume | ${profile.name}`,
   description: `ATS-friendly professional resume for ${profile.name}, ${profile.role}.`,
+  alternates: { canonical: "/resume" },
+  openGraph: {
+    title: `Resume | ${profile.name}`,
+    description: `ATS-friendly professional resume for ${profile.name}, ${profile.role}.`,
+    url: "/resume",
+  },
 };
 
 export default function ResumePage() {

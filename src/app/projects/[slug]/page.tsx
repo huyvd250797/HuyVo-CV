@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/footer";
+import { JsonLd } from "@/components/json-ld";
 import { profile } from "@/data/profile";
+import { absoluteUrl } from "@/data/seo";
+import { breadcrumbJsonLd, projectJsonLd } from "@/data/structured-data";
 
 export function generateStaticParams() {
   return profile.projects.map((project) => ({ slug: project.slug }));
@@ -10,20 +13,46 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const project = profile.projects.find((item) => item.slug === slug);
+
   return project
-    ? { title: `${project.title} | ${profile.name}`, description: project.summary }
+    ? {
+        title: `${project.title} Case Study`,
+        description: project.summary,
+        alternates: { canonical: `/projects/${project.slug}` },
+        openGraph: {
+          title: `${project.title} Case Study | ${profile.name}`,
+          description: project.summary,
+          url: `/projects/${project.slug}`,
+          type: "article",
+          images: [absoluteUrl("/opengraph-image")],
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: `${project.title} Case Study | ${profile.name}`,
+          description: project.summary,
+          images: [absoluteUrl("/opengraph-image")],
+        },
+      }
     : {};
 }
 
 export default async function ProjectCaseStudy({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const project = profile.projects.find((item) => item.slug === slug);
-  if (!project) notFound();
+  if (!project) {
+    notFound();
+  }
 
   const study = project.caseStudy;
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Home", url: absoluteUrl("/") },
+    { name: "Projects", url: absoluteUrl("/#projects") },
+    { name: project.title, url: absoluteUrl(`/projects/${project.slug}`) },
+  ]);
 
   return (
     <main id="top" className="case-study-page">
+      <JsonLd data={[projectJsonLd(project), breadcrumb]} />
       <div className="case-nav container">
         <Link href="/#projects" className="case-back">← Back to projects</Link>
         <span>{profile.shortName}<i>.</i></span>
