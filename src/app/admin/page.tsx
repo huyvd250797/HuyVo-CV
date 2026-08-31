@@ -4,7 +4,7 @@ import { profile } from "@/data/profile";
 
 export const metadata: Metadata = {
   title: `Admin | ${profile.name}`,
-  description: "Real CMS / Supabase Admin for editing live portfolio profile data.",
+  description: "Production CMS Admin for editing live portfolio profile data.",
   robots: {
     index: false,
     follow: false,

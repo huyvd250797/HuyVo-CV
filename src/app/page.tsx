@@ -10,6 +10,7 @@ import { JsonLd } from "@/components/json-ld";
 import { Hero } from "@/components/hero";
 import { Skills } from "@/components/skills";
 import { Projects } from "@/components/projects";
+import { ProductionReadiness } from "@/components/production-readiness";
 import { personJsonLdFor, websiteJsonLdFor } from "@/data/structured-data";
 import { readPortfolioProfile } from "@/lib/portfolio-cms";
 
@@ -28,6 +29,7 @@ export default async function Home() {
       <Skills profileData={profile} />
       <Credentials profileData={profile} />
       <Approach profileData={profile} />
+      <ProductionReadiness profileData={profile} />
       <Contact profileData={profile} />
       <Footer profileData={profile} />
     </main>

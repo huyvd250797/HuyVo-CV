@@ -74,8 +74,8 @@ type AdminProfileDraft = {
   social: { linkedin: string; github: string };
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v091";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v091";
+const storageKey = "huyvo-portfolio-admin-draft-v100";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v100";
 const fallbackPassword = "huyvo-admin";
 
 const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
@@ -581,6 +581,23 @@ export function AdminDashboard() {
         </div>
       </div>
 
+      <div className="admin-production-panel">
+        <div>
+          <span>Production checklist</span>
+          <strong>{cmsSource === "supabase" ? "Live CMS connected" : "Finish Supabase setup"}</strong>
+          <p>
+            Run <code>supabase/schema.sql</code>, save one live profile, replace placeholder email/social links,
+            then redeploy after environment changes.
+          </p>
+        </div>
+        <ul>
+          <li className={supabaseConfigured ? "done" : ""}>Supabase env configured</li>
+          <li className={canWriteLive ? "done" : ""}>Service role write ready</li>
+          <li className={cmsSource === "supabase" ? "done" : ""}>Live profile saved</li>
+          <li className={draft.email !== "hello@example.com" ? "done" : ""}>Real email updated</li>
+        </ul>
+      </div>
+
       <div className="admin-layout">
         <aside className="admin-sidebar" aria-label="Admin sections">
           {tabs.map((tab) => (
@@ -790,7 +807,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V0.9.1 saves live data to Supabase. Export is still available as a backup or for manual source fallback updates.">
+            <AdminSection title="Export backup" description="V1.0.0 writes live data to Supabase and keeps export as a production backup.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>
