@@ -1,4 +1,4 @@
--- HuyVo Portfolio V0.9.1 — Real CMS / Supabase Admin
+-- HuyVo Portfolio V1.0.0 — Production Portfolio
 -- Run this in Supabase SQL Editor before saving from /admin.
 
 create table if not exists public.portfolio_profiles (

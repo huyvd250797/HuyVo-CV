@@ -38,6 +38,25 @@ function readKey() {
   return serviceKey() || anonKey();
 }
 
+function friendlySupabaseError(status: number, errorText: string) {
+  let message = errorText || `Supabase request failed with status ${status}.`;
+
+  try {
+    const parsed = JSON.parse(errorText) as { code?: string; message?: string; hint?: string | null };
+    if (parsed.code === "PGRST205" || parsed.message?.includes("schema cache")) {
+      message = `Supabase table '${cmsConfig.table}' is missing or not visible in the schema cache. Run supabase/schema.sql in the same Supabase project, wait 30-60 seconds, then try Load live / Save live again.`;
+    } else if (parsed.message) {
+      message = parsed.hint ? `${parsed.message} Hint: ${parsed.hint}` : parsed.message;
+    }
+  } catch {
+    if (errorText.includes("PGRST205") || errorText.includes("schema cache")) {
+      message = `Supabase table '${cmsConfig.table}' is missing or not visible in the schema cache. Run supabase/schema.sql in the same Supabase project, wait 30-60 seconds, then try Load live / Save live again.`;
+    }
+  }
+
+  return message;
+}
+
 export function isSupabaseReadConfigured() {
   return Boolean(supabaseUrl() && readKey());
 }
@@ -94,7 +113,7 @@ export async function readPortfolioProfile(options?: { noStore?: boolean }): Pro
       return {
         profile: sourceProfile,
         source: "source",
-        reason: `Supabase read failed (${response.status}). ${errorText || "Using fallback profile."}`,
+        reason: `Supabase read failed (${response.status}). ${friendlySupabaseError(response.status, errorText)}`,
         supabaseConfigured,
         canWrite,
         table,
@@ -167,7 +186,7 @@ export async function savePortfolioProfile(data: PortfolioProfile) {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || `Supabase write failed with status ${response.status}.`);
+    throw new Error(friendlySupabaseError(response.status, errorText));
   }
 
   return response.json() as Promise<Array<{ id: string; updated_at: string }>>;

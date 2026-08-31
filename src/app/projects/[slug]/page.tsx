@@ -48,16 +48,17 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
     notFound();
   }
 
-  const study = project.caseStudy;
+  const projectData = project;
+  const study = projectData.caseStudy;
   const breadcrumb = breadcrumbJsonLd([
     { name: "Home", url: absoluteUrl("/") },
     { name: "Projects", url: absoluteUrl("/#projects") },
-    { name: project.title, url: absoluteUrl(`/projects/${project.slug}`) },
+    { name: projectData.title, url: absoluteUrl(`/projects/${projectData.slug}`) },
   ]);
 
   return (
     <main id="top" className="case-study-page">
-      <JsonLd data={[projectJsonLd(project, profile), breadcrumb]} />
+      <JsonLd data={[projectJsonLd(projectData, profile), breadcrumb]} />
       <div className="case-nav container">
         <Link href="/#projects" className="case-back">← Back to projects</Link>
         <span>{profile.shortName}<i>.</i></span>
@@ -66,13 +67,13 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
       <header className="case-hero">
         <div className="container">
           <div className="case-eyebrow">
-            <span>{project.category}</span><span>{project.year}</span><span>Case Study</span>
+            <span>{projectData.category}</span><span>{projectData.year}</span><span>Case Study</span>
           </div>
-          <h1>{project.title}</h1>
-          <p className="case-role">{project.role}</p>
-          <p className="case-lead">{project.summary}</p>
+          <h1>{projectData.title}</h1>
+          <p className="case-role">{projectData.role}</p>
+          <p className="case-lead">{projectData.summary}</p>
           <div className="project-tags case-tags">
-            {project.technologies.map((technology) => <span key={technology}>{technology}</span>)}
+            {projectData.technologies.map((technology) => <span key={technology}>{technology}</span>)}
           </div>
         </div>
       </header>
@@ -95,7 +96,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
         <div className="container">
           <p className="section-kicker">03 — My contribution</p>
           <div className="case-contribution-grid">
-            {project.contributions.map((item, index) => (
+            {projectData.contributions.map((item, index) => (
               <article key={item}><span>{String(index + 1).padStart(2, "0")}</span><h3>{item}</h3></article>
             ))}
           </div>
