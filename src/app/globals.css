@@ -710,3 +710,30 @@ html[data-active-section="contact"] .nav-cta {
   color: var(--bg);
   border-color: var(--text);
 }
+
+/* V0.8.0 — SEO & Performance */
+.not-found-section {
+  min-height: 72vh;
+  display: grid;
+  place-items: center;
+  padding-top: 150px;
+}
+
+.not-found-card {
+  max-width: 760px;
+}
+
+.not-found-card h1 {
+  margin: 0 0 22px;
+  font-size: clamp(54px, 8vw, 110px);
+  line-height: .9;
+  letter-spacing: -.065em;
+}
+
+.not-found-card p:not(.section-kicker) {
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.65;
+  max-width: 560px;
+  margin: 0 0 34px;
+}
