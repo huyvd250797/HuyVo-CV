@@ -8,6 +8,7 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Hero } from "@/components/hero";
 import { Skills } from "@/components/skills";
+import { Projects } from "@/components/projects";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
       <About />
       <CareerSummary />
       <Experience />
+      <Projects />
       <Skills />
       <Credentials />
       <Approach />

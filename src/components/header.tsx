@@ -17,6 +17,7 @@ export function Header() {
         <nav className={open ? "nav open" : "nav"} aria-label="Primary navigation">
           <a href="#about" onClick={close}>About</a>
           <a href="#experience" onClick={close}>Experience</a>
+          <a href="#projects" onClick={close}>Projects</a>
           <a href="#skills" onClick={close}>Skills</a>
           <a href="#approach" onClick={close}>Process</a>
           <a className="nav-cta" href="#contact" onClick={close}>Let&apos;s talk</a>
