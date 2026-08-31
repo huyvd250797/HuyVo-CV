@@ -1,0 +1,45 @@
+import { profile } from "@/data/profile";
+
+export function Hero() {
+  return (
+    <section className="hero section" id="top">
+      <div className="container hero-grid">
+        <div className="hero-copy">
+          <div className="eyebrow"><span className="status-dot" /> {profile.availability}</div>
+          <p className="hello">Hello, I&apos;m {profile.name}.</p>
+          <h1>{profile.role}</h1>
+          <p className="hero-headline">{profile.headline}</p>
+          <p className="hero-description">{profile.description}</p>
+          <div className="hero-actions">
+            <a href="#about" className="button primary">Explore profile <span>↘</span></a>
+            <a href="#contact" className="button secondary">Contact me</a>
+          </div>
+          <div className="hero-meta">
+            <span>{profile.location}</span>
+            <span className="meta-line" />
+            <span>Portfolio v0.1.0</span>
+          </div>
+        </div>
+
+        <div className="hero-visual" aria-label="Professional profile card">
+          <div className="profile-card">
+            <div className="card-topline">
+              <span>PROFILE / 001</span>
+              <span>2026</span>
+            </div>
+            <div className="monogram">{profile.shortName}</div>
+            <div className="card-content">
+              <span className="card-kicker">Professional focus</span>
+              <strong>{profile.headline}</strong>
+              <div className="specialty-grid">
+                {profile.specialties.map((item, index) => (
+                  <div key={item}><span>0{index + 1}</span>{item}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
