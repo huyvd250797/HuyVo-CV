@@ -169,3 +169,65 @@ button { font: inherit; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+/* V0.2.0 — Professional CV */
+.section-kicker { margin: 0 0 18px; color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.career-summary { background: var(--surface); }
+.summary-layout { display: grid; grid-template-columns: .88fr 1.12fr; gap: 100px; align-items: start; }
+.summary-layout h2, .experience h2, .skills h2, .credentials h2 { font-size: clamp(38px, 4.5vw, 62px); line-height: 1.02; letter-spacing: -.05em; margin: 0; }
+.summary-intro { margin: 0 0 38px; font-size: 20px; line-height: 1.65; color: var(--muted); max-width: 720px; }
+.snapshot-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.snapshot-card { min-height: 138px; padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; justify-content: space-between; }
+.snapshot-card span { color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+.snapshot-card strong { font-size: 20px; line-height: 1.2; letter-spacing: -.035em; }
+
+.experience { border-top: 1px solid var(--line); }
+.experience-heading, .skills-heading { display: grid; grid-template-columns: 1.2fr .8fr; gap: 80px; align-items: end; margin-bottom: 64px; }
+.experience-heading p, .skills-heading p { margin: 0; color: var(--muted); line-height: 1.65; max-width: 440px; }
+.timeline { border-top: 1px solid var(--line); }
+.timeline-item { display: grid; grid-template-columns: 260px 1fr; gap: 60px; padding: 42px 0 54px; border-bottom: 1px solid var(--line); }
+.timeline-period { color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: flex-start; gap: 12px; padding-top: 7px; }
+.timeline-dot { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px var(--accent-2); }
+.timeline-org { margin: 0 0 10px; color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.timeline-content h3 { margin: 0 0 18px; font-size: clamp(28px, 3vw, 40px); letter-spacing: -.045em; }
+.timeline-summary { margin: 0 0 26px; color: var(--muted); font-size: 17px; line-height: 1.65; max-width: 800px; }
+.timeline-content ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; max-width: 830px; }
+.timeline-content li { position: relative; padding-left: 22px; color: var(--muted); line-height: 1.55; font-size: 14px; }
+.timeline-content li::before { content: "↘"; position: absolute; left: 0; color: var(--accent); font-size: 11px; top: 3px; }
+.skill-row.compact { margin-top: 28px; }
+
+.skills { background: var(--dark); color: var(--dark-text); }
+.skills .section-label { color: color-mix(in srgb, var(--dark-text) 55%, transparent); }
+.skills .skills-heading p { color: color-mix(in srgb, var(--dark-text) 60%, transparent); }
+.skill-groups { border-top: 1px solid color-mix(in srgb, var(--dark-text) 20%, transparent); }
+.skill-group { display: grid; grid-template-columns: 320px 1fr; gap: 60px; padding: 32px 0; border-bottom: 1px solid color-mix(in srgb, var(--dark-text) 20%, transparent); }
+.skill-group-title { display: flex; align-items: baseline; gap: 20px; }
+.skill-group-title span { color: var(--accent); font-size: 10px; font-weight: 800; }
+.skill-group-title h3 { margin: 0; font-size: 20px; letter-spacing: -.025em; }
+.skill-list { display: flex; flex-wrap: wrap; gap: 9px; }
+.skill-list span { padding: 10px 13px; border: 1px solid color-mix(in srgb, var(--dark-text) 25%, transparent); border-radius: 100px; font-size: 12px; color: color-mix(in srgb, var(--dark-text) 82%, transparent); }
+
+.credentials { background: var(--surface); }
+.credentials-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; }
+.credentials-grid > div > h2 { margin-bottom: 42px; }
+.credential-item { padding: 25px 0; border-top: 1px solid var(--line); }
+.credential-item span { color: var(--accent); font-size: 11px; font-weight: 800; }
+.credential-item h3 { margin: 10px 0 8px; font-size: 22px; letter-spacing: -.025em; }
+.credential-item p, .credential-item small { margin: 0; color: var(--muted); line-height: 1.55; }
+.process-grid { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 900px) {
+  .summary-layout, .experience-heading, .skills-heading { grid-template-columns: 1fr; gap: 36px; }
+  .timeline-item { grid-template-columns: 1fr; gap: 22px; }
+  .skill-group { grid-template-columns: 1fr; gap: 24px; }
+  .credentials-grid { grid-template-columns: 1fr; gap: 60px; }
+  .process-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .snapshot-grid { grid-template-columns: 1fr; }
+  .summary-intro { font-size: 17px; }
+  .timeline-item { padding: 32px 0 40px; }
+  .skill-group { padding: 26px 0; }
+  .process-grid { grid-template-columns: 1fr; }
+}

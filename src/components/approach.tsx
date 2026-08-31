@@ -4,13 +4,13 @@ export function Approach() {
   return (
     <section className="section approach" id="approach">
       <div className="container">
-        <div className="section-label"><span>02</span> Approach</div>
+        <div className="section-label"><span>06</span> Working process</div>
         <div className="approach-heading">
           <h2>From requirement to result.</h2>
-          <p>A simple operating principle for solving complex implementation problems.</p>
+          <p>A practical six-step process for keeping complex implementation work clear, aligned and deliverable.</p>
         </div>
-        <div className="approach-grid">
-          {profile.focusAreas.map((item) => (
+        <div className="approach-grid process-grid">
+          {profile.workingProcess.map((item) => (
             <article className="approach-card" key={item.index}>
               <span className="card-index">{item.index}</span>
               <div>
