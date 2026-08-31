@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { profile, type ProjectCategory } from "@/data/profile";
 
 type Filter = "All" | ProjectCategory;
@@ -62,6 +63,7 @@ export function Projects() {
               <div className="project-tags">
                 {project.technologies.map((technology) => <span key={technology}>{technology}</span>)}
               </div>
+              <Link className="project-case-link" href={`/projects/${project.slug}`}>View case study <span>↗</span></Link>
             </article>
           ))}
         </div>

@@ -1,4 +1,5 @@
 import { profile } from "@/data/profile";
+import { appVersion } from "@/data/version";
 
 export function Footer() {
   return (
@@ -6,7 +7,7 @@ export function Footer() {
       <div className="container footer-inner">
         <span>© 2026 {profile.name}. All rights reserved.</span>
         <span>Designed for clarity. Built for the web.</span>
-        <span>V0.1.0</span>
+        <span>{appVersion.label}</span>
       </div>
     </footer>
   );

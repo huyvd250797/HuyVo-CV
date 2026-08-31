@@ -1,4 +1,5 @@
 import { profile } from "@/data/profile";
+import { appVersion } from "@/data/version";
 
 export function Hero() {
   return (
@@ -17,7 +18,7 @@ export function Hero() {
           <div className="hero-meta">
             <span>{profile.location}</span>
             <span className="meta-line" />
-            <span>Portfolio v0.2.0</span>
+            <span>Portfolio {appVersion.label}</span>
           </div>
         </div>
 
