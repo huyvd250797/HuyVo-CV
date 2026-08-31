@@ -1,35 +1,29 @@
-# HuyVo Portfolio — V0.4.0 Project Case Study
+# HuyVo Portfolio — V0.5.0 Resume & PDF
 
-Professional portfolio / interactive CV built with Next.js, TypeScript and modern responsive CSS.
+Professional personal portfolio built with Next.js, TypeScript and CSS, ready for Vercel deployment.
 
-## V0.4.0 highlights
-- Full Professional CV landing page
-- Filterable project portfolio
-- Dedicated case-study route for every project: `/projects/[slug]`
-- Case-study structure: Context → Problem → Contribution → Process → Solution → Result → Lessons Learned
-- Light / Dark / System theme
-- Responsive desktop / tablet / mobile
-- Centralized content in `src/data/profile.ts`
-- Centralized visible app version in `src/data/version.ts`
-- Vercel-ready, no database required
+## V0.5.0 highlights
+- Existing portfolio foundation, professional CV, project portfolio and project case studies.
+- New `/resume` ATS-friendly resume page.
+- Print / Save PDF directly from the browser.
+- A4 print styles for clean PDF export.
+- Resume content reuses `src/data/profile.ts` so the website and printable CV stay synchronized.
+- Central version source at `src/data/version.ts`.
 
 ## Run locally
 ```bash
 npm install
 npm run dev
 ```
-Open http://localhost:3000
+Open `http://localhost:3000`.
 
 ## Production check
 ```bash
 npm run build
-npm start
 ```
 
 ## Deploy to Vercel
-Import the project/repository into Vercel. Keep the framework preset as Next.js and leave Output Directory at its default value.
+Import the repository/project into Vercel. Keep the framework preset as Next.js and leave Output Directory at its default value.
 
-## Where to edit
-- Portfolio content: `src/data/profile.ts`
-- Visible version: `src/data/version.ts`
-- Global styles: `src/app/globals.css`
+## Customize your information
+Edit `src/data/profile.ts`. Replace placeholder email/social links before publishing.

@@ -1,20 +1,16 @@
-# HuyVo Portfolio
+# HuyVo Portfolio Version
 
-## V0.4.0 — Project Case Study
+## V0.5.0 — Resume & PDF
+
+Current version: **V0.5.0**
 
 ### Added
-- Dedicated `/projects/[slug]` case-study pages
-- Context, Problem, My Contribution, Process, Solution, Result and Lessons Learned sections
-- Case-study CTA on every project card
-- Static project routes and project-specific metadata
-- Responsive case-study layout
+- `/resume` professional resume page.
+- ATS-friendly single-column content hierarchy for print/export.
+- Print / Save PDF action using the browser print dialog.
+- Print-specific A4 stylesheet.
+- Resume link in the main navigation.
+- Selected featured projects, skills, experience, education and certifications rendered from the same profile data source.
 
-### Fixed
-- Footer version was hard-coded as `V0.1.0`
-- Added `src/data/version.ts` as the single UI version source
-- Updated package version to `0.4.0`
-
-### Previous
-- V0.3.0 — Project Portfolio
-- V0.2.0 — Professional CV
-- V0.1.0 — Portfolio Foundation
+### Version consistency
+UI version is sourced from `src/data/version.ts` and package version is `0.5.0`.
