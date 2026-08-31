@@ -1,44 +1,37 @@
-# HuyVo Portfolio V0.2.0 — Professional CV
+# HuyVo Portfolio — V0.3.0
 
-A professional personal portfolio / interactive CV built with Next.js, TypeScript and CSS, ready for Vercel.
+Professional personal portfolio / CV built with Next.js 16, React 19 and TypeScript.
 
-## Features
-- Responsive professional landing page
+## V0.3.0 — Project Portfolio
+
+Includes:
+- Portfolio foundation and responsive layout
 - Light / Dark / System theme
-- Hero and About sections
-- Career Summary dashboard
-- Professional Experience timeline
-- Skills grouped by capability
-- Education and Certifications support (auto-hidden while empty)
-- Six-step Working Process
-- Contact and social links
-
-## Customize your information
-Edit:
-
-`src/data/profile.ts`
-
-Replace the placeholder email and social links before publishing. Add your real education/certifications to the arrays and those sections will automatically appear.
+- Career summary, experience, skills and working process
+- Education and certification sections that render only when data is available
+- Selected Projects with category filters
+- Role, contribution and technology tags per project
+- Vercel-ready Next.js configuration
 
 ## Run locally
+
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open http://localhost:3000
 
 ## Production check
+
 ```bash
 npm run build
 ```
 
-## Deploy to Vercel
-1. Push the extracted project folder to GitHub, or import the project directly into Vercel.
-2. Framework Preset: Next.js.
-3. Build Command: default (`next build`).
-4. Output Directory: leave blank/default. Do **not** set it to `out`.
-5. Deploy.
+## Customize content
 
-## Version
-V0.2.0 — Professional CV
+Edit `src/data/profile.ts`.
+
+## Deploy to Vercel
+
+Import the project/repository into Vercel and keep the Framework Preset as Next.js. Do not set a custom Output Directory; use the default Next.js output.

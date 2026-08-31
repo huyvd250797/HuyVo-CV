@@ -1,3 +1,5 @@
+export type ProjectCategory = "Professional" | "Product" | "Tool";
+
 export const profile = {
   name: "Huy Vo",
   shortName: "HV",
@@ -44,6 +46,98 @@ export const profile = {
       tags: ["Project Management", "Requirements", "UAT", "SQL", "Deployment"],
     },
   ],
+  projects: [
+    {
+      title: "University Management Platform",
+      category: "Professional" as ProjectCategory,
+      year: "Current",
+      role: "Project Manager / Functional Consultant",
+      summary:
+        "Implementation and functional delivery for university management workflows, with a strong focus on requirements, data validation, UAT and stakeholder coordination.",
+      contributions: [
+        "Business process and requirement analysis",
+        "Functional workflow and solution design",
+        "UAT coordination and production rollout",
+      ],
+      technologies: ["Project Management", "SQL Server", "Jira", "UAT"],
+      featured: true,
+    },
+    {
+      title: "ASC-WORKING",
+      category: "Product" as ProjectCategory,
+      year: "2026",
+      role: "Product Owner / Builder",
+      summary:
+        "A working-list and project workspace concept for managing issues, deadlines, project documents, filters and configurable work views.",
+      contributions: [
+        "Product planning and workflow design",
+        "Issue-management UX and configurable views",
+        "Document and attachment workflow planning",
+      ],
+      technologies: ["Next.js", "TypeScript", "Google Drive", "Product Design"],
+      featured: true,
+    },
+    {
+      title: "ASC GenScript",
+      category: "Tool" as ProjectCategory,
+      year: "2026",
+      role: "Product Designer / Builder",
+      summary:
+        "A productivity tool for generating SQL scripts and explaining spreadsheet-style formulas through interactive grid workflows.",
+      contributions: [
+        "SQL generation workflow",
+        "Spreadsheet-like interaction design",
+        "Formula Helper and data simulation concepts",
+      ],
+      technologies: ["JavaScript", "SQL", "Spreadsheet UX", "Web App"],
+      featured: true,
+    },
+    {
+      title: "MarketScope",
+      category: "Product" as ProjectCategory,
+      year: "2026",
+      role: "Product Designer / Builder",
+      summary:
+        "A spot-market analysis workspace for technical indicators, position analysis, portfolio risk and strategy profiles.",
+      contributions: [
+        "Analysis workflow and information architecture",
+        "Spot position and portfolio-risk features",
+        "Strategy profile product planning",
+      ],
+      technologies: ["Next.js", "Market Data", "Analytics", "Vercel"],
+      featured: false,
+    },
+    {
+      title: "MyShop",
+      category: "Product" as ProjectCategory,
+      year: "2026",
+      role: "Product Designer / Builder",
+      summary:
+        "A hybrid commerce concept supporting product CMS, direct checkout, affiliate redirects, order administration and customer accounts.",
+      contributions: [
+        "Commerce flow and CMS planning",
+        "Checkout and order-management design",
+        "Affiliate and direct-sale hybrid workflow",
+      ],
+      technologies: ["Next.js", "TypeScript", "Database", "Vercel"],
+      featured: false,
+    },
+    {
+      title: "Family OS",
+      category: "Product" as ProjectCategory,
+      year: "2026",
+      role: "Product Designer / Builder",
+      summary:
+        "A family operations workspace concept designed to centralize household information, routines and shared planning.",
+      contributions: [
+        "Product roadmap and modular structure",
+        "Family-centered workflow design",
+        "Production-ready architecture planning",
+      ],
+      technologies: ["Next.js", "Product Planning", "Responsive UI", "Vercel"],
+      featured: false,
+    },
+  ],
   skillGroups: [
     {
       title: "Project & Business",
@@ -82,39 +176,12 @@ export const profile = {
     credentialUrl?: string;
   }>,
   workingProcess: [
-    {
-      index: "01",
-      title: "Understand",
-      text: "Clarify the business need, user context, constraints and measurable outcome.",
-    },
-    {
-      index: "02",
-      title: "Analyze",
-      text: "Break down processes, rules, dependencies, data and implementation risks.",
-    },
-    {
-      index: "03",
-      title: "Design",
-      text: "Translate findings into workflows, functional requirements and a practical solution.",
-    },
-    {
-      index: "04",
-      title: "Coordinate",
-      text: "Keep stakeholders aligned while development and testing move the solution forward.",
-    },
-    {
-      index: "05",
-      title: "Validate",
-      text: "Check functionality, data and real-world scenarios through review and UAT.",
-    },
-    {
-      index: "06",
-      title: "Deliver",
-      text: "Support rollout, resolve issues and improve the solution after implementation.",
-    },
+    { index: "01", title: "Understand", text: "Clarify the business need, user context, constraints and measurable outcome." },
+    { index: "02", title: "Analyze", text: "Break down processes, rules, dependencies, data and implementation risks." },
+    { index: "03", title: "Design", text: "Translate findings into workflows, functional requirements and a practical solution." },
+    { index: "04", title: "Coordinate", text: "Keep stakeholders aligned while development and testing move the solution forward." },
+    { index: "05", title: "Validate", text: "Check functionality, data and real-world scenarios through review and UAT." },
+    { index: "06", title: "Deliver", text: "Support rollout, resolve issues and improve the solution after implementation." },
   ],
-  social: {
-    linkedin: "#",
-    github: "#",
-  },
+  social: { linkedin: "#", github: "#" },
 } as const;
