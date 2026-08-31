@@ -19,7 +19,7 @@ export function Projects() {
       <div className="container">
         <div className="projects-heading">
           <div>
-            <p className="section-kicker">Selected work</p>
+            <div className="section-label"><span>04</span> Selected work</div>
             <h2>Projects that connect business, product and delivery.</h2>
           </div>
           <p>
@@ -39,6 +39,7 @@ export function Projects() {
             </button>
           ))}
         </div>
+        <p className="project-result-count" aria-live="polite">Showing {visible.length} project{visible.length === 1 ? "" : "s"} · {active}</p>
 
         <div className="project-grid">
           {visible.map((project, index) => (

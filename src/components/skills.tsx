@@ -4,7 +4,7 @@ export function Skills() {
   return (
     <section className="section skills" id="skills">
       <div className="container">
-        <div className="section-label"><span>04</span> Skills</div>
+        <div className="section-label"><span>05</span> Skills</div>
         <div className="skills-heading">
           <h2>Capabilities built around real implementation work.</h2>
           <p>No arbitrary percentage bars — just the areas I use to understand, shape and deliver software solutions.</p>

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main>
+    <main id="top">
       <Header />
       <div className="contact-page-spacer" />
       <Contact />

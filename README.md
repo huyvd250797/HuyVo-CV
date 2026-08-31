@@ -1,16 +1,16 @@
-# HuyVo Portfolio — V0.6.0 Contact & Social
+# HuyVo Portfolio — V0.7.0 Animation & UX
 
 Professional personal portfolio built with Next.js, TypeScript and CSS, ready for Vercel deployment.
 
-## V0.6.0 highlights
-- Existing portfolio foundation, professional CV, project portfolio, case studies and resume PDF support.
-- New dedicated `/contact` page.
-- Upgraded contact section on the homepage.
-- Contact method cards for Email, LinkedIn and GitHub.
-- Client-side quick message form that opens a prepared email draft with `mailto:`.
-- No backend/database required for the contact form in this version.
-- Header CTA now routes to `/contact`.
-- Central version source at `src/data/version.ts` updated to `V0.6.0`.
+## V0.7.0 highlights
+- Existing portfolio foundation, professional CV, project portfolio, case studies, resume PDF support and contact page.
+- New scroll-reveal animation system using IntersectionObserver.
+- Scroll progress indicator under the fixed header.
+- Active section state for the navbar while scrolling.
+- Improved button, card, project, contact and profile-card micro-interactions.
+- Better project filter UX with live result count.
+- Respects `prefers-reduced-motion` for accessibility.
+- Central version source at `src/data/version.ts` updated to `V0.7.0`.
 
 ## Run locally
 ```bash
@@ -37,4 +37,4 @@ Important fields to replace before publishing:
 - `social.github`
 - education/certifications if you want them displayed
 
-The contact form uses `mailto:` in V0.6.0, so messages are sent through the visitor's email app instead of a backend API.
+The contact form uses `mailto:` in V0.7.0, so messages are sent through the visitor's email app instead of a backend API.

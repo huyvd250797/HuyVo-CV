@@ -241,7 +241,7 @@ export const profile = {
     title: "Let's build something useful.",
     subtitle: "Have a project, role or idea to discuss?",
     description:
-      "Send a short message with the context, goal and timeline. This form opens your email app, so no backend or database is required for V0.6.0.",
+      "Send a short message with the context, goal and timeline. This form opens your email app, so no backend or database is required for V0.7.0.",
     responseNote: "Replace placeholder email and social links in src/data/profile.ts before publishing.",
     preferredTopics: [
       "Project opportunity",

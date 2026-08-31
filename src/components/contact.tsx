@@ -10,7 +10,7 @@ export function Contact() {
     <section className="section contact contact-v060" id="contact">
       <div className="container contact-shell">
         <div className="contact-content">
-          <div className="section-label light"><span>03</span> Contact</div>
+          <div className="section-label light"><span>07</span> Contact</div>
           <p className="contact-kicker">{profile.contact.subtitle}</p>
           <h2>{profile.contact.title}</h2>
           <p className="contact-description">{profile.contact.description}</p>
