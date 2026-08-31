@@ -1,7 +1,8 @@
 import { ContactForm } from "@/components/contact-form";
-import { profile } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 
-export function Contact() {
+export function Contact({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+  const profile = profileData;
   const contactMethods = profile.contact.methods.map((method) =>
     method.label === "Email" ? { ...method, value: profile.email, href: `mailto:${profile.email}` } : method
   );
@@ -36,7 +37,7 @@ export function Contact() {
             <span>Quick message</span>
             <p>{profile.contact.responseNote}</p>
           </div>
-          <ContactForm />
+          <ContactForm profileData={profile} />
         </aside>
       </div>
     </section>

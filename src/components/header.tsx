@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { profile } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 import { ThemeSwitcher } from "./theme-switcher";
 
-export function Header() {
+export function Header({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+  const profile = profileData;
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 

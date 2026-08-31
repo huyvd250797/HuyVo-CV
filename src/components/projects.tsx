@@ -2,16 +2,17 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { profile, type ProjectCategory } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile, type ProjectCategory } from "@/data/profile";
 
 type Filter = "All" | ProjectCategory;
 const filters: Filter[] = ["All", "Professional", "Product", "Tool"];
 
-export function Projects() {
+export function Projects({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+  const profile = profileData;
   const [active, setActive] = useState<Filter>("All");
   const visible = useMemo(
     () => profile.projects.filter((project) => active === "All" || project.category === active),
-    [active],
+    [active, profile.projects],
   );
 
   return (

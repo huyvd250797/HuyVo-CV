@@ -1,6 +1,7 @@
-import { profile } from "@/data/profile";
+import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 
-export function Credentials() {
+export function Credentials({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+  const profile = profileData;
   const hasEducation = profile.education.length > 0;
   const hasCertifications = profile.certifications.length > 0;
   if (!hasEducation && !hasCertifications) return null;
