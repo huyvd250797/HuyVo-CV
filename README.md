@@ -1,21 +1,42 @@
-# HuyVo Portfolio — V0.8.1 OpenGraph Build Fix
+# HuyVo Portfolio — V0.9.0 Portfolio CMS / Admin
 
 Professional personal portfolio built with Next.js, TypeScript and CSS, ready for Vercel deployment.
 
-## V0.8.1 highlights
-- Existing portfolio foundation, professional CV, project portfolio, case studies, resume PDF support, contact page and Animation/UX upgrades.
-- Fixed Vercel prerender error on `/opengraph-image` by adding explicit flex display to OpenGraph image containers.
-- Central version source updated to `V0.8.1` in `src/data/version.ts`.
-- SEO metadata upgraded in `src/app/layout.tsx`.
-- Added `src/data/seo.ts` for canonical URL, title, description and keywords.
-- Added structured data JSON-LD for Person, WebSite, Project Case Study and Breadcrumbs.
-- Added `sitemap.xml` via `src/app/sitemap.ts`.
-- Added `robots.txt` via `src/app/robots.ts`.
-- Added `manifest.webmanifest` via `src/app/manifest.ts`.
-- Added dynamic OpenGraph image via `src/app/opengraph-image.tsx`.
-- Added SVG favicon/app icons in `public/`.
-- Added security/performance response headers in `next.config.ts`.
-- Added a polished 404 page.
+## V0.9.0 highlights
+- Existing portfolio foundation, professional CV, project portfolio, case studies, resume PDF support, contact page, Animation/UX and SEO/Performance upgrades.
+- Added `/admin` Portfolio CMS / Admin Lite.
+- Added client-side password gate for the admin screen.
+- Added browser draft saving with `localStorage`.
+- Added editing screens for Profile, Experience, Projects, Skills, Education, Certifications, Contact and Social links.
+- Added project case-study editor for context, problem, process, solution, result and lessons learned.
+- Added export tools to copy generated `src/data/profile.ts` or download a JSON draft.
+- Admin route is marked `noindex, nofollow`.
+- Central version source updated to `V0.9.0` in `src/data/version.ts`.
+
+## Important admin note
+V0.9.0 is **Admin Lite**. It does not include a database yet.
+
+Edits made at `/admin` are saved only in the current browser. To publish changes:
+
+1. Open `/admin`.
+2. Edit your profile data.
+3. Click **Copy profile.ts**.
+4. Replace the content of `src/data/profile.ts` with the copied code.
+5. Commit/redeploy to Vercel.
+
+For production, set this Vercel environment variable:
+
+```bash
+NEXT_PUBLIC_ADMIN_PASSWORD=your-password
+```
+
+If this is not set, the local fallback password is:
+
+```bash
+huyvo-admin
+```
+
+This is only a simple client-side gate. A future CMS/database version should use real server-side authentication.
 
 ## Run locally
 ```bash
@@ -23,6 +44,12 @@ npm install
 npm run dev
 ```
 Open `http://localhost:3000`.
+
+Admin route:
+
+```bash
+http://localhost:3000/admin
+```
 
 ## Production check
 ```bash
@@ -32,16 +59,17 @@ npm run build
 ## Deploy to Vercel
 Import the repository/project into Vercel. Keep the framework preset as Next.js and leave Output Directory at its default value.
 
-Recommended environment variable before publishing:
+Recommended environment variables:
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_ADMIN_PASSWORD=your-password
 ```
 
-If you do not set it, the app falls back to `https://huyvo-portfolio.vercel.app` for sitemap, robots, OpenGraph and canonical URLs.
+If `NEXT_PUBLIC_SITE_URL` is not set, the app falls back to `https://huyvo-portfolio.vercel.app` for sitemap, robots, OpenGraph and canonical URLs.
 
-## Customize your information
-Edit `src/data/profile.ts`.
+## Customize your information manually
+You can still edit `src/data/profile.ts` directly.
 
 Important fields to replace before publishing:
 - `email`
