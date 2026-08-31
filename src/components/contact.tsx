@@ -1,19 +1,43 @@
+import { ContactForm } from "@/components/contact-form";
 import { profile } from "@/data/profile";
 
 export function Contact() {
+  const contactMethods = profile.contact.methods.map((method) =>
+    method.label === "Email" ? { ...method, value: profile.email, href: `mailto:${profile.email}` } : method
+  );
+
   return (
-    <section className="section contact" id="contact">
-      <div className="container contact-inner">
-        <div className="section-label light"><span>03</span> Contact</div>
-        <p className="contact-kicker">Have a project, role or idea to discuss?</p>
-        <h2>Let&apos;s build something useful.</h2>
-        <div className="contact-bottom">
-          <a className="email-link" href={`mailto:${profile.email}`}>{profile.email} <span>↗</span></a>
-          <div className="social-links">
-            <a href={profile.social.linkedin}>LinkedIn ↗</a>
-            <a href={profile.social.github}>GitHub ↗</a>
+    <section className="section contact contact-v060" id="contact">
+      <div className="container contact-shell">
+        <div className="contact-content">
+          <div className="section-label light"><span>03</span> Contact</div>
+          <p className="contact-kicker">{profile.contact.subtitle}</p>
+          <h2>{profile.contact.title}</h2>
+          <p className="contact-description">{profile.contact.description}</p>
+
+          <div className="contact-methods" aria-label="Contact methods">
+            {contactMethods.map((method) => (
+              <a className="contact-method" href={method.href} key={method.label}>
+                <span>{method.label}</span>
+                <strong>{method.value}</strong>
+                <p>{method.description}</p>
+              </a>
+            ))}
+          </div>
+
+          <div className="contact-note">
+            <span>Profile status</span>
+            <p>{profile.availability}</p>
           </div>
         </div>
+
+        <aside className="contact-panel" aria-label="Send a message">
+          <div className="contact-panel-head">
+            <span>Quick message</span>
+            <p>{profile.contact.responseNote}</p>
+          </div>
+          <ContactForm />
+        </aside>
       </div>
     </section>
   );

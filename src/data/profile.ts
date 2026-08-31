@@ -237,5 +237,38 @@ export const profile = {
     { index: "05", title: "Validate", text: "Check functionality, data and real-world scenarios through review and UAT." },
     { index: "06", title: "Deliver", text: "Support rollout, resolve issues and improve the solution after implementation." },
   ],
+  contact: {
+    title: "Let's build something useful.",
+    subtitle: "Have a project, role or idea to discuss?",
+    description:
+      "Send a short message with the context, goal and timeline. This form opens your email app, so no backend or database is required for V0.6.0.",
+    responseNote: "Replace placeholder email and social links in src/data/profile.ts before publishing.",
+    preferredTopics: [
+      "Project opportunity",
+      "Functional consulting",
+      "Software implementation",
+      "Product collaboration",
+    ],
+    methods: [
+      {
+        label: "Email",
+        value: "hello@example.com",
+        href: "mailto:hello@example.com",
+        description: "Best for project briefs, role discussions and direct collaboration.",
+      },
+      {
+        label: "LinkedIn",
+        value: "Professional network",
+        href: "#",
+        description: "Use this for professional connection and background review.",
+      },
+      {
+        label: "GitHub",
+        value: "Product & source work",
+        href: "#",
+        description: "Browse product experiments, web apps and technical work.",
+      },
+    ],
+  },
   social: { linkedin: "#", github: "#" },
 } as const;

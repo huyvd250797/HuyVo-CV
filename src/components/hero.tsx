@@ -12,8 +12,8 @@ export function Hero() {
           <p className="hero-headline">{profile.headline}</p>
           <p className="hero-description">{profile.description}</p>
           <div className="hero-actions">
-            <a href="#about" className="button primary">Explore profile <span>↘</span></a>
-            <a href="#contact" className="button secondary">Contact me</a>
+            <a href="/#about" className="button primary">Explore profile <span>↘</span></a>
+            <a href="/contact" className="button secondary">Contact me</a>
           </div>
           <div className="hero-meta">
             <span>{profile.location}</span>
