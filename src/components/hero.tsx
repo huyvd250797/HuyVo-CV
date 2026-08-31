@@ -17,7 +17,7 @@ export function Hero() {
           <div className="hero-meta">
             <span>{profile.location}</span>
             <span className="meta-line" />
-            <span>Portfolio v0.1.0</span>
+            <span>Portfolio v0.2.0</span>
           </div>
         </div>
 
