@@ -20,6 +20,7 @@ export function Header() {
           <a href="#projects" onClick={close}>Projects</a>
           <a href="#skills" onClick={close}>Skills</a>
           <a href="#approach" onClick={close}>Process</a>
+          <a href="/resume" onClick={close}>Resume</a>
           <a className="nav-cta" href="#contact" onClick={close}>Let&apos;s talk</a>
         </nav>
         <div className="nav-actions">
