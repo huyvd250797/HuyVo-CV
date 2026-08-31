@@ -23,7 +23,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
   const study = project.caseStudy;
 
   return (
-    <main className="case-study-page">
+    <main id="top" className="case-study-page">
       <div className="case-nav container">
         <Link href="/#projects" className="case-back">← Back to projects</Link>
         <span>{profile.shortName}<i>.</i></span>

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function ResumePage() {
   return (
-    <main className="resume-page">
+    <main id="top" className="resume-page">
       <div className="resume-toolbar container">
         <Link href="/">← Back to portfolio</Link>
         <div className="resume-toolbar-actions">

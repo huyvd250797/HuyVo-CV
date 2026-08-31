@@ -10,16 +10,17 @@ export function Header() {
 
   return (
     <header className="site-header">
+      <div className="scroll-progress-bar" aria-hidden="true" />
       <div className="container nav-wrap">
         <a className="brand" href="/#top" onClick={close} aria-label={`${profile.name} home`}>
           <span>{profile.shortName}</span><i>.</i>
         </a>
         <nav className={open ? "nav open" : "nav"} aria-label="Primary navigation">
-          <a href="/#about" onClick={close}>About</a>
-          <a href="/#experience" onClick={close}>Experience</a>
-          <a href="/#projects" onClick={close}>Projects</a>
-          <a href="/#skills" onClick={close}>Skills</a>
-          <a href="/#approach" onClick={close}>Process</a>
+          <a href="/#about" data-section="about" onClick={close}>About</a>
+          <a href="/#experience" data-section="experience" onClick={close}>Experience</a>
+          <a href="/#projects" data-section="projects" onClick={close}>Projects</a>
+          <a href="/#skills" data-section="skills" onClick={close}>Skills</a>
+          <a href="/#approach" data-section="approach" onClick={close}>Process</a>
           <a href="/resume" onClick={close}>Resume</a>
           <a className="nav-cta" href="/contact" onClick={close}>Let&apos;s talk</a>
         </nav>
