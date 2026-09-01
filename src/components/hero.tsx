@@ -14,8 +14,8 @@ export function Hero({ profileData = fallbackProfile }: { profileData?: Portfoli
           <p className="hero-headline">{profile.headline}</p>
           <p className="hero-description">{profile.description}</p>
           <div className="hero-actions">
-            <a href="/#about" className="button primary">Explore profile <span>↘</span></a>
-            <a href="/contact" className="button secondary">Contact me</a>
+            <a href="/#about" className="button primary" data-track-event="cta_click" data-track-label="Hero Explore profile">Explore profile <span>↘</span></a>
+            <a href="/contact" className="button secondary" data-track-event="contact_click" data-track-label="Hero Contact me">Contact me</a>
           </div>
           <div className="hero-meta">
             <span>{profile.location}</span>

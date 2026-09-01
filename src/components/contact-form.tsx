@@ -87,7 +87,7 @@ export function ContactForm({ profileData = fallbackProfile }: { profileData?: P
       </label>
 
       <div className="contact-form-actions">
-        <button type="submit">Open email draft ↗</button>
+        <button type="submit" data-track-event="contact_click" data-track-label="Contact form mailto">Open email draft ↗</button>
         <p>{submitted ? "Your email app should open with a prepared message." : "No backend required — this creates a mailto draft."}</p>
       </div>
     </form>

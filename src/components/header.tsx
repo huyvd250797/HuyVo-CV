@@ -22,8 +22,8 @@ export function Header({ profileData = fallbackProfile }: { profileData?: Portfo
           <a href="/#projects" data-section="projects" onClick={close}>Projects</a>
           <a href="/#skills" data-section="skills" onClick={close}>Skills</a>
           <a href="/#approach" data-section="approach" onClick={close}>Process</a>
-          <a href="/resume" onClick={close}>Resume</a>
-          <a className="nav-cta" href="/contact" onClick={close}>Let&apos;s talk</a>
+          <a href="/resume" data-track-event="cta_click" data-track-label="Navbar Resume" onClick={close}>Resume</a>
+          <a className="nav-cta" href="/contact" data-track-event="contact_click" data-track-label="Navbar Let's talk" onClick={close}>Let&apos;s talk</a>
         </nav>
         <div className="nav-actions">
           <ThemeSwitcher />

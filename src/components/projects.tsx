@@ -65,7 +65,7 @@ export function Projects({ profileData = fallbackProfile }: { profileData?: Port
               <div className="project-tags">
                 {project.technologies.map((technology) => <span key={technology}>{technology}</span>)}
               </div>
-              <Link className="project-case-link" href={`/projects/${project.slug}`}>View case study <span>↗</span></Link>
+              <Link className="project-case-link" href={`/projects/${project.slug}`} data-track-event="cta_click" data-track-label={`View case study: ${project.title}`}>View case study <span>↗</span></Link>
             </article>
           ))}
         </div>

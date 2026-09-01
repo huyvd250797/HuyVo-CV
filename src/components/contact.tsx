@@ -18,7 +18,7 @@ export function Contact({ profileData = fallbackProfile }: { profileData?: Portf
 
           <div className="contact-methods" aria-label="Contact methods">
             {contactMethods.map((method) => (
-              <a className="contact-method" href={method.href} key={method.label}>
+              <a className="contact-method" href={method.href} key={method.label} data-track-event="contact_click" data-track-label={`Contact method: ${method.label}`}>
                 <span>{method.label}</span>
                 <strong>{method.value}</strong>
                 <p>{method.description}</p>
