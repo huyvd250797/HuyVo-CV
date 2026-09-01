@@ -4,6 +4,7 @@ import { ResumePrintButton } from "@/components/resume-print-button";
 import { profile } from "@/data/profile";
 import { appVersion } from "@/data/version";
 import { readPortfolioProfile } from "@/lib/portfolio-cms";
+import { mediaViewUrl } from "@/lib/media-url";
 
 export const metadata: Metadata = {
   title: `Resume | ${profile.name}`,
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 
 export default async function ResumePage() {
   const { profile } = await readPortfolioProfile();
-  const resumeUrl = profile.media?.resumeUrl?.trim();
+  const resumeUrl = mediaViewUrl(profile.media?.resumeUrl);
 
   return (
     <main id="top" className="resume-page">

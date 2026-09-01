@@ -1,10 +1,10 @@
-# HuyVo Portfolio — V1.2.0 Media & Project Assets
+# HuyVo Portfolio — V1.2.1 Google Drive Media URL Support
 
-A professional portfolio/CV web app built with Next.js, TypeScript, Supabase CMS and privacy-conscious analytics.
+A professional portfolio/CV web app built with Next.js, TypeScript, Supabase CMS, visitor analytics and media asset management.
 
 ## Current version
 
-**V1.2.0 — Media & Project Assets**
+**V1.2.1 — Google Drive Media URL Support**
 
 ## Main features
 
@@ -19,11 +19,40 @@ A professional portfolio/CV web app built with Next.js, TypeScript, Supabase CMS
 - `/admin` Light / Dark / System theme switcher
 - Visitor analytics dashboard in `/admin`
 - Media & Project Assets management in `/admin`
+- Google Drive media URL support for avatar, thumbnails and gallery images
 - Fallback to `src/data/profile.ts` when Supabase is not configured
+
+## Google Drive media support
+
+V1.2.1 automatically detects common Google Drive links and converts them to an image preview URL when rendering public pages or the Admin preview.
+
+Supported inputs:
+
+```text
+https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+https://drive.google.com/open?id=FILE_ID
+https://drive.google.com/uc?export=view&id=FILE_ID
+FILE_ID
+```
+
+You can paste a Google Drive share link directly into:
+
+- Avatar image URL
+- Project thumbnail image URL
+- Case-study gallery asset URL
+- Resume/CV file URL
+
+For images to display publicly, set the Drive file permission to:
+
+```text
+Share → General access → Anyone with the link → Viewer
+```
+
+The app preserves the URL you entered in CMS data, but uses the normalized Google Drive preview URL for image rendering.
 
 ## Media & Project Assets
 
-V1.2.0 adds URL-based media management. In `/admin → Media`, you can manage:
+In `/admin → Media`, you can manage:
 
 - Profile avatar image URL
 - Resume/CV file URL
@@ -71,7 +100,7 @@ SUPABASE_ANALYTICS_TABLE=portfolio_events
 ANALYTICS_MAX_ROWS=5000
 ```
 
-No extra environment variable is required for URL-based media in V1.2.0.
+No extra environment variable is required for Google Drive URL support.
 
 ## Supabase setup
 
@@ -99,24 +128,9 @@ Open:
 http://localhost:3000
 ```
 
-Admin:
+## Deploy notes
 
-```text
-http://localhost:3000/admin
-```
-
-Local fallback admin password:
-
-```text
-huyvo-admin
-```
-
-## Build
-
-```bash
-npm run build
-```
-
-## Vercel deploy note
-
-Keep Vercel Output Directory as the default. Do not set it to `out`.
+- Keep Vercel Output Directory as default.
+- Do not commit `.env.local`.
+- Do not expose `SUPABASE_SERVICE_ROLE_KEY` in frontend code or GitHub.
+- After changing Vercel environment variables, redeploy the project.

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState, type ReactNode } from "react";
 import { profile, type MediaAssetType, type ProjectCategory } from "@/data/profile";
 import { appVersion } from "@/data/version";
 import type { AnalyticsSummary } from "@/lib/portfolio-analytics";
+import { mediaPreviewUrl, mediaUrlInfo } from "@/lib/media-url";
 import { ThemeSwitcher } from "./theme-switcher";
 
 type AdminTab = "profile" | "media" | "experience" | "projects" | "skills" | "credentials" | "analytics" | "export";
@@ -81,8 +82,8 @@ type AdminProfileDraft = {
   social: { linkedin: string; github: string };
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v120";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v120";
+const storageKey = "huyvo-portfolio-admin-draft-v121";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v121";
 const fallbackPassword = "huyvo-admin";
 
 const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
@@ -302,6 +303,53 @@ function MediaTypeField({ value, onChange }: { value: MediaAssetType; onChange: 
         {mediaAssetTypes.map((type) => <option key={type} value={type}>{type}</option>)}
       </select>
     </label>
+  );
+}
+
+function GoogleDriveHelp({ url }: { url?: string }) {
+  const info = mediaUrlInfo(url);
+  if (info.provider !== "google-drive") return null;
+
+  return (
+    <small className="admin-drive-note">
+      Google Drive detected · File ID: <code>{info.fileId}</code> · preview/render will use a direct thumbnail URL.
+    </small>
+  );
+}
+
+function AdminImagePreview({
+  url,
+  alt,
+  fallback,
+  note,
+  small = false,
+}: {
+  url?: string;
+  alt: string;
+  fallback: string;
+  note: string;
+  small?: boolean;
+}) {
+  const info = mediaUrlInfo(url, small ? 900 : 1400);
+  const previewUrl = mediaPreviewUrl(url, small ? 900 : 1400);
+
+  return (
+    <div className={small ? "admin-media-preview small" : "admin-media-preview"}>
+      {previewUrl ? (
+        <img src={previewUrl} alt={alt} loading="lazy" referrerPolicy="no-referrer" />
+      ) : (
+        <span>{fallback}</span>
+      )}
+      <p>
+        {note}
+        {info.provider === "google-drive" && (
+          <>
+            <br />
+            <strong>Google Drive:</strong> auto-converted for image preview. Make sure the file is shared as <code>Anyone with the link → Viewer</code>.
+          </>
+        )}
+      </p>
+    </div>
   );
 }
 
@@ -642,7 +690,7 @@ export function AdminDashboard() {
           <h1>Portfolio CMS / Admin</h1>
           <p>
             This version connects profile, media assets and analytics to Supabase through protected Next.js API routes.
-            Add public avatar, resume, thumbnail and gallery URLs, then click <strong>Save live</strong> to update the portfolio without editing code.
+            Paste public image URLs or Google Drive share links, then click <strong>Save live</strong> to update the portfolio without editing code.
           </p>
           <form onSubmit={handleUnlock} className="admin-login-form">
             <label>
@@ -728,6 +776,7 @@ export function AdminDashboard() {
           <li className={draft.email !== "hello@example.com" ? "done" : ""}>Real email updated</li>
           <li className={analytics?.enabled ? "done" : ""}>Analytics tracking enabled</li>
           <li className={draft.projects.some((project) => project.media.thumbnailUrl || project.media.assets.some((asset) => asset.url)) ? "done" : ""}>Project media configured</li>
+          <li className={draft.media.avatarUrl || draft.projects.some((project) => project.media.thumbnailUrl || project.media.assets.some((asset) => asset.url)) ? "done" : ""}>Google Drive/direct media supported</li>
         </ul>
       </div>
 
@@ -786,19 +835,30 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "media" && (
-            <AdminSection title="Media & project assets" description="Add public image/file URLs for avatar, resume file, project thumbnails and case-study galleries. Use sanitized screenshots only.">
+            <AdminSection title="Media & project assets" description="Add public image/file URLs or Google Drive share links for avatar, resume file, project thumbnails and case-study galleries. Use sanitized screenshots only.">
               <div className="admin-nested-card">
                 <h3>Profile media</h3>
                 <div className="admin-grid two admin-media-profile-grid">
-                  <TextField label="Avatar image URL" value={draft.media.avatarUrl ?? ""} onChange={(value) => updateProfileMedia({ avatarUrl: value })} placeholder="https://..." />
+                  <div>
+                    <TextField label="Avatar image URL" value={draft.media.avatarUrl ?? ""} onChange={(value) => updateProfileMedia({ avatarUrl: value })} placeholder="Google Drive share link or https://..." />
+                    <GoogleDriveHelp url={draft.media.avatarUrl} />
+                  </div>
                   <TextField label="Avatar alt text" value={draft.media.avatarAlt ?? ""} onChange={(value) => updateProfileMedia({ avatarAlt: value })} />
-                  <TextField label="Cover image URL" value={draft.media.coverImageUrl ?? ""} onChange={(value) => updateProfileMedia({ coverImageUrl: value })} placeholder="Optional" />
-                  <TextField label="Resume/CV file URL" value={draft.media.resumeUrl ?? ""} onChange={(value) => updateProfileMedia({ resumeUrl: value })} placeholder="PDF link, Google Drive share link or public URL" />
+                  <div>
+                    <TextField label="Cover image URL" value={draft.media.coverImageUrl ?? ""} onChange={(value) => updateProfileMedia({ coverImageUrl: value })} placeholder="Optional Google Drive share link or public URL" />
+                    <GoogleDriveHelp url={draft.media.coverImageUrl} />
+                  </div>
+                  <div>
+                    <TextField label="Resume/CV file URL" value={draft.media.resumeUrl ?? ""} onChange={(value) => updateProfileMedia({ resumeUrl: value })} placeholder="PDF link, Google Drive share link or public URL" />
+                    <GoogleDriveHelp url={draft.media.resumeUrl} />
+                  </div>
                 </div>
-                <div className="admin-media-preview">
-                  {draft.media.avatarUrl ? <img src={draft.media.avatarUrl} alt={draft.media.avatarAlt || "Profile preview"} /> : <span>{draft.shortName}</span>}
-                  <p>Avatar preview. For best result, use a square public image URL. Leave empty to keep the monogram card.</p>
-                </div>
+                <AdminImagePreview
+                  url={draft.media.avatarUrl}
+                  alt={draft.media.avatarAlt || "Profile preview"}
+                  fallback={draft.shortName}
+                  note="Avatar preview. For best result, use a square public image URL or a public Google Drive image link. Leave empty to keep the monogram card."
+                />
               </div>
 
               <div className="admin-stack">
@@ -814,11 +874,17 @@ export function AdminDashboard() {
                     <div className="admin-grid two">
                       <TextField label="Project icon / initials" value={project.media.icon ?? ""} onChange={(value) => updateProjectMedia(projectIndex, { icon: value })} />
                       <TextField label="Thumbnail alt text" value={project.media.thumbnailAlt ?? ""} onChange={(value) => updateProjectMedia(projectIndex, { thumbnailAlt: value })} />
-                      <TextField label="Thumbnail image URL" value={project.media.thumbnailUrl ?? ""} onChange={(value) => updateProjectMedia(projectIndex, { thumbnailUrl: value })} placeholder="https://..." />
-                      <div className="admin-media-preview small">
-                        {project.media.thumbnailUrl ? <img src={project.media.thumbnailUrl} alt={project.media.thumbnailAlt || project.title} /> : <span>{project.media.icon || project.title.slice(0, 2).toUpperCase()}</span>}
-                        <p>Shown on project cards and case-study hero.</p>
+                      <div>
+                        <TextField label="Thumbnail image URL" value={project.media.thumbnailUrl ?? ""} onChange={(value) => updateProjectMedia(projectIndex, { thumbnailUrl: value })} placeholder="Google Drive share link or https://..." />
+                        <GoogleDriveHelp url={project.media.thumbnailUrl} />
                       </div>
+                      <AdminImagePreview
+                        url={project.media.thumbnailUrl}
+                        alt={project.media.thumbnailAlt || project.title}
+                        fallback={project.media.icon || project.title.slice(0, 2).toUpperCase()}
+                        note="Shown on project cards and case-study hero."
+                        small
+                      />
                     </div>
 
                     <div className="admin-stack compact-stack">
@@ -827,7 +893,10 @@ export function AdminDashboard() {
                         <div className="admin-grid two admin-row-card" key={`${project.slug}-${assetIndex}`}>
                           <TextField label="Asset title" value={asset.title} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { title: value })} />
                           <MediaTypeField value={asset.type} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { type: value })} />
-                          <TextField label="Asset URL" value={asset.url} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { url: value })} placeholder="Image, document, video or public link" />
+                          <div>
+                            <TextField label="Asset URL" value={asset.url} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { url: value })} placeholder="Google Drive share link, image, document, video or public link" />
+                            <GoogleDriveHelp url={asset.url} />
+                          </div>
                           <TextField label="Alt text" value={asset.alt ?? ""} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { alt: value })} />
                           <TextAreaField label="Caption" value={asset.caption ?? ""} rows={3} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { caption: value })} />
                           <button type="button" onClick={() => removeProjectAsset(projectIndex, assetIndex)}>Remove asset</button>
@@ -1051,7 +1120,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.2.0 writes live profile and media data to Supabase, tracks visitor insights and keeps export as a production backup.">
+            <AdminSection title="Export backup" description="V1.2.1 writes live profile and media data to Supabase, supports Google Drive media links, tracks visitor insights and keeps export as a production backup.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>
