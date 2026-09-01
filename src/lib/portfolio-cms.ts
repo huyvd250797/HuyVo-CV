@@ -70,6 +70,8 @@ export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
   const sourceCareerSummary = objectValue(source.careerSummary);
   const rawContact = objectValue(raw.contact);
   const sourceContact = objectValue(source.contact);
+  const rawPersonalBranding = objectValue(raw.personalBranding);
+  const sourcePersonalBranding = objectValue(source.personalBranding);
   const rawMedia = objectValue(raw.media);
   const sourceMedia = objectValue(source.media);
   const rawSocial = objectValue(raw.social);
@@ -91,6 +93,13 @@ export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
       ...sourceCareerSummary,
       ...rawCareerSummary,
       highlights: arrayValue(rawCareerSummary.highlights, sourceProfile.careerSummary.highlights),
+    },
+    personalBranding: {
+      ...sourcePersonalBranding,
+      ...rawPersonalBranding,
+      metrics: arrayValue(rawPersonalBranding.metrics, sourceProfile.personalBranding.metrics),
+      pillars: arrayValue(rawPersonalBranding.pillars, sourceProfile.personalBranding.pillars),
+      keywords: arrayValue(rawPersonalBranding.keywords, sourceProfile.personalBranding.keywords),
     },
     experience: arrayValue(raw.experience, sourceProfile.experience),
     projects: inputProjects.map((project, index) => normalizeProject(project, sourceProjects[index] ?? sourceProjects[0])),

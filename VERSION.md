@@ -1,18 +1,21 @@
 # Version
 
-**V1.5.0 – Advanced Admin CMS**
+**V1.6.0 – Public Polish & Personal Branding**
 
-## Release focus
+## Summary
 
-This release upgrades the portfolio admin area from a basic editor into a more practical CMS for everyday CV maintenance.
+This release improves the public portfolio experience and adds a stronger personal brand layer to the landing page.
 
-## Main changes
+## Highlights
 
-- Advanced add, duplicate, reorder and delete controls
-- Content health validation panel
-- Quick admin statistics panel
-- Unsaved-change badge and leave-page protection
-- Safer text input and textarea behavior
-- Unique slug generation for duplicated projects/blog posts
-- Save live blocked when required errors exist
-- Documentation updated for production maintenance
+- New Personal Brand section
+- Brand statement, signature, metrics, pillars and keywords
+- Admin editing support for English and Vietnamese branding content
+- Better public navigation with Brand anchor
+- Softer cards, rounded UI refinements and better text wrapping
+- CSS cleanup for older blog variable usage
+- CMS normalization for older Supabase records
+
+## Database impact
+
+No new database table is required.

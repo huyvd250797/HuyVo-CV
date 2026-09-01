@@ -16,7 +16,7 @@ export function ProductionReadiness({ profileData = fallbackProfile, locale = "e
       <div className="container">
         <div className="production-heading">
           <div>
-            <div className="section-label"><span>08</span> {copy.production.kicker}</div>
+            <div className="section-label"><span>09</span> {copy.production.kicker}</div>
             <h2>{appVersion.label} {copy.production.title}</h2>
           </div>
           <p>{profile.name}: {copy.production.description}</p>

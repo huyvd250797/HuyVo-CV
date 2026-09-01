@@ -60,6 +60,9 @@ type SkillGroupDraft = { title: string; skills: string[] };
 type EducationDraft = { period: string; institution: string; degree: string; note?: string };
 type CertificationDraft = { year: string; name: string; issuer: string; credentialUrl?: string };
 type ContactMethodDraft = { label: string; value: string; href: string; description: string };
+type BrandMetricDraft = { label: string; value: string; detail: string };
+type BrandPillarDraft = { title: string; text: string };
+type PersonalBrandingDraft = { statement: string; signature: string; metrics: BrandMetricDraft[]; pillars: BrandPillarDraft[]; keywords: string[] };
 
 type AdminProfileDraft = {
   name: string;
@@ -70,6 +73,7 @@ type AdminProfileDraft = {
   location: string;
   email: string;
   availability: string;
+  personalBranding: PersonalBrandingDraft;
   media: ProfileMediaDraft;
   specialties: string[];
   about: string[];
@@ -97,8 +101,8 @@ type AdminProfileDraft = {
   translations?: Record<string, unknown>;
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v150";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v150";
+const storageKey = "huyvo-portfolio-admin-draft-v160";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v160";
 const fallbackPassword = "huyvo-admin";
 
 type ContentLocale = "en" | "vi";
@@ -247,6 +251,8 @@ function validateDraft(draft: AdminProfileDraft): ValidationIssue[] {
   if (draft.email.trim() === "hello@example.com") issues.push({ level: "warning", message: "Replace placeholder email before publishing." });
   if (!draft.headline.trim()) issues.push({ level: "warning", message: "Hero headline is empty." });
   if (!draft.about.length) issues.push({ level: "warning", message: "About paragraphs are empty." });
+  if (!draft.personalBranding.statement.trim()) issues.push({ level: "warning", message: "Personal brand statement is empty." });
+  if (!draft.personalBranding.pillars.length) issues.push({ level: "warning", message: "Personal brand pillars are empty." });
   if (!draft.projects.length) issues.push({ level: "error", message: "At least one project is required." });
 
   const projectSlugs = draft.projects.map((project) => project.slug.trim()).filter(Boolean);
@@ -288,6 +294,12 @@ function createDraftFromProfile(): AdminProfileDraft {
     location: profile.location,
     email: profile.email,
     availability: profile.availability,
+    personalBranding: {
+      ...profile.personalBranding,
+      metrics: profile.personalBranding.metrics.map((item) => ({ ...item })),
+      pillars: profile.personalBranding.pillars.map((item) => ({ ...item })),
+      keywords: [...profile.personalBranding.keywords],
+    },
     media: { ...profile.media },
     specialties: [...profile.specialties],
     about: [...profile.about],
@@ -334,6 +346,40 @@ function createDraftFromProfile(): AdminProfileDraft {
     },
     social: { ...profile.social },
     translations: JSON.parse(JSON.stringify((profile as unknown as { translations?: Record<string, unknown> }).translations || {})),
+  };
+}
+
+
+function normalizeAdminDraft(input: Partial<AdminProfileDraft>): AdminProfileDraft {
+  const base = createDraftFromProfile();
+  const inputRecord = isRecord(input) ? input as MutableRecord : {};
+  const rawPersonalBranding = isRecord(inputRecord.personalBranding) ? inputRecord.personalBranding as Partial<PersonalBrandingDraft> : {};
+  const rawCareerSummary = isRecord(inputRecord.careerSummary) ? inputRecord.careerSummary as Partial<AdminProfileDraft["careerSummary"]> : {};
+  const rawContact = isRecord(inputRecord.contact) ? inputRecord.contact as Partial<AdminProfileDraft["contact"]> : {};
+
+  return {
+    ...base,
+    ...input,
+    media: { ...base.media, ...(isRecord(inputRecord.media) ? inputRecord.media : {}) },
+    personalBranding: {
+      ...base.personalBranding,
+      ...rawPersonalBranding,
+      metrics: Array.isArray(rawPersonalBranding.metrics) ? rawPersonalBranding.metrics as BrandMetricDraft[] : base.personalBranding.metrics,
+      pillars: Array.isArray(rawPersonalBranding.pillars) ? rawPersonalBranding.pillars as BrandPillarDraft[] : base.personalBranding.pillars,
+      keywords: Array.isArray(rawPersonalBranding.keywords) ? rawPersonalBranding.keywords as string[] : base.personalBranding.keywords,
+    },
+    careerSummary: {
+      ...base.careerSummary,
+      ...rawCareerSummary,
+      highlights: Array.isArray(rawCareerSummary.highlights) ? rawCareerSummary.highlights as HighlightDraft[] : base.careerSummary.highlights,
+    },
+    contact: {
+      ...base.contact,
+      ...rawContact,
+      preferredTopics: Array.isArray(rawContact.preferredTopics) ? rawContact.preferredTopics as string[] : base.contact.preferredTopics,
+      methods: Array.isArray(rawContact.methods) ? rawContact.methods as ContactMethodDraft[] : base.contact.methods,
+    },
+    social: { ...base.social, ...(isRecord(inputRecord.social) ? inputRecord.social : {}) },
   };
 }
 
@@ -413,7 +459,7 @@ function buildProfileSource(draft: AdminProfileDraft) {
       '"certifications": [] as Array<{\n    year: string;\n    name: string;\n    issuer: string;\n    credentialUrl?: string;\n  }>',
     );
   }
-  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\nexport type BlogStatus = "Draft" | "Published";\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport type BlogPost = {\n  title: string;\n  slug: string;\n  date: string;\n  status: BlogStatus;\n  featured?: boolean;\n  tags: string[];\n  summary: string;\n  content: string[];\n  coverImageUrl?: string;\n  coverImageAlt?: string;\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
+  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\nexport type BlogStatus = "Draft" | "Published";\nexport type BrandMetric = { label: string; value: string; detail: string };\nexport type BrandPillar = { title: string; text: string };\nexport type PersonalBranding = { statement: string; signature: string; metrics: BrandMetric[]; pillars: BrandPillar[]; keywords: string[] };\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport type BlogPost = {\n  title: string;\n  slug: string;\n  date: string;\n  status: BlogStatus;\n  featured?: boolean;\n  tags: string[];\n  summary: string;\n  content: string[];\n  coverImageUrl?: string;\n  coverImageAlt?: string;\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
 }
 
 function TextField({
@@ -752,7 +798,7 @@ export function AdminDashboard() {
       const saved = window.localStorage.getItem(storageKey);
       const session = window.sessionStorage.getItem(sessionKey);
       if (saved) {
-        const parsedDraft = JSON.parse(saved) as AdminProfileDraft;
+        const parsedDraft = normalizeAdminDraft(JSON.parse(saved) as Partial<AdminProfileDraft>);
         setDraft(parsedDraft);
         setSavedSnapshot(JSON.stringify(parsedDraft));
         setMessage("Loaded browser draft");
@@ -836,7 +882,7 @@ export function AdminDashboard() {
         throw new Error(result.message || "Could not load CMS profile.");
       }
 
-      const loadedProfile = result.profile as AdminProfileDraft;
+      const loadedProfile = normalizeAdminDraft(result.profile as Partial<AdminProfileDraft>);
       setDraft(loadedProfile);
       setSavedSnapshot(JSON.stringify(loadedProfile));
       setCmsSource(result.source as CmsSource);
@@ -947,6 +993,31 @@ export function AdminDashboard() {
 
   function updateRoot<K extends keyof AdminProfileDraft>(key: K, value: AdminProfileDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
+  }
+
+
+  function updatePersonalBranding(patch: Partial<PersonalBrandingDraft>) {
+    setDraft((current) => ({ ...current, personalBranding: { ...current.personalBranding, ...patch } }));
+  }
+
+  function updateBrandMetric(index: number, patch: Partial<BrandMetricDraft>) {
+    setDraft((current) => ({
+      ...current,
+      personalBranding: {
+        ...current.personalBranding,
+        metrics: current.personalBranding.metrics.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item),
+      },
+    }));
+  }
+
+  function updateBrandPillar(index: number, patch: Partial<BrandPillarDraft>) {
+    setDraft((current) => ({
+      ...current,
+      personalBranding: {
+        ...current.personalBranding,
+        pillars: current.personalBranding.pillars.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item),
+      },
+    }));
   }
 
   function updateViTranslation(path: TranslationPath, value: unknown) {
@@ -1402,6 +1473,32 @@ export function AdminDashboard() {
                     <LineListField label="Specialties" value={draft.specialties} onChange={(value) => updateRoot("specialties", value)} />
                     <LineListField label="About paragraphs" value={draft.about} onChange={(value) => updateRoot("about", value)} rows={6} />
                   </div>
+                  <div className="admin-nested-card brand-editor-card">
+                    <h3>Personal branding</h3>
+                    <div className="admin-grid two">
+                      <TextAreaField label="Brand statement" value={draft.personalBranding.statement} rows={3} onChange={(value) => updatePersonalBranding({ statement: value })} />
+                      <TextAreaField label="Brand signature" value={draft.personalBranding.signature} rows={4} onChange={(value) => updatePersonalBranding({ signature: value })} />
+                      <LineListField label="Brand keywords" value={draft.personalBranding.keywords} rows={5} onChange={(value) => updatePersonalBranding({ keywords: value })} />
+                    </div>
+                    <div className="admin-mini-grid">
+                      {draft.personalBranding.metrics.map((metric, index) => (
+                        <div className="admin-grid two admin-row-card" key={`brand-metric-${index}`}>
+                          <TextField label="Metric label" value={metric.label} onChange={(value) => updateBrandMetric(index, { label: value })} />
+                          <TextField label="Metric value" value={metric.value} onChange={(value) => updateBrandMetric(index, { value })} />
+                          <TextAreaField label="Metric detail" value={metric.detail} rows={3} onChange={(value) => updateBrandMetric(index, { detail: value })} />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="admin-stack compact-stack">
+                      <h4>Brand pillars</h4>
+                      {draft.personalBranding.pillars.map((pillar, index) => (
+                        <div className="admin-grid two admin-row-card" key={`brand-pillar-${index}`}>
+                          <TextField label="Pillar title" value={pillar.title} onChange={(value) => updateBrandPillar(index, { title: value })} />
+                          <TextAreaField label="Pillar text" value={pillar.text} rows={3} onChange={(value) => updateBrandPillar(index, { text: value })} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   <div className="admin-nested-card">
                     <h3>Career summary</h3>
                     <div className="admin-grid two">
@@ -1455,6 +1552,32 @@ export function AdminDashboard() {
                     <TextAreaField label="VI Description" value={getViText(["description"])} rows={4} onChange={(value) => updateViTranslation(["description"], value)} />
                     <LineListField label="VI Specialties" value={getViList(["specialties"])} onChange={(value) => updateViTranslation(["specialties"], value)} />
                     <LineListField label="VI About paragraphs" value={getViList(["about"])} onChange={(value) => updateViTranslation(["about"], value)} rows={6} />
+                  </div>
+                  <div className="admin-nested-card vi-card brand-editor-card">
+                    <h3>Personal branding — Tiếng Việt</h3>
+                    <div className="admin-grid two">
+                      <TextAreaField label="VI Brand statement" value={getViText(["personalBranding", "statement"])} rows={3} onChange={(value) => updateViTranslation(["personalBranding", "statement"], value)} />
+                      <TextAreaField label="VI Brand signature" value={getViText(["personalBranding", "signature"])} rows={4} onChange={(value) => updateViTranslation(["personalBranding", "signature"], value)} />
+                      <LineListField label="VI Brand keywords" value={getViList(["personalBranding", "keywords"])} rows={5} onChange={(value) => updateViTranslation(["personalBranding", "keywords"], value)} />
+                    </div>
+                    <div className="admin-mini-grid">
+                      {draft.personalBranding.metrics.map((metric, index) => (
+                        <div className="admin-grid two admin-row-card" key={`vi-brand-metric-${index}`}>
+                          <TextField label="VI Metric label" value={getViText(["personalBranding", "metrics", index, "label"])} placeholder={metric.label} onChange={(value) => updateViTranslation(["personalBranding", "metrics", index, "label"], value)} />
+                          <TextField label="VI Metric value" value={getViText(["personalBranding", "metrics", index, "value"])} placeholder={metric.value} onChange={(value) => updateViTranslation(["personalBranding", "metrics", index, "value"], value)} />
+                          <TextAreaField label="VI Metric detail" value={getViText(["personalBranding", "metrics", index, "detail"])} rows={3} onChange={(value) => updateViTranslation(["personalBranding", "metrics", index, "detail"], value)} />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="admin-stack compact-stack">
+                      <h4>Brand pillars — Tiếng Việt</h4>
+                      {draft.personalBranding.pillars.map((pillar, index) => (
+                        <div className="admin-grid two admin-row-card" key={`vi-brand-pillar-${index}`}>
+                          <TextField label="VI Pillar title" value={getViText(["personalBranding", "pillars", index, "title"])} placeholder={pillar.title} onChange={(value) => updateViTranslation(["personalBranding", "pillars", index, "title"], value)} />
+                          <TextAreaField label="VI Pillar text" value={getViText(["personalBranding", "pillars", index, "text"])} rows={3} onChange={(value) => updateViTranslation(["personalBranding", "pillars", index, "text"], value)} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="admin-nested-card vi-card">
                     <h3>Career summary — Tiếng Việt</h3>
@@ -2162,7 +2285,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.5.0 adds advanced CMS operations, validation, unsaved-change protection, safer text inputs and backup exports for production use.">
+            <AdminSection title="Export backup" description="V1.6.0 adds public polish, personal branding content, brand positioning blocks and production-ready UI refinements.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>

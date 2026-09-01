@@ -2,6 +2,15 @@ export type ProjectCategory = "Professional" | "Product" | "Tool";
 export type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";
 export type BlogStatus = "Draft" | "Published";
 
+export type BrandMetric = { label: string; value: string; detail: string };
+export type BrandPillar = { title: string; text: string };
+export type PersonalBranding = {
+  statement: string;
+  signature: string;
+  metrics: BrandMetric[];
+  pillars: BrandPillar[];
+  keywords: string[];
+};
 
 export type MediaAsset = {
   title: string;
@@ -48,6 +57,21 @@ export const profile = {
   location: "Ho Chi Minh City, Vietnam",
   email: "hello@example.com",
   availability: "Open to professional connections",
+  personalBranding: {
+    statement: "Practical delivery for complex business workflows.",
+    signature: "I work best where business rules, data and product decisions need to become one clear delivery path.",
+    metrics: [
+      { label: "Focus", value: "PM / FC", detail: "Project delivery, functional consulting and stakeholder coordination." },
+      { label: "Domain", value: "EdTech", detail: "University management, student workflows and operational systems." },
+      { label: "Strength", value: "Bridge", detail: "Translate business context into software behaviors teams can build and test." },
+    ],
+    pillars: [
+      { title: "Clear requirements", text: "I turn scattered discussions into structured workflows, acceptance points and implementation decisions." },
+      { title: "Data-aware delivery", text: "I treat data validation as part of functional delivery, especially when workflows affect records and reports." },
+      { title: "Practical product thinking", text: "I prefer usable, maintainable solutions that help teams move faster without adding unnecessary complexity." },
+    ],
+    keywords: ["Project delivery", "Functional analysis", "Business workflow", "Data validation", "UAT", "Product thinking"],
+  } as PersonalBranding,
   media: {
     avatarUrl: "",
     avatarAlt: "Portrait photo of Huy Vo",
@@ -397,6 +421,21 @@ export const profile = {
       description: "Tập trung vào triển khai phần mềm, phân tích nghiệp vụ, thiết kế quy trình và bàn giao giải pháp cho hệ thống quản trị giáo dục.",
       availability: "Sẵn sàng kết nối chuyên môn",
       location: "TP. Hồ Chí Minh, Việt Nam",
+      personalBranding: {
+        statement: "Triển khai thực tế cho các workflow nghiệp vụ phức tạp.",
+        signature: "Tôi phù hợp với những bài toán cần biến quy tắc nghiệp vụ, dữ liệu và quyết định sản phẩm thành một lộ trình triển khai rõ ràng.",
+        metrics: [
+          { label: "Trọng tâm", value: "PM / FC", detail: "Quản lý triển khai, tư vấn chức năng và phối hợp các bên liên quan." },
+          { label: "Lĩnh vực", value: "EdTech", detail: "Quản trị trường đại học, quy trình sinh viên và hệ thống vận hành." },
+          { label: "Thế mạnh", value: "Cầu nối", detail: "Chuyển bối cảnh nghiệp vụ thành hành vi phần mềm có thể xây dựng và kiểm thử." },
+        ],
+        pillars: [
+          { title: "Yêu cầu rõ ràng", text: "Chuyển các trao đổi rời rạc thành workflow, điểm nghiệm thu và quyết định triển khai có cấu trúc." },
+          { title: "Triển khai gắn với dữ liệu", text: "Xem kiểm tra dữ liệu là một phần của bàn giao chức năng, nhất là khi workflow ảnh hưởng hồ sơ và báo cáo." },
+          { title: "Tư duy sản phẩm thực tế", text: "Ưu tiên giải pháp dùng được, dễ bảo trì và giúp đội nhóm làm nhanh hơn mà không tăng độ phức tạp không cần thiết." },
+        ],
+        keywords: ["Triển khai dự án", "Phân tích chức năng", "Workflow nghiệp vụ", "Kiểm tra dữ liệu", "UAT", "Tư duy sản phẩm"],
+      },
       specialties: ["Quản lý dự án", "Tư vấn chức năng", "Phân tích nghiệp vụ", "SQL & Dữ liệu"],
       about: [
         "Tôi làm việc ở điểm giao giữa vận hành nghiệp vụ và triển khai phần mềm, chuyển các yêu cầu thực tế thành quy trình rõ ràng và quyết định sản phẩm có thể thực thi.",

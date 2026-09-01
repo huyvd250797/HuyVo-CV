@@ -10,6 +10,7 @@ import { JsonLd } from "@/components/json-ld";
 import { Hero } from "@/components/hero";
 import { Skills } from "@/components/skills";
 import { Projects } from "@/components/projects";
+import { PersonalBranding } from "@/components/personal-branding";
 import { ProductionReadiness } from "@/components/production-readiness";
 import { BlogPreview } from "@/components/blog-preview";
 import type { PortfolioProfile } from "@/data/profile";
@@ -24,6 +25,7 @@ export function PortfolioPage({ profile, locale }: { profile: PortfolioProfile; 
       <Hero profileData={profile} locale={locale} />
       <About profileData={profile} locale={locale} />
       <CareerSummary profileData={profile} locale={locale} />
+      <PersonalBranding profileData={profile} locale={locale} />
       <Experience profileData={profile} locale={locale} />
       <Projects profileData={profile} locale={locale} />
       <Skills profileData={profile} locale={locale} />

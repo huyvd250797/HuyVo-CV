@@ -8,7 +8,7 @@ export function Experience({ profileData = fallbackProfile, locale = "en" }: { p
   return (
     <section className="section experience" id="experience">
       <div className="container">
-        <div className="section-label"><span>03</span> {copy.sections.experience}</div>
+        <div className="section-label"><span>04</span> {copy.sections.experience}</div>
         <div className="experience-heading">
           <h2>{copy.sections.experienceTitle}</h2>
           <p>{copy.sections.experienceDescription}</p>

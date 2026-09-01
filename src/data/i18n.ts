@@ -35,6 +35,7 @@ export const uiCopy = {
     languageName: "English",
     nav: {
       about: "About",
+      brand: "Brand",
       experience: "Experience",
       projects: "Projects",
       skills: "Skills",
@@ -58,6 +59,9 @@ export const uiCopy = {
       aboutTitle: "Connecting business context with software execution.",
       summary: "Career summary",
       summaryTitle: "Business context.\nStructured execution.",
+      brand: "Personal brand",
+      brandTitle: "A clear bridge between business, data and delivery.",
+      brandDescription: "A sharper public positioning block for recruiters, partners and customers who need to understand how I work.",
       experience: "Experience",
       experienceTitle: "Where strategy meets delivery.",
       experienceDescription: "Selected professional experience focused on software implementation, functional analysis and cross-team execution.",
@@ -187,6 +191,7 @@ export const uiCopy = {
     languageName: "Tiếng Việt",
     nav: {
       about: "Giới thiệu",
+      brand: "Định vị",
       experience: "Kinh nghiệm",
       projects: "Dự án",
       skills: "Kỹ năng",
@@ -210,6 +215,9 @@ export const uiCopy = {
       aboutTitle: "Kết nối bối cảnh nghiệp vụ với triển khai phần mềm.",
       summary: "Tóm tắt nghề nghiệp",
       summaryTitle: "Bối cảnh nghiệp vụ.\nTriển khai có cấu trúc.",
+      brand: "Thương hiệu cá nhân",
+      brandTitle: "Cầu nối rõ ràng giữa nghiệp vụ, dữ liệu và triển khai.",
+      brandDescription: "Khối định vị cá nhân rõ hơn để nhà tuyển dụng, đối tác và khách hàng hiểu cách tôi làm việc.",
       experience: "Kinh nghiệm",
       experienceTitle: "Nơi chiến lược gặp năng lực triển khai.",
       experienceDescription: "Kinh nghiệm tiêu biểu về triển khai phần mềm, phân tích chức năng và phối hợp liên phòng ban.",
@@ -358,6 +366,13 @@ export type PortfolioTranslation = Partial<{
   media: Partial<{
     avatarAlt: string;
   }>;
+  personalBranding: Partial<{
+    statement: string;
+    signature: string;
+    metrics: Array<Partial<{ label: string; value: string; detail: string }>>;
+    pillars: Array<Partial<{ title: string; text: string }>>;
+    keywords: string[];
+  }>;
   specialties: string[];
   about: string[];
   careerSummary: Partial<{
@@ -431,11 +446,25 @@ export function localizeProfile(profile: PortfolioProfile, localeInput?: string 
   const translations = (profile as unknown as { translations?: TranslationMap }).translations || {};
   const translation = translations[locale] as AnyRecord | undefined;
   if (!translation) return profile;
+  const baseBrand = profile.personalBranding || { statement: "", signature: "", metrics: [], pillars: [], keywords: [] };
 
   const localized = {
     ...(profile as AnyRecord),
     ...translation,
     media: { ...(profile.media as AnyRecord), ...(translation.media || {}) },
+    personalBranding: {
+      ...(baseBrand as AnyRecord),
+      ...(translation.personalBranding || {}),
+      metrics: baseBrand.metrics.map((item, index) => ({
+        ...(item as AnyRecord),
+        ...((translation.personalBranding?.metrics || [])[index] || {}),
+      })),
+      pillars: baseBrand.pillars.map((item, index) => ({
+        ...(item as AnyRecord),
+        ...((translation.personalBranding?.pillars || [])[index] || {}),
+      })),
+      keywords: translation.personalBranding?.keywords || baseBrand.keywords,
+    },
     social: { ...(profile.social as AnyRecord) },
     careerSummary: {
       ...(profile.careerSummary as AnyRecord),

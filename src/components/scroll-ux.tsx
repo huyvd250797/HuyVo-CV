@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-const sectionIds = ["top", "about", "experience", "projects", "skills", "approach", "contact"];
+const sectionIds = ["top", "about", "brand", "experience", "projects", "skills", "approach", "contact"];
 const revealSelector = [
   ".section .container",
   ".hero-copy",
   ".hero-visual",
   ".snapshot-card",
+  ".brand-metrics-panel article",
+  ".brand-pillar-grid article",
   ".timeline-item",
   ".project-card",
   ".skill-group",

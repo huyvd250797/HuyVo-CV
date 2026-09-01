@@ -27,6 +27,7 @@ export function personJsonLdFor(profile: PortfolioProfile = fallbackProfile, loc
     },
     knowsAbout: [
       ...profile.specialties,
+      ...(profile.personalBranding?.keywords || []),
       ...profile.skillGroups.flatMap((group) => group.skills),
     ],
     sameAs,
