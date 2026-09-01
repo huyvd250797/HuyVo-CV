@@ -66,6 +66,8 @@ export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
   const sourceSocial = objectValue(source.social);
   const sourceProjects = sourceProfile.projects;
   const inputProjects = Array.isArray(raw.projects) ? raw.projects : sourceProjects;
+  const rawTranslations = objectValue(raw.translations);
+  const sourceTranslations = objectValue(source.translations);
 
   return {
     ...sourceProfile,
@@ -91,6 +93,7 @@ export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
       methods: arrayValue(rawContact.methods, sourceProfile.contact.methods),
     },
     social: { ...sourceSocial, ...rawSocial },
+    translations: { ...sourceTranslations, ...rawTranslations },
   } as unknown as PortfolioProfile;
 }
 

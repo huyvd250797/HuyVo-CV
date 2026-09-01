@@ -37,7 +37,7 @@ export function ThemeSwitcher() {
   }, [theme]);
 
   const cycle = () => {
-    const next = themes[(themes.indexOf(theme) + 1) % themes.length];
+    const next = themes[(themes.indexOf(theme) + 1) % themes.length] ?? "system";
     setTheme(next);
   };
 

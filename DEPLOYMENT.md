@@ -1,12 +1,16 @@
-# Deployment Guide — HuyVo Portfolio V1.2.1
+# Deployment Guide – HuyVo Portfolio V1.3.0
 
-## 1. Deploy source to Vercel
+## 1. Deploy to Vercel
 
-Use the ZIP source or push it to GitHub, then import the project into Vercel.
+1. Push the source to GitHub.
+2. Import the repository into Vercel.
+3. Framework preset: Next.js.
+4. Build command: `npm run build`.
+5. Output Directory: leave empty/default.
 
-Do not set Output Directory to `out`. Keep it as the default Next.js output.
+## 2. Environment variables
 
-## 2. Add environment variables
+Add these in Vercel Project → Settings → Environment Variables:
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
@@ -15,86 +19,78 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ADMIN_PASSWORD=your-admin-password
 NEXT_PUBLIC_ENABLE_ANALYTICS=true
-```
-
-Optional:
-
-```env
-SUPABASE_PORTFOLIO_TABLE=portfolio_profiles
-SUPABASE_PORTFOLIO_ID=default
-PORTFOLIO_REVALIDATE_SECONDS=60
 SUPABASE_ANALYTICS_TABLE=portfolio_events
 ANALYTICS_MAX_ROWS=5000
 ```
 
-## 3. Run Supabase SQL
+Then redeploy.
 
-Open Supabase SQL Editor and run:
+## 3. Supabase SQL
+
+Run:
 
 ```text
 supabase/schema.sql
 ```
 
-This creates the CMS table and analytics table. V1.2.1 media data is saved inside `portfolio_profiles.data`, so no separate media table is required.
+This creates/keeps:
 
-## 4. Save live CMS data
+- `portfolio_profiles`
+- `portfolio_events`
 
-Open:
+V1.3.0 multilingual content uses the existing `portfolio_profiles.data` JSON column.
+
+## 4. Public routes
+
+English:
+
+```text
+/en
+/en/resume
+/en/contact
+/en/projects/[slug]
+```
+
+Vietnamese:
+
+```text
+/vi
+/vi/resume
+/vi/contact
+/vi/projects/[slug]
+```
+
+Legacy English routes still work:
+
+```text
+/
+/resume
+/contact
+/projects/[slug]
+```
+
+## 5. Admin workflow
 
 ```text
 /admin
+↓
+Login with ADMIN_PASSWORD
+↓
+Edit content
+↓
+Save live
 ```
 
-Login with `ADMIN_PASSWORD`, edit your profile and click **Save live**.
-
-## 5. Add Google Drive media assets
-
-Open:
+For multilingual content:
 
 ```text
-/admin → Media
+/admin → Language → edit translations JSON → Apply translations JSON → Save live
 ```
 
-Paste Google Drive share links or normal public URLs for:
+## 6. Media URLs
 
-- Avatar image
-- Resume/CV PDF file
-- Project thumbnail
-- Case-study screenshots, diagrams, documents, videos or links
-
-Supported Drive formats:
+Google Drive image links are supported. Make sure each Drive file is shared as:
 
 ```text
-https://drive.google.com/file/d/FILE_ID/view?usp=sharing
-https://drive.google.com/open?id=FILE_ID
-https://drive.google.com/uc?export=view&id=FILE_ID
-FILE_ID
+Anyone with the link → Viewer
 ```
-
-For images to display publicly, set each Google Drive file to:
-
-```text
-Share → General access → Anyone with the link → Viewer
-```
-
-Click **Save live** after updating media.
-
-## 6. Check analytics
-
-Visit the public portfolio pages, then open:
-
-```text
-/admin → Analytics
-```
-
-Click **Refresh analytics**.
-
-## 7. Disable analytics if needed
-
-Set:
-
-```env
-NEXT_PUBLIC_ENABLE_ANALYTICS=false
-```
-
-Then redeploy.

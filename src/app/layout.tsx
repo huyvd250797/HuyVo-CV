@@ -20,18 +20,22 @@ export const metadata: Metadata = {
   publisher: profile.name,
   category: "Portfolio",
   alternates: {
-    canonical: "/",
+    canonical: "/en",
+    languages: {
+      en: absoluteUrl("/en"),
+      vi: absoluteUrl("/vi"),
+    },
   },
   openGraph: {
     type: "website",
     locale: siteConfig.locale,
-    url: siteConfig.url,
+    url: "/en",
     siteName: siteConfig.name,
     title: siteConfig.title,
     description: siteConfig.description,
     images: [
       {
-        url: absoluteUrl("/opengraph-image"),
+        url: absoluteUrl("/opengraph-image?locale=en"),
         width: 1200,
         height: 630,
         alt: `${profile.name} professional portfolio`,
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteConfig.title,
     description: siteConfig.description,
-    images: [absoluteUrl("/opengraph-image")],
+    images: [absoluteUrl("/opengraph-image?locale=en")],
   },
   robots: {
     index: true,

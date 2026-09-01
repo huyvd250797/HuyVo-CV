@@ -1,20 +1,22 @@
 import Link from "next/link";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { getUiCopy } from "@/data/i18n";
 
 export default function NotFound() {
+  const copy = getUiCopy("en");
   return (
     <main id="top">
-      <Header />
+      <Header locale="en" />
       <section className="section not-found-section">
         <div className="container not-found-card">
-          <p className="section-kicker">404 — Not found</p>
-          <h1>Page not found.</h1>
-          <p>The page you opened does not exist or may have been moved during a portfolio version upgrade.</p>
-          <Link href="/" className="button primary">Back to portfolio <span>↗</span></Link>
+          <p className="section-kicker">{copy.notFound.kicker}</p>
+          <h1>{copy.notFound.title}</h1>
+          <p>{copy.notFound.description}</p>
+          <Link href="/en" className="button primary">{copy.notFound.action} <span>↗</span></Link>
         </div>
       </section>
-      <Footer />
+      <Footer locale="en" />
     </main>
   );
 }
