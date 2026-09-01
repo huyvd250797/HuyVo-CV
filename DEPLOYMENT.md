@@ -1,6 +1,6 @@
-# Deployment Guide – HuyVo Portfolio V1.6.0
+# Deployment Guide – HuyVo Portfolio V1.7.0
 
-## 1. Install locally
+## 1. Install and run locally
 
 ```bash
 npm install
@@ -13,58 +13,44 @@ npm run dev
 npm run build
 ```
 
-## 3. Supabase
+## 3. Vercel settings
 
-Run the SQL file if this is your first CMS/Analytics setup:
+Use default Vercel settings for a Next.js app.
 
-```text
-supabase/schema.sql
-```
+Do not set Output Directory to `out`.
 
-V1.6.0 does not add a new table. Branding content is saved into the existing profile JSON.
-
-## 4. Vercel Environment Variables
+## 4. Environment variables
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-ADMIN_PASSWORD=your-secure-admin-password
+ADMIN_PASSWORD=your-admin-password
 NEXT_PUBLIC_ENABLE_ANALYTICS=true
 SUPABASE_ANALYTICS_TABLE=portfolio_events
 ANALYTICS_MAX_ROWS=5000
 ```
 
-## 5. Vercel settings
+## 5. Supabase schema
 
-- Framework Preset: Next.js
-- Build Command: `npm run build`
-- Output Directory: leave empty/default
-- Install Command: default
+V1.7.0 does not add a new table. If this is a fresh setup, run:
 
-## 6. After deploy
+```text
+supabase/schema.sql
+```
+
+Existing V1.6.0 Supabase data will be normalized automatically when loaded, so older records will receive default V1.7.0 case-study fields in Admin.
+
+## 6. Admin workflow
 
 ```text
 /admin
-↓
-Load live
-↓
-Profile → Personal branding
-↓
-Update brand statement, metrics, pillars and keywords
-↓
-Toggle Tiếng Việt to add Vietnamese content
-↓
-Save live
+→ Load live
+→ Projects
+→ Edit Case Study Pro blocks
+→ Toggle English gốc / Tiếng Việt when needed
+→ Save live
 ```
 
-## 7. Production checklist
-
-- Replace placeholder email
-- Replace placeholder LinkedIn/GitHub links
-- Add avatar/resume/media URLs
-- Save live once from Admin
-- Check `/`, `/en`, `/vi`, `/resume`, `/blog`, `/contact`
-- Check one project case-study page
-- Check analytics dashboard after public page views
+The Admin editing header becomes sticky and compact after scrolling so the current tab, save state, Save buttons and language toggle remain accessible.

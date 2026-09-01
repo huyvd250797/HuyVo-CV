@@ -63,9 +63,13 @@ export function projectJsonLd(project: Project, profile: PortfolioProfile = fall
     name: project.title,
     headline: project.title,
     description: project.summary,
+    abstract: (project.caseStudy as unknown as Record<string, unknown>).result || project.summary,
     url: absoluteUrl(localizedPath(locale, `/projects/${project.slug}`)),
     datePublished: project.year === "Current" ? undefined : project.year,
-    keywords: project.technologies.join(", "),
+    keywords: Array.from(new Set([
+      ...project.technologies,
+      ...(((project.caseStudy as unknown as Record<string, unknown>).competencies as string[] | undefined) || []),
+    ])).join(", "),
     image: project.media?.thumbnailUrl ? absoluteUrl(mediaPreviewUrl(project.media.thumbnailUrl)) : undefined,
     inLanguage: locale,
     associatedMedia: project.media?.assets?.filter((asset) => asset.url).map((asset) => ({
