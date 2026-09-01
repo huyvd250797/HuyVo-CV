@@ -16,6 +16,84 @@ export type PortfolioReadResult = {
 const defaultTable = "portfolio_profiles";
 const defaultRecordId = "default";
 
+type MutableRecord = Record<string, unknown>;
+
+function objectValue(value: unknown): MutableRecord {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as MutableRecord : {};
+}
+
+function arrayValue<T>(value: unknown, fallback: readonly T[]): T[] {
+  return Array.isArray(value) ? value as T[] : [...fallback];
+}
+
+function normalizeProject(project: unknown, fallbackProject: PortfolioProfile["projects"][number]) {
+  const raw = objectValue(project);
+  const fallback = fallbackProject as unknown as MutableRecord;
+  const rawCaseStudy = objectValue(raw.caseStudy);
+  const fallbackCaseStudy = objectValue(fallback.caseStudy);
+  const rawMedia = objectValue(raw.media);
+  const fallbackMedia = objectValue(fallback.media);
+
+  return {
+    ...fallbackProject,
+    ...raw,
+    contributions: arrayValue(raw.contributions, fallbackProject.contributions),
+    technologies: arrayValue(raw.technologies, fallbackProject.technologies),
+    media: {
+      ...fallbackMedia,
+      ...rawMedia,
+      assets: arrayValue(rawMedia.assets, Array.isArray(fallbackMedia.assets) ? fallbackMedia.assets as never[] : []),
+    },
+    caseStudy: {
+      ...fallbackCaseStudy,
+      ...rawCaseStudy,
+      process: arrayValue(rawCaseStudy.process, fallbackProject.caseStudy.process),
+      lessons: arrayValue(rawCaseStudy.lessons, fallbackProject.caseStudy.lessons),
+    },
+  } as unknown as PortfolioProfile["projects"][number];
+}
+
+export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
+  const source = sourceProfile as unknown as MutableRecord;
+  const raw = objectValue(input);
+  const rawCareerSummary = objectValue(raw.careerSummary);
+  const sourceCareerSummary = objectValue(source.careerSummary);
+  const rawContact = objectValue(raw.contact);
+  const sourceContact = objectValue(source.contact);
+  const rawMedia = objectValue(raw.media);
+  const sourceMedia = objectValue(source.media);
+  const rawSocial = objectValue(raw.social);
+  const sourceSocial = objectValue(source.social);
+  const sourceProjects = sourceProfile.projects;
+  const inputProjects = Array.isArray(raw.projects) ? raw.projects : sourceProjects;
+
+  return {
+    ...sourceProfile,
+    ...raw,
+    media: { ...sourceMedia, ...rawMedia },
+    specialties: arrayValue(raw.specialties, sourceProfile.specialties),
+    about: arrayValue(raw.about, sourceProfile.about),
+    careerSummary: {
+      ...sourceCareerSummary,
+      ...rawCareerSummary,
+      highlights: arrayValue(rawCareerSummary.highlights, sourceProfile.careerSummary.highlights),
+    },
+    experience: arrayValue(raw.experience, sourceProfile.experience),
+    projects: inputProjects.map((project, index) => normalizeProject(project, sourceProjects[index] ?? sourceProjects[0])),
+    skillGroups: arrayValue(raw.skillGroups, sourceProfile.skillGroups),
+    education: arrayValue(raw.education, sourceProfile.education),
+    certifications: arrayValue(raw.certifications, sourceProfile.certifications),
+    workingProcess: arrayValue(raw.workingProcess, sourceProfile.workingProcess),
+    contact: {
+      ...sourceContact,
+      ...rawContact,
+      preferredTopics: arrayValue(rawContact.preferredTopics, sourceProfile.contact.preferredTopics),
+      methods: arrayValue(rawContact.methods, sourceProfile.contact.methods),
+    },
+    social: { ...sourceSocial, ...rawSocial },
+  } as unknown as PortfolioProfile;
+}
+
 export const cmsConfig = {
   table: process.env.SUPABASE_PORTFOLIO_TABLE || defaultTable,
   recordId: process.env.SUPABASE_PORTFOLIO_ID || defaultRecordId,
@@ -87,7 +165,7 @@ export async function readPortfolioProfile(options?: { noStore?: boolean }): Pro
 
   if (!supabaseConfigured) {
     return {
-      profile: sourceProfile,
+      profile: normalizePortfolioProfile(sourceProfile),
       source: "source",
       reason: "Supabase environment variables are not configured. Using src/data/profile.ts fallback.",
       supabaseConfigured,
@@ -111,7 +189,7 @@ export async function readPortfolioProfile(options?: { noStore?: boolean }): Pro
     if (!response.ok) {
       const errorText = await response.text();
       return {
-        profile: sourceProfile,
+        profile: normalizePortfolioProfile(sourceProfile),
         source: "source",
         reason: `Supabase read failed (${response.status}). ${friendlySupabaseError(response.status, errorText)}`,
         supabaseConfigured,
@@ -126,7 +204,7 @@ export async function readPortfolioProfile(options?: { noStore?: boolean }): Pro
 
     if (!row?.data) {
       return {
-        profile: sourceProfile,
+        profile: normalizePortfolioProfile(sourceProfile),
         source: "source",
         reason: `No Supabase record found for id '${recordId}'. Using fallback profile until you save from /admin.`,
         supabaseConfigured,
@@ -137,7 +215,7 @@ export async function readPortfolioProfile(options?: { noStore?: boolean }): Pro
     }
 
     return {
-      profile: row.data,
+      profile: normalizePortfolioProfile(row.data),
       source: "supabase",
       updatedAt: row.updated_at ?? null,
       supabaseConfigured,
@@ -147,7 +225,7 @@ export async function readPortfolioProfile(options?: { noStore?: boolean }): Pro
     };
   } catch (error) {
     return {
-      profile: sourceProfile,
+      profile: normalizePortfolioProfile(sourceProfile),
       source: "source",
       reason: error instanceof Error ? error.message : "Unexpected Supabase read error. Using fallback profile.",
       supabaseConfigured,
@@ -164,6 +242,7 @@ export async function getPortfolioProfile() {
 }
 
 export async function savePortfolioProfile(data: PortfolioProfile) {
+  const normalizedData = normalizePortfolioProfile(data);
   if (!isSupabaseWriteConfigured()) {
     throw new Error("Supabase write is not configured. Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
   }
@@ -179,7 +258,7 @@ export async function savePortfolioProfile(data: PortfolioProfile) {
     },
     body: JSON.stringify({
       id: cmsConfig.recordId,
-      data,
+      data: normalizedData,
       updated_at: new Date().toISOString(),
     }),
   });

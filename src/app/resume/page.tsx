@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 
 export default async function ResumePage() {
   const { profile } = await readPortfolioProfile();
+  const resumeUrl = profile.media?.resumeUrl?.trim();
 
   return (
     <main id="top" className="resume-page">
@@ -25,6 +26,7 @@ export default async function ResumePage() {
         <Link href="/">← Back to portfolio</Link>
         <div className="resume-toolbar-actions">
           <span>{appVersion.label} · {appVersion.name}</span>
+          {resumeUrl && <a className="resume-download-link" href={resumeUrl} target="_blank" rel="noreferrer" data-track-event="resume_download" data-track-label="Resume Download attached CV">Download CV file</a>}
           <ResumePrintButton />
         </div>
       </div>

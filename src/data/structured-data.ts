@@ -14,6 +14,7 @@ export function personJsonLdFor(profile: PortfolioProfile = fallbackProfile) {
     description: profile.description,
     email: `mailto:${profile.email}`,
     url: siteConfig.url,
+    image: profile.media?.avatarUrl ? absoluteUrl(profile.media.avatarUrl) : undefined,
     address: {
       "@type": "PostalAddress",
       addressLocality: "Ho Chi Minh City",
@@ -54,6 +55,13 @@ export function projectJsonLd(project: Project, profile: PortfolioProfile = fall
     url: absoluteUrl(`/projects/${project.slug}`),
     datePublished: project.year === "Current" ? undefined : project.year,
     keywords: project.technologies.join(", "),
+    image: project.media?.thumbnailUrl ? absoluteUrl(project.media.thumbnailUrl) : undefined,
+    associatedMedia: project.media?.assets?.filter((asset) => asset.url).map((asset) => ({
+      "@type": asset.type === "Video" ? "VideoObject" : "MediaObject",
+      name: asset.title,
+      contentUrl: absoluteUrl(asset.url),
+      description: asset.caption,
+    })),
     author: {
       "@type": "Person",
       name: profile.name,
