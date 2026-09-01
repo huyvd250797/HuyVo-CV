@@ -1,4 +1,4 @@
-# Deployment Guide – HuyVo Portfolio V1.3.0
+# Deployment Guide – HuyVo Portfolio V1.3.1
 
 ## 1. Deploy to Vercel
 
@@ -38,7 +38,7 @@ This creates/keeps:
 - `portfolio_profiles`
 - `portfolio_events`
 
-V1.3.0 multilingual content uses the existing `portfolio_profiles.data` JSON column.
+V1.3.1 multilingual content uses the existing `portfolio_profiles.data` JSON column.
 
 ## 4. Public routes
 
@@ -76,7 +76,7 @@ Legacy English routes still work:
 ↓
 Login with ADMIN_PASSWORD
 ↓
-Edit content
+Edit English source content, or switch the Admin toggle to Tiếng Việt to edit Vietnamese fields in-place
 ↓
 Save live
 ```
