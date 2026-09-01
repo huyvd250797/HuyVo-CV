@@ -29,7 +29,7 @@ export function Projects({ profileData = fallbackProfile, locale = "en" }: { pro
       <div className="container">
         <div className="projects-heading">
           <div>
-            <div className="section-label"><span>04</span> {copy.sections.selectedWork}</div>
+            <div className="section-label"><span>05</span> {copy.sections.selectedWork}</div>
             <h2>{copy.sections.projectsTitle}</h2>
           </div>
           <p>{copy.sections.projectsDescription}</p>
