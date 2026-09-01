@@ -37,6 +37,8 @@ export function siteConfigFor(localeInput?: string | null) {
       "Portfolio",
       "Resume",
       "CV",
+      "Blog",
+      "Professional Notes",
     ],
   } as const;
 }

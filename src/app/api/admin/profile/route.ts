@@ -32,11 +32,15 @@ export async function PUT(request: NextRequest) {
     revalidatePath("/resume");
     revalidatePath("/contact");
     profilePayload.projects.forEach((project) => revalidatePath(`/projects/${project.slug}`));
+    revalidatePath("/blog");
+    profilePayload.blog?.forEach((post) => revalidatePath(`/blog/${post.slug}`));
 
     locales.forEach((locale) => {
       revalidatePath(localizedPath(locale));
       revalidatePath(localizedPath(locale, "/resume"));
       revalidatePath(localizedPath(locale, "/contact"));
+      revalidatePath(localizedPath(locale, "/blog"));
+      profilePayload.blog?.forEach((post) => revalidatePath(localizedPath(locale, `/blog/${post.slug}`)));
       profilePayload.projects.forEach((project) => revalidatePath(localizedPath(locale, `/projects/${project.slug}`)));
     });
 

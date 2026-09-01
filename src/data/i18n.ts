@@ -40,6 +40,7 @@ export const uiCopy = {
       skills: "Skills",
       process: "Process",
       resume: "Resume",
+      blog: "Blog",
       contact: "Let's talk",
     },
     hero: {
@@ -72,6 +73,9 @@ export const uiCopy = {
       process: "Process",
       processTitle: "How I move work from unclear to usable.",
       processDescription: "A practical six-step process for keeping complex implementation work clear, aligned and deliverable.",
+      blog: "Blog / Notes",
+      blogTitle: "Notes on project delivery, systems and practical work.",
+      blogDescription: "Short professional notes about implementation, business analysis, data validation and product thinking.",
       contact: "Contact",
     },
     projects: {
@@ -88,6 +92,20 @@ export const uiCopy = {
       projects: "projects",
       contribution: "Contribution",
       viewCaseStudy: "View case study",
+    },
+    blog: {
+      back: "← Back to blog",
+      readAll: "Read all notes",
+      latest: "Latest notes",
+      featured: "Featured",
+      published: "Published",
+      draft: "Draft",
+      readMore: "Read note",
+      emptyTitle: "No published notes yet.",
+      emptyDescription: "Create and publish blog notes from the Admin Blog / Notes tab.",
+      allPostsTitle: "Blog / Notes",
+      allPostsDescription: "Selected notes on software implementation, project delivery, business analysis and practical product work.",
+      contentLabel: "Professional note",
     },
     contact: {
       profileStatus: "Profile status",
@@ -174,6 +192,7 @@ export const uiCopy = {
       skills: "Kỹ năng",
       process: "Quy trình",
       resume: "CV",
+      blog: "Bài viết",
       contact: "Liên hệ",
     },
     hero: {
@@ -206,6 +225,9 @@ export const uiCopy = {
       process: "Quy trình",
       processTitle: "Cách tôi biến yêu cầu chưa rõ thành giải pháp dùng được.",
       processDescription: "Quy trình 6 bước giúp công việc triển khai phức tạp trở nên rõ ràng, đồng bộ và có thể bàn giao.",
+      blog: "Blog / Ghi chú",
+      blogTitle: "Ghi chú về triển khai dự án, hệ thống và công việc thực tế.",
+      blogDescription: "Các bài viết ngắn về triển khai phần mềm, phân tích nghiệp vụ, kiểm tra dữ liệu và tư duy sản phẩm.",
       contact: "Liên hệ",
     },
     projects: {
@@ -222,6 +244,20 @@ export const uiCopy = {
       projects: "dự án",
       contribution: "Đóng góp",
       viewCaseStudy: "Xem case study",
+    },
+    blog: {
+      back: "← Quay lại blog",
+      readAll: "Xem tất cả ghi chú",
+      latest: "Ghi chú mới",
+      featured: "Nổi bật",
+      published: "Đã đăng",
+      draft: "Bản nháp",
+      readMore: "Đọc ghi chú",
+      emptyTitle: "Chưa có bài viết đã đăng.",
+      emptyDescription: "Tạo và publish bài viết trong tab Blog / Notes của Admin.",
+      allPostsTitle: "Blog / Ghi chú",
+      allPostsDescription: "Các ghi chú về triển khai phần mềm, quản lý dự án, phân tích nghiệp vụ và tư duy sản phẩm thực tế.",
+      contentLabel: "Ghi chú chuyên môn",
     },
     contact: {
       profileStatus: "Trạng thái hồ sơ",
@@ -358,6 +394,14 @@ export type PortfolioTranslation = Partial<{
       lessons: string[];
     }>;
   }>>;
+  blog: Record<string, Partial<{
+    title: string;
+    date: string;
+    summary: string;
+    tags: string[];
+    content: string[];
+    coverImageAlt: string;
+  }>>;
   skillGroups: Record<string, Partial<{ title: string; skills: string[] }>>;
   education: Record<string, Partial<{ period: string; institution: string; degree: string; note: string }>>;
   certifications: Record<string, Partial<{ year: string; name: string; issuer: string }>>;
@@ -427,6 +471,14 @@ export function localizeProfile(profile: PortfolioProfile, localeInput?: string 
         },
       };
     }),
+    blog: profile.blog.map((post) => ({
+      ...(post as AnyRecord),
+      ...(translation.blog?.[post.slug] || {}),
+      slug: post.slug,
+      status: post.status,
+      featured: post.featured,
+      coverImageUrl: post.coverImageUrl,
+    })),
     skillGroups: profile.skillGroups.map((group) => mergeByRecord(group, translation.skillGroups?.[group.title])),
     education: profile.education.map((item) => mergeByRecord(item, translation.education?.[item.degree])),
     certifications: profile.certifications.map((item) => mergeByRecord(item, translation.certifications?.[item.name])),

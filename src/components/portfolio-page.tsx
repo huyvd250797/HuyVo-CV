@@ -11,6 +11,7 @@ import { Hero } from "@/components/hero";
 import { Skills } from "@/components/skills";
 import { Projects } from "@/components/projects";
 import { ProductionReadiness } from "@/components/production-readiness";
+import { BlogPreview } from "@/components/blog-preview";
 import type { PortfolioProfile } from "@/data/profile";
 import { type Locale } from "@/data/i18n";
 import { personJsonLdFor, websiteJsonLdFor } from "@/data/structured-data";
@@ -29,6 +30,7 @@ export function PortfolioPage({ profile, locale }: { profile: PortfolioProfile; 
       <Credentials profileData={profile} locale={locale} />
       <Approach profileData={profile} locale={locale} />
       <ProductionReadiness profileData={profile} locale={locale} />
+      <BlogPreview profileData={profile} locale={locale} />
       <Contact profileData={profile} locale={locale} />
       <Footer profileData={profile} locale={locale} />
     </main>

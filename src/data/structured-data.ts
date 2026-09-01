@@ -1,4 +1,4 @@
-import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
+import { profile as fallbackProfile, type BlogPost, type PortfolioProfile } from "@/data/profile";
 import { absoluteUrl, siteConfigFor } from "@/data/seo";
 import { getLocale, localizedPath, type Locale } from "@/data/i18n";
 import { mediaPreviewUrl, mediaViewUrl } from "@/lib/media-url";
@@ -73,6 +73,28 @@ export function projectJsonLd(project: Project, profile: PortfolioProfile = fall
       contentUrl: absoluteUrl(mediaViewUrl(asset.url)),
       description: asset.caption,
     })),
+    author: {
+      "@type": "Person",
+      name: profile.name,
+      jobTitle: profile.role,
+    },
+  };
+}
+
+export function blogPostJsonLd(post: BlogPost, profile: PortfolioProfile = fallbackProfile, localeInput?: string | null) {
+  const locale = getLocale(localeInput);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    name: post.title,
+    description: post.summary,
+    url: absoluteUrl(localizedPath(locale, `/blog/${post.slug}`)),
+    datePublished: post.date,
+    dateModified: post.date,
+    keywords: post.tags.join(", "),
+    image: post.coverImageUrl ? absoluteUrl(mediaPreviewUrl(post.coverImageUrl)) : undefined,
+    inLanguage: locale,
     author: {
       "@type": "Person",
       name: profile.name,

@@ -31,6 +31,7 @@ export function Header({ profileData = fallbackProfile, locale = "en" }: { profi
           <a href={sectionHref("skills")} data-section="skills" onClick={close}>{copy.nav.skills}</a>
           <a href={sectionHref("approach")} data-section="approach" onClick={close}>{copy.nav.process}</a>
           <a href={localizedPath(activeLocale, "/resume")} data-track-event="cta_click" data-track-label="Navbar Resume" onClick={close}>{copy.nav.resume}</a>
+          <a href={localizedPath(activeLocale, "/blog")} data-track-event="cta_click" data-track-label="Navbar Blog" onClick={close}>{copy.nav.blog}</a>
           <a className="nav-cta" href={localizedPath(activeLocale, "/contact")} data-track-event="contact_click" data-track-label="Navbar Let's talk" onClick={close}>{copy.nav.contact}</a>
         </nav>
         <div className="nav-actions">

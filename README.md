@@ -1,6 +1,6 @@
-# HuyVo Portfolio V1.3.1 – Admin Translation Toggle UX
+# HuyVo Portfolio V1.4.0 – Blog / Notes
 
-Professional portfolio/CV web app built with Next.js, TypeScript and CSS. This patch improves the Admin multilingual editing experience with an English/Tiếng Việt toggle in content tabs, while keeping the English source data untouched.
+Professional portfolio/CV web app built with Next.js, TypeScript and CSS. V1.4.0 extends the production portfolio with a bilingual Blog / Notes module for publishing professional notes from the Admin CMS.
 
 ## Main features
 
@@ -13,27 +13,26 @@ Professional portfolio/CV web app built with Next.js, TypeScript and CSS. This p
 - Media/project assets with Google Drive URL support
 - Admin dark/light/system theme
 - English/Vietnamese public routes
+- Blog / Notes public pages
+- Blog / Notes Admin editor with English/Tiếng Việt toggle
 - SEO, sitemap, robots, manifest, OpenGraph and JSON-LD
 
-## New in V1.3.1
+## New in V1.4.0
 
-- Added an Admin content toggle: **English gốc / Tiếng Việt**.
-- Vietnamese fields now appear directly inside Profile, Media, Experience, Projects, Skills and Credentials tabs.
-- Removed the need to edit raw translation JSON for normal bilingual content updates.
-- English source data remains unchanged when editing in Tiếng Việt mode.
-- Empty Vietnamese fields continue to fall back to English source content.
-
-## From V1.3.0
-
-- `/en` and `/vi` landing pages
-- `/en/resume` and `/vi/resume`
-- `/en/contact` and `/vi/contact`
-- `/en/projects/[slug]` and `/vi/projects/[slug]`
-- Navigation language switcher: EN / VI
-- Localized UI labels for public pages
-- Vietnamese content overrides with fallback to English source data
-- Admin **Language** tab for editing `translations` JSON
-- Fixed Admin textarea line-break issue when entering multi-line list content
+- Added public Blog / Notes pages:
+  - `/blog`
+  - `/blog/[slug]`
+  - `/en/blog`
+  - `/vi/blog`
+  - `/en/blog/[slug]`
+  - `/vi/blog/[slug]`
+- Added Blog preview section on the landing page.
+- Added Blog / Notes tab inside `/admin`.
+- Blog posts support title, slug, date, status, featured, tags, summary, content paragraphs and cover image URL.
+- Only `Published` blog posts appear on public pages.
+- Blog supports English source content and Vietnamese translation fields through the existing Admin language toggle.
+- Added blog SEO metadata, sitemap entries and JSON-LD BlogPosting data.
+- Blog content is stored in the existing `portfolio_profiles.data` JSON column, so no new Supabase table is required.
 
 ## Run locally
 
@@ -47,6 +46,7 @@ Open:
 ```text
 http://localhost:3000/en
 http://localhost:3000/vi
+http://localhost:3000/blog
 http://localhost:3000/admin
 ```
 
@@ -82,24 +82,25 @@ Run this file in Supabase SQL Editor:
 supabase/schema.sql
 ```
 
-V1.3.1 does not require a new table compared with V1.2.x/V1.1.x. Multilingual content is stored inside `portfolio_profiles.data.translations`.
-
-## Editing multilingual content
-
-Go to:
+V1.4.0 does not require a new Supabase table. Blog posts are saved inside:
 
 ```text
-/admin → Language
+portfolio_profiles.data.blog
+portfolio_profiles.data.translations.vi.blog
 ```
 
-The main profile fields are treated as English content. Vietnamese content is stored as overrides inside:
+## Admin workflow
 
 ```text
-translations.vi
+/admin
+↓
+Login with ADMIN_PASSWORD
+↓
+Open Blog / Notes
+↓
+Create or edit English source notes
+↓
+Switch to Tiếng Việt to translate each note in-place
+↓
+Save live
 ```
-
-If a Vietnamese field is missing, the app automatically falls back to the English source value.
-
-## Admin textarea fix
-
-Line-list textareas now keep the cursor/new line while typing. Blank rows are cleaned only when leaving the field, so pressing Enter works normally.

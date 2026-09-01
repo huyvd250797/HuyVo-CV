@@ -1,5 +1,7 @@
 export type ProjectCategory = "Professional" | "Product" | "Tool";
 export type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";
+export type BlogStatus = "Draft" | "Published";
+
 
 export type MediaAsset = {
   title: string;
@@ -23,6 +25,18 @@ export type ProjectMedia = {
   assets: MediaAsset[];
 };
 
+export type BlogPost = {
+  title: string;
+  slug: string;
+  date: string;
+  status: BlogStatus;
+  featured?: boolean;
+  tags: string[];
+  summary: string;
+  content: string[];
+  coverImageUrl?: string;
+  coverImageAlt?: string;
+};
 
 export const profile = {
   name: "Huy Vo",
@@ -309,6 +323,40 @@ export const profile = {
     { index: "05", title: "Validate", text: "Check functionality, data and real-world scenarios through review and UAT." },
     { index: "06", title: "Deliver", text: "Support rollout, resolve issues and improve the solution after implementation." },
   ],
+  blog: [
+    {
+      title: "How I approach software implementation projects",
+      slug: "software-implementation-approach",
+      date: "2026-09-01",
+      status: "Published" as BlogStatus,
+      featured: true,
+      tags: ["Project Management", "Functional Consulting", "Software Implementation"],
+      summary: "A practical note about turning unclear business needs into structured software delivery steps.",
+      content: [
+        "Successful implementation work starts before development. The most important step is turning business context into a shared understanding that customers, product, development and testing teams can use.",
+        "My approach is to clarify the real operational problem, map the workflow, identify data conditions, document edge cases and keep stakeholders aligned around testable behavior instead of vague expectations.",
+        "This makes delivery easier to validate during UAT and reduces the gap between what users expect and what the system actually does in production.",
+      ],
+      coverImageUrl: "",
+      coverImageAlt: "Software implementation planning note",
+    },
+    {
+      title: "Why data validation matters in UAT",
+      slug: "data-validation-in-uat",
+      date: "2026-09-01",
+      status: "Published" as BlogStatus,
+      featured: false,
+      tags: ["UAT", "Data Validation", "SQL"],
+      summary: "A short note on treating data validation as part of functional delivery, not a separate afterthought.",
+      content: [
+        "UAT is not only about clicking through screens. In many software implementation projects, real confidence comes from checking whether the data behind the workflow is consistent, complete and aligned with business rules.",
+        "When data validation is built into the functional delivery process, teams can detect mismatched rules, missing scenarios and rollout risks earlier.",
+        "For education management systems, this is especially important because a small data issue can affect reports, student records, registration flows or downstream operational decisions.",
+      ],
+      coverImageUrl: "",
+      coverImageAlt: "Data validation in UAT note",
+    },
+  ],
   contact: {
     title: "Let's build something useful.",
     subtitle: "Have a project, role or idea to discuss?",
@@ -436,6 +484,30 @@ export const profile = {
         "04": { title: "Phối hợp", text: "Giữ các bên liên quan đồng bộ trong quá trình phát triển và kiểm thử." },
         "05": { title: "Xác thực", text: "Kiểm tra chức năng, dữ liệu và tình huống thực tế thông qua review và UAT." },
         "06": { title: "Bàn giao", text: "Hỗ trợ golive, xử lý vấn đề và cải tiến giải pháp sau triển khai." },
+      },
+      blog: {
+        "software-implementation-approach": {
+          title: "Cách tôi tiếp cận dự án triển khai phần mềm",
+          summary: "Một ghi chú thực tế về cách chuyển nhu cầu nghiệp vụ chưa rõ thành các bước triển khai phần mềm có cấu trúc.",
+          tags: ["Quản lý dự án", "Tư vấn chức năng", "Triển khai phần mềm"],
+          content: [
+            "Triển khai thành công bắt đầu trước khi phát triển. Bước quan trọng nhất là chuyển bối cảnh nghiệp vụ thành một cách hiểu chung mà khách hàng, sản phẩm, phát triển và kiểm thử đều có thể sử dụng.",
+            "Cách làm của tôi là làm rõ vấn đề vận hành thật, map workflow, xác định điều kiện dữ liệu, ghi nhận edge case và giữ các bên cùng nhìn vào hành vi có thể kiểm thử thay vì kỳ vọng mơ hồ.",
+            "Cách này giúp việc bàn giao dễ xác thực hơn trong UAT và giảm khoảng cách giữa điều người dùng kỳ vọng với cách hệ thống vận hành thật trên production.",
+          ],
+          coverImageAlt: "Ghi chú về lập kế hoạch triển khai phần mềm",
+        },
+        "data-validation-in-uat": {
+          title: "Vì sao kiểm tra dữ liệu quan trọng trong UAT",
+          summary: "Một ghi chú ngắn về việc xem kiểm tra dữ liệu là một phần của bàn giao chức năng, không phải việc xử lý sau cùng.",
+          tags: ["UAT", "Kiểm tra dữ liệu", "SQL"],
+          content: [
+            "UAT không chỉ là bấm qua các màn hình. Trong nhiều dự án triển khai phần mềm, sự tự tin thật sự đến từ việc kiểm tra dữ liệu phía sau workflow có nhất quán, đầy đủ và đúng quy tắc nghiệp vụ hay không.",
+            "Khi kiểm tra dữ liệu được đưa vào quy trình bàn giao chức năng, đội dự án có thể phát hiện lệch quy tắc, thiếu tình huống và rủi ro golive sớm hơn.",
+            "Với hệ thống quản trị giáo dục, điều này đặc biệt quan trọng vì một lỗi dữ liệu nhỏ có thể ảnh hưởng báo cáo, hồ sơ sinh viên, luồng đăng ký hoặc quyết định vận hành phía sau.",
+          ],
+          coverImageAlt: "Ghi chú về kiểm tra dữ liệu trong UAT",
+        },
       },
       contact: {
         title: "Cùng xây dựng điều gì đó hữu ích.",

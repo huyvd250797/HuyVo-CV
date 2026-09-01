@@ -1,13 +1,13 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState, type ReactNode } from "react";
-import { profile, type MediaAssetType, type ProjectCategory } from "@/data/profile";
+import { profile, type BlogStatus, type MediaAssetType, type ProjectCategory } from "@/data/profile";
 import { appVersion } from "@/data/version";
 import type { AnalyticsSummary } from "@/lib/portfolio-analytics";
 import { mediaPreviewUrl, mediaUrlInfo } from "@/lib/media-url";
 import { ThemeSwitcher } from "./theme-switcher";
 
-type AdminTab = "profile" | "media" | "language" | "experience" | "projects" | "skills" | "credentials" | "analytics" | "export";
+type AdminTab = "profile" | "media" | "language" | "experience" | "projects" | "skills" | "credentials" | "blog" | "analytics" | "export";
 type CmsSource = "supabase" | "source";
 
 type HighlightDraft = { label: string; value: string };
@@ -43,6 +43,18 @@ type ProjectDraft = {
   media: ProjectMediaDraft;
   caseStudy: ProjectCaseStudyDraft;
 };
+type BlogPostDraft = {
+  title: string;
+  slug: string;
+  date: string;
+  status: BlogStatus;
+  featured?: boolean;
+  tags: string[];
+  summary: string;
+  content: string[];
+  coverImageUrl?: string;
+  coverImageAlt?: string;
+};
 type SkillGroupDraft = { title: string; skills: string[] };
 type EducationDraft = { period: string; institution: string; degree: string; note?: string };
 type CertificationDraft = { year: string; name: string; issuer: string; credentialUrl?: string };
@@ -71,6 +83,7 @@ type AdminProfileDraft = {
   education: EducationDraft[];
   certifications: CertificationDraft[];
   workingProcess: Array<{ index: string; title: string; text: string }>;
+  blog: BlogPostDraft[];
   contact: {
     title: string;
     subtitle: string;
@@ -83,15 +96,15 @@ type AdminProfileDraft = {
   translations?: Record<string, unknown>;
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v131";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v131";
+const storageKey = "huyvo-portfolio-admin-draft-v140";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v140";
 const fallbackPassword = "huyvo-admin";
 
 type ContentLocale = "en" | "vi";
 type TranslationPath = Array<string | number>;
 type MutableRecord = Record<string, any>;
 
-const localizedEditorTabs: AdminTab[] = ["profile", "media", "experience", "projects", "skills", "credentials"];
+const localizedEditorTabs: AdminTab[] = ["profile", "media", "experience", "projects", "skills", "credentials", "blog"];
 
 function isRecord(value: unknown): value is MutableRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -168,6 +181,10 @@ function contactMethodTranslationKey(item: ContactMethodDraft) {
   return item.label;
 }
 
+function blogTranslationKey(item: BlogPostDraft) {
+  return item.slug;
+}
+
 
 const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
   { id: "profile", label: "Profile", description: "Core identity, headline, about and contact basics." },
@@ -177,6 +194,7 @@ const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
   { id: "projects", label: "Projects", description: "Portfolio cards and case study content." },
   { id: "skills", label: "Skills", description: "Skill groups used across portfolio and resume." },
   { id: "credentials", label: "Credentials", description: "Education, certifications and contact channels." },
+  { id: "blog", label: "Blog / Notes", description: "Publish professional notes with EN/VI content." },
   { id: "analytics", label: "Analytics", description: "Visitor insights, page views and CTA clicks." },
   { id: "export", label: "Export", description: "Backup profile.ts and JSON when you still want a code copy." },
 ];
@@ -242,6 +260,11 @@ function createDraftFromProfile(): AdminProfileDraft {
     education: profile.education.map((item) => ({ ...item })),
     certifications: profile.certifications.map((item) => ({ ...item })),
     workingProcess: profile.workingProcess.map((item) => ({ ...item })),
+    blog: profile.blog.map((post) => ({
+      ...post,
+      tags: [...post.tags],
+      content: [...post.content],
+    })),
     contact: {
       title: profile.contact.title,
       subtitle: profile.contact.subtitle,
@@ -294,6 +317,21 @@ function emptyProject(): ProjectDraft {
   };
 }
 
+function emptyBlogPost(): BlogPostDraft {
+  return {
+    title: "New professional note",
+    slug: "new-professional-note",
+    date: new Date().toISOString().slice(0, 10),
+    status: "Draft",
+    featured: false,
+    tags: ["Project Management", "Notes"],
+    summary: "Short summary of the note.",
+    content: ["Write the first paragraph.", "Add another paragraph with practical context."],
+    coverImageUrl: "",
+    coverImageAlt: "Professional note cover image",
+  };
+}
+
 function emptySkillGroup(): SkillGroupDraft {
   return { title: "New Skill Group", skills: ["Skill one", "Skill two"] };
 }
@@ -312,7 +350,7 @@ function buildProfileSource(draft: AdminProfileDraft) {
       '"certifications": [] as Array<{\n    year: string;\n    name: string;\n    issuer: string;\n    credentialUrl?: string;\n  }>',
     );
   }
-  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
+  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\nexport type BlogStatus = "Draft" | "Published";\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport type BlogPost = {\n  title: string;\n  slug: string;\n  date: string;\n  status: BlogStatus;\n  featured?: boolean;\n  tags: string[];\n  summary: string;\n  content: string[];\n  coverImageUrl?: string;\n  coverImageAlt?: string;\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
 }
 
 function TextField({
@@ -406,6 +444,18 @@ function MediaTypeField({ value, onChange }: { value: MediaAssetType; onChange: 
       <span>Asset type</span>
       <select value={value} onChange={(event) => onChange(event.target.value as MediaAssetType)}>
         {mediaAssetTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+      </select>
+    </label>
+  );
+}
+
+function BlogStatusField({ value, onChange }: { value: BlogStatus; onChange: (value: BlogStatus) => void }) {
+  return (
+    <label className="admin-field">
+      <span>Status</span>
+      <select value={value} onChange={(event) => onChange(event.target.value as BlogStatus)}>
+        <option value="Draft">Draft</option>
+        <option value="Published">Published</option>
       </select>
     </label>
   );
@@ -802,6 +852,13 @@ export function AdminDashboard() {
     }));
   }
 
+  function updateBlog(index: number, patch: Partial<BlogPostDraft>) {
+    setDraft((current) => ({
+      ...current,
+      blog: current.blog.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item),
+    }));
+  }
+
   function updateProfileMedia(patch: Partial<ProfileMediaDraft>) {
     setDraft((current) => ({ ...current, media: { ...current.media, ...patch } }));
   }
@@ -863,11 +920,11 @@ export function AdminDashboard() {
             <a className="admin-back" href="/">← Back to portfolio</a>
             <ThemeSwitcher />
           </div>
-          <div className="admin-badge">{appVersion.label} · Media CMS</div>
+          <div className="admin-badge">{appVersion.label} · Blog CMS</div>
           <h1>Portfolio CMS / Admin</h1>
           <p>
-            This version connects profile, media assets and analytics to Supabase through protected Next.js API routes.
-            Paste public image URLs or Google Drive share links, then click <strong>Save live</strong> to update the portfolio without editing code.
+            This version connects profile, blog notes, media assets and analytics to Supabase through protected Next.js API routes.
+            Create professional notes in Blog / Notes, then click <strong>Save live</strong> to update the portfolio without editing code.
           </p>
           <form onSubmit={handleUnlock} className="admin-login-form">
             <label>
@@ -955,6 +1012,7 @@ export function AdminDashboard() {
           <li className={draft.projects.some((project) => project.media.thumbnailUrl || project.media.assets.some((asset) => asset.url)) ? "done" : ""}>Project media configured</li>
           <li className={draft.media.avatarUrl || draft.projects.some((project) => project.media.thumbnailUrl || project.media.assets.some((asset) => asset.url)) ? "done" : ""}>Google Drive/direct media supported</li>
           <li className={draft.translations?.vi ? "done" : ""}>Vietnamese translation overrides configured</li>
+          <li className={draft.blog?.some((post) => post.status === "Published") ? "done" : ""}>Published blog notes configured</li>
         </ul>
       </div>
 
@@ -1211,7 +1269,7 @@ export function AdminDashboard() {
               <div className="admin-stack">
                 <div className="admin-nested-card">
                   <h3>Public language routes</h3>
-                  <p className="admin-muted-text">The public portfolio supports <code>/en</code>, <code>/vi</code>, <code>/en/resume</code>, <code>/vi/resume</code>, <code>/en/contact</code>, <code>/vi/contact</code> and localized project case studies.</p>
+                  <p className="admin-muted-text">The public portfolio supports <code>/en</code>, <code>/vi</code>, <code>/en/resume</code>, <code>/vi/resume</code>, <code>/en/contact</code>, <code>/vi/contact</code> localized project case studies and localized blog notes.</p>
                 </div>
                 <div className="admin-nested-card vi-card">
                   <h3>Recommended editing flow</h3>
@@ -1542,6 +1600,89 @@ export function AdminDashboard() {
             </AdminSection>
           )}
 
+
+          {activeTab === "blog" && (
+            <AdminSection
+              title={isVietnameseEditor ? "Blog / Notes — Tiếng Việt" : "Blog / Notes"}
+              description={isVietnameseEditor ? "Nhập bản dịch tiếng Việt cho bài viết. Slug, ngày đăng, trạng thái, featured và cover URL vẫn dùng dữ liệu gốc English." : "Create professional notes for /blog and /blog/[slug]. Only Published posts are visible on public pages."}
+            >
+              <div className="admin-stack">
+                {draft.blog.map((post, index) => {
+                  const viKey = blogTranslationKey(post);
+                  return (
+                    <article className="admin-editor-card" key={`${post.slug}-${index}`}>
+                      <div className="admin-card-head">
+                        <div>
+                          <h3>{isVietnameseEditor ? getViText(["blog", viKey, "title"]) || post.title : post.title}</h3>
+                          <small>{post.slug} · {post.status} · {post.date}</small>
+                        </div>
+                        {!isVietnameseEditor && (
+                          <button type="button" onClick={() => setDraft((current) => ({ ...current, blog: current.blog.filter((_, itemIndex) => itemIndex !== index) }))}>Remove</button>
+                        )}
+                      </div>
+
+                      {!isVietnameseEditor ? (
+                        <>
+                          <div className="admin-grid two">
+                            <TextField label="Title" value={post.title} onChange={(value) => updateBlog(index, { title: value })} />
+                            <TextField label="Slug" value={post.slug} onChange={(value) => updateBlog(index, { slug: slugify(value) })} />
+                            <TextField label="Date" value={post.date} onChange={(value) => updateBlog(index, { date: value })} placeholder="YYYY-MM-DD" />
+                            <BlogStatusField value={post.status} onChange={(value) => updateBlog(index, { status: value })} />
+                            <label className="admin-check-field">
+                              <input type="checkbox" checked={Boolean(post.featured)} onChange={(event) => updateBlog(index, { featured: event.target.checked })} />
+                              <span>Featured note</span>
+                            </label>
+                            <LineListField label="Tags" value={post.tags} onChange={(value) => updateBlog(index, { tags: value })} rows={4} />
+                            <TextAreaField label="Summary" value={post.summary} rows={4} onChange={(value) => updateBlog(index, { summary: value })} />
+                            <LineListField label="Content paragraphs" value={post.content} rows={10} onChange={(value) => updateBlog(index, { content: value })} />
+                          </div>
+                          <div className="admin-nested-card">
+                            <h4>Cover media</h4>
+                            <div className="admin-grid two">
+                              <div>
+                                <TextField label="Cover image URL" value={post.coverImageUrl ?? ""} onChange={(value) => updateBlog(index, { coverImageUrl: value })} placeholder="Google Drive share link or https://..." />
+                                <GoogleDriveHelp url={post.coverImageUrl} />
+                              </div>
+                              <TextField label="Cover image alt text" value={post.coverImageAlt ?? ""} onChange={(value) => updateBlog(index, { coverImageAlt: value })} />
+                              <AdminImagePreview
+                                url={post.coverImageUrl}
+                                alt={post.coverImageAlt || post.title}
+                                fallback={post.title.slice(0, 2).toUpperCase()}
+                                note="Optional cover image for blog list, blog detail and social preview."
+                                small
+                              />
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="admin-translation-reference">
+                            <strong>English reference</strong>
+                            <span>{post.title} · {post.summary}</span>
+                            <small>Slug, date, status, featured and cover URL remain controlled from English source mode.</small>
+                          </div>
+                          <div className="admin-grid two">
+                            <TextField label="VI Title" value={getViText(["blog", viKey, "title"])} placeholder={post.title} onChange={(value) => updateViTranslation(["blog", viKey, "title"], value)} />
+                            <TextField label="VI Date label" value={getViText(["blog", viKey, "date"])} placeholder={post.date} onChange={(value) => updateViTranslation(["blog", viKey, "date"], value)} />
+                            <TextAreaField label="VI Summary" value={getViText(["blog", viKey, "summary"])} rows={4} onChange={(value) => updateViTranslation(["blog", viKey, "summary"], value)} />
+                            <LineListField label="VI Tags" value={getViList(["blog", viKey, "tags"])} onChange={(value) => updateViTranslation(["blog", viKey, "tags"], value)} rows={4} />
+                            <LineListField label="VI Content paragraphs" value={getViList(["blog", viKey, "content"])} onChange={(value) => updateViTranslation(["blog", viKey, "content"], value)} rows={10} />
+                            <TextField label="VI Cover image alt" value={getViText(["blog", viKey, "coverImageAlt"])} placeholder={post.coverImageAlt ?? post.title} onChange={(value) => updateViTranslation(["blog", viKey, "coverImageAlt"], value)} />
+                          </div>
+                        </>
+                      )}
+                    </article>
+                  );
+                })}
+                {!isVietnameseEditor ? (
+                  <button type="button" className="admin-add-button" onClick={() => setDraft((current) => ({ ...current, blog: [...current.blog, emptyBlogPost()] }))}>+ Add blog note</button>
+                ) : (
+                  <p className="admin-empty-note">Để thêm/xóa bài viết hoặc chỉnh slug/status/featured, tắt Tiếng Việt và chỉnh ở English gốc.</p>
+                )}
+              </div>
+            </AdminSection>
+          )}
+
           {activeTab === "analytics" && (
             <AdminSection title="Analytics & visitor insights" description="Track public page views, project views, contact clicks and resume actions from Supabase events.">
               <div className="admin-analytics-toolbar">
@@ -1598,7 +1739,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.3.1 writes live profile, multilingual translations and media data to Supabase, tracks visitor insights and keeps export as a production backup.">
+            <AdminSection title="Export backup" description="V1.4.0 writes live profile, multilingual translations, blog notes and media data to Supabase, tracks visitor insights and keeps export as a production backup.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>
