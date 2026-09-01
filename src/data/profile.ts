@@ -1,4 +1,28 @@
 export type ProjectCategory = "Professional" | "Product" | "Tool";
+export type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";
+
+export type MediaAsset = {
+  title: string;
+  type: MediaAssetType;
+  url: string;
+  caption?: string;
+  alt?: string;
+};
+
+export type ProfileMedia = {
+  avatarUrl?: string;
+  avatarAlt?: string;
+  coverImageUrl?: string;
+  resumeUrl?: string;
+};
+
+export type ProjectMedia = {
+  icon?: string;
+  thumbnailUrl?: string;
+  thumbnailAlt?: string;
+  assets: MediaAsset[];
+};
+
 
 export const profile = {
   name: "Huy Vo",
@@ -10,6 +34,12 @@ export const profile = {
   location: "Ho Chi Minh City, Vietnam",
   email: "hello@example.com",
   availability: "Open to professional connections",
+  media: {
+    avatarUrl: "",
+    avatarAlt: "Portrait photo of Huy Vo",
+    coverImageUrl: "",
+    resumeUrl: "",
+  } as ProfileMedia,
   specialties: [
     "Project Management",
     "Functional Consulting",
@@ -62,6 +92,14 @@ export const profile = {
       ],
       technologies: ["Project Management", "SQL Server", "Jira", "UAT"],
       featured: true,
+      media: {
+        icon: "UM",
+        thumbnailUrl: "",
+        thumbnailAlt: "University management workflow preview",
+        assets: [
+          { title: "Workflow overview", type: "Diagram", url: "", caption: "Add a workflow diagram or sanitized screenshot when available.", alt: "University workflow diagram" },
+        ],
+      } as ProjectMedia,
       caseStudy: {
         context: "University management software involves many connected processes, stakeholder groups and operational rules that must work together in production.",
         problem: "Business requirements can become fragmented across discussions, data checks, UAT feedback and implementation constraints, increasing delivery risk if they are not translated into a shared functional view.",
@@ -86,6 +124,14 @@ export const profile = {
       ],
       technologies: ["Next.js", "TypeScript", "Google Drive", "Product Design"],
       featured: true,
+      media: {
+        icon: "AW",
+        thumbnailUrl: "",
+        thumbnailAlt: "ASC-WORKING project workspace preview",
+        assets: [
+          { title: "Workspace dashboard", type: "Screenshot", url: "", caption: "Add a screenshot of issue lists, filters or project document views.", alt: "ASC-WORKING dashboard screenshot" },
+        ],
+      } as ProjectMedia,
       caseStudy: {
         context: "Project work often spreads issues, deadlines, documents and operational views across multiple tools.",
         problem: "When work information is fragmented, it becomes harder to prioritize, filter, follow up and keep project context attached to the actual issue being handled.",
@@ -110,6 +156,14 @@ export const profile = {
       ],
       technologies: ["JavaScript", "SQL", "Spreadsheet UX", "Web App"],
       featured: true,
+      media: {
+        icon: "GS",
+        thumbnailUrl: "",
+        thumbnailAlt: "ASC GenScript formula and SQL helper preview",
+        assets: [
+          { title: "Formula helper simulation", type: "Screenshot", url: "", caption: "Add a screenshot showing formula explanation or SQL generation output.", alt: "GenScript formula helper screenshot" },
+        ],
+      } as ProjectMedia,
       caseStudy: {
         context: "Repetitive SQL preparation and spreadsheet-style data manipulation can consume significant time during implementation and data-checking work.",
         problem: "Manual script composition is error-prone, while formula behavior can be difficult to explain when users only see the final result.",
@@ -134,6 +188,12 @@ export const profile = {
       ],
       technologies: ["Next.js", "Market Data", "Analytics", "Vercel"],
       featured: false,
+      media: {
+        icon: "MS",
+        thumbnailUrl: "",
+        thumbnailAlt: "MarketScope analysis workspace preview",
+        assets: [] as MediaAsset[],
+      } as ProjectMedia,
       caseStudy: {
         context: "Market analysis becomes difficult to act on when indicators, position information and risk views are separated.",
         problem: "Users need a clearer path from market data to spot-position decisions without mixing in futures-oriented workflows they do not use.",
@@ -158,6 +218,12 @@ export const profile = {
       ],
       technologies: ["Next.js", "TypeScript", "Database", "Vercel"],
       featured: false,
+      media: {
+        icon: "SH",
+        thumbnailUrl: "",
+        thumbnailAlt: "MyShop commerce interface preview",
+        assets: [] as MediaAsset[],
+      } as ProjectMedia,
       caseStudy: {
         context: "A small commerce site may need both direct ordering and affiliate redirection depending on the product.",
         problem: "A single checkout model does not fit every product, while administrators still need one coherent way to manage products and direct orders.",
@@ -182,6 +248,12 @@ export const profile = {
       ],
       technologies: ["Next.js", "Product Planning", "Responsive UI", "Vercel"],
       featured: false,
+      media: {
+        icon: "FO",
+        thumbnailUrl: "",
+        thumbnailAlt: "Family OS household workspace preview",
+        assets: [] as MediaAsset[],
+      } as ProjectMedia,
       caseStudy: {
         context: "Family information, routines and shared planning are often spread across notes, messages and separate apps.",
         problem: "Fragmentation makes it harder for a household to maintain one shared operational view without introducing unnecessary complexity.",

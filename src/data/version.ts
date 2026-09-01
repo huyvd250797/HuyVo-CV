@@ -1,5 +1,5 @@
 export const appVersion = {
-  number: "1.1.0",
-  label: "V1.1.0",
-  name: "Analytics & Visitor Insights",
+  number: "1.2.0",
+  label: "V1.2.0",
+  name: "Media & Project Assets",
 } as const;

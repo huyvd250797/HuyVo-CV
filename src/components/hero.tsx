@@ -3,6 +3,8 @@ import { appVersion } from "@/data/version";
 
 export function Hero({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
   const profile = profileData;
+  const avatarUrl = profile.media?.avatarUrl?.trim();
+  const resumeUrl = profile.media?.resumeUrl?.trim();
 
   return (
     <section className="hero section" id="top">
@@ -16,6 +18,9 @@ export function Hero({ profileData = fallbackProfile }: { profileData?: Portfoli
           <div className="hero-actions">
             <a href="/#about" className="button primary" data-track-event="cta_click" data-track-label="Hero Explore profile">Explore profile <span>↘</span></a>
             <a href="/contact" className="button secondary" data-track-event="contact_click" data-track-label="Hero Contact me">Contact me</a>
+            {resumeUrl && (
+              <a href={resumeUrl} className="button secondary" target="_blank" rel="noreferrer" data-track-event="resume_download" data-track-label="Hero Download CV">Download CV</a>
+            )}
           </div>
           <div className="hero-meta">
             <span>{profile.location}</span>
@@ -30,7 +35,13 @@ export function Hero({ profileData = fallbackProfile }: { profileData?: Portfoli
               <span>PROFILE / 001</span>
               <span>2026</span>
             </div>
-            <div className="monogram">{profile.shortName}</div>
+            {avatarUrl ? (
+              <div className="profile-photo-wrap">
+                <img src={avatarUrl} alt={profile.media?.avatarAlt || `Portrait photo of ${profile.name}`} />
+              </div>
+            ) : (
+              <div className="monogram">{profile.shortName}</div>
+            )}
             <div className="card-content">
               <span className="card-kicker">Professional focus</span>
               <strong>{profile.headline}</strong>

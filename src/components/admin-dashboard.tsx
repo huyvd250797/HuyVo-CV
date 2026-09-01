@@ -1,12 +1,12 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState, type ReactNode } from "react";
-import { profile, type ProjectCategory } from "@/data/profile";
+import { profile, type MediaAssetType, type ProjectCategory } from "@/data/profile";
 import { appVersion } from "@/data/version";
 import type { AnalyticsSummary } from "@/lib/portfolio-analytics";
 import { ThemeSwitcher } from "./theme-switcher";
 
-type AdminTab = "profile" | "experience" | "projects" | "skills" | "credentials" | "analytics" | "export";
+type AdminTab = "profile" | "media" | "experience" | "projects" | "skills" | "credentials" | "analytics" | "export";
 type CmsSource = "supabase" | "source";
 
 type HighlightDraft = { label: string; value: string };
@@ -26,6 +26,9 @@ type ProjectCaseStudyDraft = {
   result: string;
   lessons: string[];
 };
+type MediaAssetDraft = { title: string; type: MediaAssetType; url: string; caption?: string; alt?: string };
+type ProfileMediaDraft = { avatarUrl?: string; avatarAlt?: string; coverImageUrl?: string; resumeUrl?: string };
+type ProjectMediaDraft = { icon?: string; thumbnailUrl?: string; thumbnailAlt?: string; assets: MediaAssetDraft[] };
 type ProjectDraft = {
   title: string;
   slug: string;
@@ -36,6 +39,7 @@ type ProjectDraft = {
   contributions: string[];
   technologies: string[];
   featured: boolean;
+  media: ProjectMediaDraft;
   caseStudy: ProjectCaseStudyDraft;
 };
 type SkillGroupDraft = { title: string; skills: string[] };
@@ -52,6 +56,7 @@ type AdminProfileDraft = {
   location: string;
   email: string;
   availability: string;
+  media: ProfileMediaDraft;
   specialties: string[];
   about: string[];
   careerSummary: {
@@ -76,12 +81,13 @@ type AdminProfileDraft = {
   social: { linkedin: string; github: string };
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v110";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v110";
+const storageKey = "huyvo-portfolio-admin-draft-v120";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v120";
 const fallbackPassword = "huyvo-admin";
 
 const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
   { id: "profile", label: "Profile", description: "Core identity, headline, about and contact basics." },
+  { id: "media", label: "Media", description: "Avatar, resume file, project thumbnails and case-study assets." },
   { id: "experience", label: "Experience", description: "Career timeline and responsibilities." },
   { id: "projects", label: "Projects", description: "Portfolio cards and case study content." },
   { id: "skills", label: "Skills", description: "Skill groups used across portfolio and resume." },
@@ -120,6 +126,7 @@ function createDraftFromProfile(): AdminProfileDraft {
     location: profile.location,
     email: profile.email,
     availability: profile.availability,
+    media: { ...profile.media },
     specialties: [...profile.specialties],
     about: [...profile.about],
     careerSummary: {
@@ -134,6 +141,10 @@ function createDraftFromProfile(): AdminProfileDraft {
     })),
     projects: profile.projects.map((project) => ({
       ...project,
+      media: {
+        ...project.media,
+        assets: project.media.assets.map((asset) => ({ ...asset })),
+      },
       contributions: [...project.contributions],
       technologies: [...project.technologies],
       caseStudy: {
@@ -180,6 +191,12 @@ function emptyProject(): ProjectDraft {
     contributions: ["Define the problem", "Design the workflow", "Coordinate delivery"],
     technologies: ["Next.js", "TypeScript"],
     featured: false,
+    media: {
+      icon: "NP",
+      thumbnailUrl: "",
+      thumbnailAlt: "New project preview",
+      assets: [],
+    },
     caseStudy: {
       context: "Where the work started.",
       problem: "What needed to be solved.",
@@ -209,7 +226,7 @@ function buildProfileSource(draft: AdminProfileDraft) {
       '"certifications": [] as Array<{\n    year: string;\n    name: string;\n    issuer: string;\n    credentialUrl?: string;\n  }>',
     );
   }
-  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\n\nexport const profile = ${body} as const;\n`;
+  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
 }
 
 function TextField({
@@ -273,6 +290,23 @@ function LineListField({
       onChange={(text) => onChange(splitLines(text))}
     />
   );
+}
+
+const mediaAssetTypes: MediaAssetType[] = ["Image", "Screenshot", "Diagram", "Document", "Video", "Link"];
+
+function MediaTypeField({ value, onChange }: { value: MediaAssetType; onChange: (value: MediaAssetType) => void }) {
+  return (
+    <label className="admin-field">
+      <span>Asset type</span>
+      <select value={value} onChange={(event) => onChange(event.target.value as MediaAssetType)}>
+        {mediaAssetTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+      </select>
+    </label>
+  );
+}
+
+function emptyMediaAsset(): MediaAssetDraft {
+  return { title: "New asset", type: "Screenshot", url: "", caption: "", alt: "" };
 }
 
 function AdminSection({ title, description, children }: { title: string; description: string; children: ReactNode }) {
@@ -543,6 +577,59 @@ export function AdminDashboard() {
     }));
   }
 
+  function updateProfileMedia(patch: Partial<ProfileMediaDraft>) {
+    setDraft((current) => ({ ...current, media: { ...current.media, ...patch } }));
+  }
+
+  function updateProjectMedia(projectIndex: number, patch: Partial<ProjectMediaDraft>) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) =>
+        itemIndex === projectIndex ? { ...project, media: { ...project.media, ...patch } } : project,
+      ),
+    }));
+  }
+
+  function updateProjectAsset(projectIndex: number, assetIndex: number, patch: Partial<MediaAssetDraft>) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => {
+        if (itemIndex !== projectIndex) return project;
+        return {
+          ...project,
+          media: {
+            ...project.media,
+            assets: project.media.assets.map((asset, currentAssetIndex) =>
+              currentAssetIndex === assetIndex ? { ...asset, ...patch } : asset,
+            ),
+          },
+        };
+      }),
+    }));
+  }
+
+  function addProjectAsset(projectIndex: number) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) =>
+        itemIndex === projectIndex
+          ? { ...project, media: { ...project.media, assets: [...project.media.assets, emptyMediaAsset()] } }
+          : project,
+      ),
+    }));
+  }
+
+  function removeProjectAsset(projectIndex: number, assetIndex: number) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) =>
+        itemIndex === projectIndex
+          ? { ...project, media: { ...project.media, assets: project.media.assets.filter((_, currentAssetIndex) => currentAssetIndex !== assetIndex) } }
+          : project,
+      ),
+    }));
+  }
+
   if (!unlocked) {
     return (
       <main className="admin-page admin-login-page">
@@ -551,11 +638,11 @@ export function AdminDashboard() {
             <a className="admin-back" href="/">← Back to portfolio</a>
             <ThemeSwitcher />
           </div>
-          <div className="admin-badge">{appVersion.label} · Analytics CMS</div>
+          <div className="admin-badge">{appVersion.label} · Media CMS</div>
           <h1>Portfolio CMS / Admin</h1>
           <p>
-            This version connects the editor to Supabase through a protected Next.js API route.
-            When Supabase is configured, clicking <strong>Save live</strong> updates the portfolio, resume and case-study data without editing code.
+            This version connects profile, media assets and analytics to Supabase through protected Next.js API routes.
+            Add public avatar, resume, thumbnail and gallery URLs, then click <strong>Save live</strong> to update the portfolio without editing code.
           </p>
           <form onSubmit={handleUnlock} className="admin-login-form">
             <label>
@@ -631,7 +718,7 @@ export function AdminDashboard() {
           <strong>{cmsSource === "supabase" ? "Live CMS connected" : "Finish Supabase setup"}</strong>
           <p>
             Run <code>supabase/schema.sql</code>, save one live profile, replace placeholder email/social links,
-            enable analytics if needed, then redeploy after environment changes.
+            add media URLs if available, enable analytics if needed, then redeploy after environment changes.
           </p>
         </div>
         <ul>
@@ -640,6 +727,7 @@ export function AdminDashboard() {
           <li className={cmsSource === "supabase" ? "done" : ""}>Live profile saved</li>
           <li className={draft.email !== "hello@example.com" ? "done" : ""}>Real email updated</li>
           <li className={analytics?.enabled ? "done" : ""}>Analytics tracking enabled</li>
+          <li className={draft.projects.some((project) => project.media.thumbnailUrl || project.media.assets.some((asset) => asset.url)) ? "done" : ""}>Project media configured</li>
         </ul>
       </div>
 
@@ -693,6 +781,62 @@ export function AdminDashboard() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </AdminSection>
+          )}
+
+          {activeTab === "media" && (
+            <AdminSection title="Media & project assets" description="Add public image/file URLs for avatar, resume file, project thumbnails and case-study galleries. Use sanitized screenshots only.">
+              <div className="admin-nested-card">
+                <h3>Profile media</h3>
+                <div className="admin-grid two admin-media-profile-grid">
+                  <TextField label="Avatar image URL" value={draft.media.avatarUrl ?? ""} onChange={(value) => updateProfileMedia({ avatarUrl: value })} placeholder="https://..." />
+                  <TextField label="Avatar alt text" value={draft.media.avatarAlt ?? ""} onChange={(value) => updateProfileMedia({ avatarAlt: value })} />
+                  <TextField label="Cover image URL" value={draft.media.coverImageUrl ?? ""} onChange={(value) => updateProfileMedia({ coverImageUrl: value })} placeholder="Optional" />
+                  <TextField label="Resume/CV file URL" value={draft.media.resumeUrl ?? ""} onChange={(value) => updateProfileMedia({ resumeUrl: value })} placeholder="PDF link, Google Drive share link or public URL" />
+                </div>
+                <div className="admin-media-preview">
+                  {draft.media.avatarUrl ? <img src={draft.media.avatarUrl} alt={draft.media.avatarAlt || "Profile preview"} /> : <span>{draft.shortName}</span>}
+                  <p>Avatar preview. For best result, use a square public image URL. Leave empty to keep the monogram card.</p>
+                </div>
+              </div>
+
+              <div className="admin-stack">
+                {draft.projects.map((project, projectIndex) => (
+                  <div className="admin-editor-card" key={`${project.slug}-media`}>
+                    <div className="admin-card-head">
+                      <div>
+                        <h3>{project.title}</h3>
+                        <small>{project.slug}</small>
+                      </div>
+                      <button type="button" onClick={() => addProjectAsset(projectIndex)}>+ Add asset</button>
+                    </div>
+                    <div className="admin-grid two">
+                      <TextField label="Project icon / initials" value={project.media.icon ?? ""} onChange={(value) => updateProjectMedia(projectIndex, { icon: value })} />
+                      <TextField label="Thumbnail alt text" value={project.media.thumbnailAlt ?? ""} onChange={(value) => updateProjectMedia(projectIndex, { thumbnailAlt: value })} />
+                      <TextField label="Thumbnail image URL" value={project.media.thumbnailUrl ?? ""} onChange={(value) => updateProjectMedia(projectIndex, { thumbnailUrl: value })} placeholder="https://..." />
+                      <div className="admin-media-preview small">
+                        {project.media.thumbnailUrl ? <img src={project.media.thumbnailUrl} alt={project.media.thumbnailAlt || project.title} /> : <span>{project.media.icon || project.title.slice(0, 2).toUpperCase()}</span>}
+                        <p>Shown on project cards and case-study hero.</p>
+                      </div>
+                    </div>
+
+                    <div className="admin-stack compact-stack">
+                      <h4>Case-study gallery assets</h4>
+                      {project.media.assets.map((asset, assetIndex) => (
+                        <div className="admin-grid two admin-row-card" key={`${project.slug}-${assetIndex}`}>
+                          <TextField label="Asset title" value={asset.title} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { title: value })} />
+                          <MediaTypeField value={asset.type} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { type: value })} />
+                          <TextField label="Asset URL" value={asset.url} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { url: value })} placeholder="Image, document, video or public link" />
+                          <TextField label="Alt text" value={asset.alt ?? ""} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { alt: value })} />
+                          <TextAreaField label="Caption" value={asset.caption ?? ""} rows={3} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { caption: value })} />
+                          <button type="button" onClick={() => removeProjectAsset(projectIndex, assetIndex)}>Remove asset</button>
+                        </div>
+                      ))}
+                      {project.media.assets.length === 0 && <p className="admin-empty-note">No gallery assets yet. Add screenshots, diagrams or public document links for this project.</p>}
+                    </div>
+                  </div>
+                ))}
               </div>
             </AdminSection>
           )}
@@ -907,7 +1051,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.1.0 writes live data to Supabase, tracks visitor insights and keeps export as a production backup.">
+            <AdminSection title="Export backup" description="V1.2.0 writes live profile and media data to Supabase, tracks visitor insights and keeps export as a production backup.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>

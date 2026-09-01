@@ -1,4 +1,4 @@
-# Deployment Guide — HuyVo Portfolio V1.1.0
+# Deployment Guide — HuyVo Portfolio V1.2.0
 
 ## 1. Deploy source to Vercel
 
@@ -35,7 +35,7 @@ Open Supabase SQL Editor and run:
 supabase/schema.sql
 ```
 
-This creates the CMS table and analytics table.
+This creates the CMS table and analytics table. V1.2.0 media data is saved inside `portfolio_profiles.data`, so no separate media table is required.
 
 ## 4. Save live CMS data
 
@@ -47,7 +47,24 @@ Open:
 
 Login with `ADMIN_PASSWORD`, edit your profile and click **Save live**.
 
-## 5. Check analytics
+## 5. Add media assets
+
+Open:
+
+```text
+/admin → Media
+```
+
+Then add public URLs for:
+
+- Avatar image
+- Resume/CV PDF file
+- Project thumbnail
+- Case-study screenshots, diagrams, documents, videos or links
+
+Click **Save live** after updating media.
+
+## 6. Check analytics
 
 Visit the public portfolio pages, then open:
 
@@ -57,7 +74,7 @@ Visit the public portfolio pages, then open:
 
 Click **Refresh analytics**.
 
-## 6. Disable analytics if needed
+## 7. Disable analytics if needed
 
 Set:
 
