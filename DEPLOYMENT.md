@@ -1,16 +1,26 @@
-# Deployment Guide – HuyVo Portfolio V1.4.0
+# Deployment Guide – HuyVo Portfolio V1.5.0
 
-## 1. Deploy to Vercel
+## 1. Install and run locally
 
-1. Push the source to GitHub.
-2. Import the repository into Vercel.
-3. Framework preset: Next.js.
-4. Build command: `npm run build`.
-5. Output Directory: leave empty/default.
+```bash
+npm install
+npm run dev
+```
 
-## 2. Environment variables
+Open `/admin` and unlock with `ADMIN_PASSWORD` or the local fallback `huyvo-admin`.
 
-Add these in Vercel Project → Settings → Environment Variables:
+## 2. Supabase
+
+Run `supabase/schema.sql` if you have not already created the CMS and analytics tables.
+
+V1.5.0 does not add a new database table. It improves the Admin CMS UI and uses the same tables:
+
+```text
+portfolio_profiles
+portfolio_events
+```
+
+## 3. Vercel variables
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
@@ -23,78 +33,18 @@ SUPABASE_ANALYTICS_TABLE=portfolio_events
 ANALYTICS_MAX_ROWS=5000
 ```
 
-Then redeploy.
+## 4. After deploy
 
-## 3. Supabase SQL
+1. Open `/admin`.
+2. Click Load live.
+3. Update content.
+4. Use the Content health panel to fix required errors.
+5. Click Save live.
+6. Check `/`, `/resume`, `/projects/[slug]` and `/blog`.
 
-Run:
+## 5. Important notes
 
-```text
-supabase/schema.sql
-```
-
-This creates/keeps:
-
-- `portfolio_profiles`
-- `portfolio_events`
-
-V1.4.0 Blog / Notes uses the existing `portfolio_profiles.data` JSON column. No new table is required.
-
-## 4. Public routes
-
-English:
-
-```text
-/en
-/en/resume
-/en/contact
-/en/projects/[slug]
-/en/blog
-/en/blog/[slug]
-```
-
-Vietnamese:
-
-```text
-/vi
-/vi/resume
-/vi/contact
-/vi/projects/[slug]
-/vi/blog
-/vi/blog/[slug]
-```
-
-Legacy English routes still work:
-
-```text
-/
-/resume
-/contact
-/projects/[slug]
-/blog
-/blog/[slug]
-```
-
-## 5. Admin workflow
-
-```text
-/admin
-↓
-Login with ADMIN_PASSWORD
-↓
-Open Blog / Notes
-↓
-Edit English source content or switch to Tiếng Việt for translations
-↓
-Save live
-```
-
-Only blog posts with `Published` status are visible on the public website.
-
-## 6. Media URLs
-
-Google Drive image links are supported for avatar, project media and blog cover images. Make sure each Drive file is shared as:
-
-```text
-Anyone with the link → Viewer
-```
+- Do not commit `SUPABASE_SERVICE_ROLE_KEY` to GitHub.
+- Keep Vercel Output Directory empty/default.
+- If duplicated projects or blog posts are created, V1.5.0 generates unique slugs automatically.
+- If the Unsaved badge is visible, Save draft or Save live before leaving.

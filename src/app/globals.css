@@ -1939,7 +1939,7 @@ html[data-active-section="contact"] .nav-cta {
 }
 
 /* V1.3.0 - Multi-language Portfolio */
-/* V1.3.1 - Admin Translation Toggle UX styles are appended below. */
+/* Admin Translation Toggle UX styles are appended below. */
 .language-switcher {
   display: inline-flex;
   align-items: center;
@@ -1986,7 +1986,7 @@ html[data-active-section="contact"] .nav-cta {
   }
 }
 
-/* V1.3.1 — Admin Vietnamese Translation Toggle UX */
+/* Admin Vietnamese Translation Toggle UX */
 .admin-current-tab {
   display: flex;
   align-items: center;
@@ -2088,7 +2088,7 @@ html[data-active-section="contact"] .nav-cta {
   }
 }
 
-/* V1.4.0 – Blog / Notes */
+/* Blog / Notes styles */
 .blog-preview {
   background: var(--surface);
 }
@@ -2297,5 +2297,207 @@ html[data-active-section="contact"] .nav-cta {
 
   .blog-post-cover {
     aspect-ratio: 16 / 10;
+  }
+}
+
+/* V1.5.0 – Advanced Admin CMS */
+.admin-quick-stats,
+.admin-validation-panel {
+  max-width: 1440px;
+  margin: 0 auto 18px;
+}
+
+.admin-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-quick-stats article,
+.admin-validation-panel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 18px;
+}
+
+.admin-quick-stats span,
+.admin-validation-panel span,
+.admin-dirty-badge {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.admin-quick-stats strong,
+.admin-validation-panel strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.admin-quick-stats small,
+.admin-validation-panel p {
+  display: block;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.admin-validation-panel {
+  display: grid;
+  grid-template-columns: minmax(240px, .8fr) minmax(0, 1.2fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-validation-panel.has-issues {
+  border-color: color-mix(in srgb, #f59e0b 45%, var(--line));
+  background: color-mix(in srgb, #f59e0b 6%, var(--surface));
+}
+
+.admin-validation-panel ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.admin-validation-panel li.error {
+  color: #ef4444;
+  font-weight: 850;
+}
+
+.admin-validation-panel li.warning {
+  color: #d97706;
+  font-weight: 750;
+}
+
+.admin-current-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.admin-current-actions button,
+.admin-item-actions button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.admin-current-actions button:hover,
+.admin-item-actions button:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+}
+
+.admin-current-actions button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.admin-current-actions button:disabled,
+.admin-item-actions button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+  transform: none;
+}
+
+.admin-dirty-badge {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: var(--surface-2);
+}
+
+.admin-dirty-badge.active {
+  border-color: color-mix(in srgb, #f59e0b 50%, var(--line));
+  background: color-mix(in srgb, #f59e0b 12%, var(--surface));
+  color: #d97706;
+}
+
+.admin-item-actions {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-item-actions .danger {
+  color: #ef4444;
+  border-color: color-mix(in srgb, #ef4444 34%, var(--line));
+}
+
+.admin-row-card .admin-item-actions,
+.admin-grid .admin-item-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-start;
+}
+
+.admin-field input,
+.admin-field textarea,
+.admin-inline-pair input,
+.admin-live-password input,
+.admin-login-form input {
+  caret-color: var(--accent);
+}
+
+.admin-field textarea {
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.admin-field textarea:focus,
+.admin-code-output:focus {
+  background: color-mix(in srgb, var(--surface) 94%, var(--accent));
+}
+
+.admin-field textarea::selection,
+.admin-field input::selection,
+.admin-code-output::selection {
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
+}
+
+@media (max-width: 980px) {
+  .admin-quick-stats,
+  .admin-validation-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-quick-stats,
+  .admin-validation-panel {
+    grid-template-columns: 1fr;
+  }
+  .admin-current-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .admin-current-actions button,
+  .admin-current-actions .admin-dirty-badge {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+  .admin-item-actions {
+    justify-content: flex-start;
   }
 }

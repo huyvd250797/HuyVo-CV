@@ -1,4 +1,4 @@
--- HuyVo Portfolio V1.4.0 — Blog / Notes
+-- HuyVo Portfolio V1.5.0 — Advanced Admin CMS
 -- Run this in Supabase SQL Editor before using Save live, Blog / Notes, Media assets and Analytics in /admin.
 
 create table if not exists public.portfolio_profiles (
