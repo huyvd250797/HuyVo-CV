@@ -1,21 +1,21 @@
 # Version
 
-**V1.6.0 – Public Polish & Personal Branding**
+**V1.7.0 – Career Case Study Pro**
 
 ## Summary
 
-This release improves the public portfolio experience and adds a stronger personal brand layer to the landing page.
+This release upgrades project pages into professional career case studies and improves Admin usability during long editing sessions.
 
 ## Highlights
 
-- New Personal Brand section
-- Brand statement, signature, metrics, pillars and keywords
-- Admin editing support for English and Vietnamese branding content
-- Better public navigation with Brand anchor
-- Softer cards, rounded UI refinements and better text wrapping
-- CSS cleanup for older blog variable usage
-- CMS normalization for older Supabase records
+- Career Case Study Pro public layout
+- Overview, stakeholders, responsibilities, timeline, challenges, impact and competencies blocks
+- Admin editing fields for advanced case-study content
+- Vietnamese translation inputs for advanced case-study content
+- Sticky compact Admin editing header while scrolling
+- Always-visible saved/unsaved state, Save buttons and EN/VI toggle in Admin
+- Version synchronized across package, app data and UI
 
-## Database impact
+## Supabase
 
-No new database table is required.
+No new table is required. New content is saved in the existing `portfolio_profiles.data.projects[].caseStudy` JSON structure.

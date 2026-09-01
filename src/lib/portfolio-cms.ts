@@ -26,6 +26,26 @@ function arrayValue<T>(value: unknown, fallback: readonly T[]): T[] {
   return Array.isArray(value) ? value as T[] : [...fallback];
 }
 
+function stringArrayValue(value: unknown, fallback: readonly string[]): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [...fallback];
+}
+
+function defaultOverview(project: PortfolioProfile["projects"][number]) {
+  return [
+    { label: "Role", value: project.role, detail: "Primary ownership and professional contribution." },
+    { label: "Project type", value: project.category, detail: "How this work should be evaluated." },
+    { label: "Timeframe", value: project.year, detail: "The project period or current status." },
+  ];
+}
+
+function defaultTimeline(process: readonly string[]) {
+  return process.map((item, index) => ({
+    phase: String(index + 1).padStart(2, "0"),
+    title: item,
+    text: item,
+  }));
+}
+
 function normalizeProject(project: unknown, fallbackProject: PortfolioProfile["projects"][number]) {
   const raw = objectValue(project);
   const fallback = fallbackProject as unknown as MutableRecord;
@@ -47,8 +67,15 @@ function normalizeProject(project: unknown, fallbackProject: PortfolioProfile["p
     caseStudy: {
       ...fallbackCaseStudy,
       ...rawCaseStudy,
-      process: arrayValue(rawCaseStudy.process, fallbackProject.caseStudy.process),
-      lessons: arrayValue(rawCaseStudy.lessons, fallbackProject.caseStudy.lessons),
+      process: stringArrayValue(rawCaseStudy.process, fallbackProject.caseStudy.process),
+      lessons: stringArrayValue(rawCaseStudy.lessons, fallbackProject.caseStudy.lessons),
+      overview: arrayValue(rawCaseStudy.overview, arrayValue(fallbackCaseStudy.overview, defaultOverview(fallbackProject))),
+      responsibilities: stringArrayValue(rawCaseStudy.responsibilities, fallbackProject.contributions),
+      stakeholders: stringArrayValue(rawCaseStudy.stakeholders, stringArrayValue(fallbackCaseStudy.stakeholders, ["Business users", "Customer stakeholders", "Product team", "Development team", "Testing team"])),
+      timeline: arrayValue(rawCaseStudy.timeline, arrayValue(fallbackCaseStudy.timeline, defaultTimeline(stringArrayValue(rawCaseStudy.process, fallbackProject.caseStudy.process)))),
+      challenges: stringArrayValue(rawCaseStudy.challenges, stringArrayValue(fallbackCaseStudy.challenges, [typeof rawCaseStudy.problem === "string" ? rawCaseStudy.problem : fallbackProject.caseStudy.problem])),
+      impact: stringArrayValue(rawCaseStudy.impact, stringArrayValue(fallbackCaseStudy.impact, [typeof rawCaseStudy.result === "string" ? rawCaseStudy.result : fallbackProject.caseStudy.result])),
+      competencies: stringArrayValue(rawCaseStudy.competencies, stringArrayValue(fallbackCaseStudy.competencies, fallbackProject.technologies)),
     },
   } as unknown as PortfolioProfile["projects"][number];
 }

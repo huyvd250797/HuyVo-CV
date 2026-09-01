@@ -1,33 +1,43 @@
-# HuyVo Portfolio V1.6.0 – Public Polish & Personal Branding
+# HuyVo Portfolio V1.7.0 – Career Case Study Pro
 
-Professional portfolio/CV web app built with Next.js, TypeScript and CSS. V1.6.0 focuses on the public-facing experience: a stronger personal brand section, cleaner navigation, refined card styling and better positioning for recruiters, partners and customers.
+Professional portfolio/CV web app built with Next.js, TypeScript and CSS. V1.7.0 upgrades project detail pages into stronger career case studies and improves the Admin editing experience with a sticky compact editing header.
 
-## What's included
+## New in V1.7.0
 
-- Landing portfolio page
-- Resume page with print/save PDF support
-- Project portfolio and case-study pages
-- Contact page and mailto contact form
-- Blog / Notes
-- Supabase-backed CMS Admin
-- Analytics dashboard
-- Multi-language routes: English and Vietnamese
-- Google Drive media URL support
-- Public polish and personal branding section
+- Version updated to `1.7.0`
+- Project case-study pages upgraded to Career Case Study Pro layout
+- Added case-study blocks for:
+  - Overview metrics
+  - Stakeholders
+  - Responsibilities
+  - Delivery timeline
+  - Challenges
+  - Solution
+  - Impact / outcomes
+  - Competencies demonstrated
+  - Lessons learned
+- Added case-study CTA group: View Resume, Contact Me and Explore Other Projects
+- Added Admin fields to edit the new case-study content
+- Added Vietnamese translation inputs for the new case-study content
+- Added sticky compact Admin editing header
+- Admin header now stays visible while scrolling and keeps:
+  - current section name
+  - saved/unsaved state
+  - Save draft
+  - Save live
+  - English gốc / Tiếng Việt toggle
+- Improved Admin text entry for long textarea content and translation fields
+- Updated CMS normalization so older Supabase records receive V1.7.0 case-study defaults automatically
 
-## New in V1.6.0
+## Stack
 
-- Version updated to `1.6.0`
-- Added **Personal Brand** public section
-- Added brand statement, signature, brand metrics, pillars and keywords
-- Added EN/VI translation support for the new branding content
-- Added Admin fields to edit branding content in English source mode and Vietnamese override mode
-- Added `Brand` navigation anchor
-- Improved visual polish: softer rounded cards, refined CTAs, better text wrapping and public page spacing
-- Fixed undefined CSS variable usage from older blog styles
-- Updated CMS normalization so older Supabase records automatically receive V1.6.0 branding defaults
+- Next.js
+- TypeScript
+- CSS custom properties
+- Supabase CMS fallback support
+- Vercel-ready structure
 
-## Quick start
+## Local setup
 
 ```bash
 npm install
@@ -40,83 +50,71 @@ Open:
 http://localhost:3000
 ```
 
-Admin:
+## Build
 
-```text
-http://localhost:3000/admin
+```bash
+npm run build
 ```
 
-Local fallback password:
+## Admin
+
+Open:
+
+```text
+/admin
+```
+
+Default local fallback password:
 
 ```text
 huyvo-admin
 ```
 
-## Environment variables
-
-Create `.env.local` or configure the same values on Vercel:
+For Vercel production, set:
 
 ```env
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-ADMIN_PASSWORD=your-secure-admin-password
-NEXT_PUBLIC_ENABLE_ANALYTICS=true
-SUPABASE_ANALYTICS_TABLE=portfolio_events
-ANALYTICS_MAX_ROWS=5000
+ADMIN_PASSWORD=your-secure-password
 ```
 
-## Supabase setup
+## Supabase
 
-Run this SQL in Supabase SQL Editor:
-
-```text
-supabase/schema.sql
-```
-
-V1.6.0 does not require a new Supabase table. It keeps using:
+V1.7.0 does not require a new Supabase table. It keeps using:
 
 ```text
 portfolio_profiles
 portfolio_events
 ```
 
-The new `personalBranding` data is stored inside:
+If you have not created the tables yet, run:
 
 ```text
-portfolio_profiles.data.personalBranding
-portfolio_profiles.data.translations.vi.personalBranding
+supabase/schema.sql
 ```
 
-## Admin workflow
+## Required Vercel environment variables
 
-```text
-/admin
-↓
-Unlock admin
-↓
-Profile → Personal branding
-↓
-Edit English source data
-↓
-Toggle Tiếng Việt to edit Vietnamese branding text
-↓
-Save live
+```env
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ADMIN_PASSWORD=your-admin-password
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+SUPABASE_ANALYTICS_TABLE=portfolio_events
+ANALYTICS_MAX_ROWS=5000
 ```
 
 ## Deploy to Vercel
 
-1. Push this source to GitHub or import the ZIP source into your project.
-2. On Vercel, keep **Output Directory** empty/default.
+1. Upload the ZIP to a GitHub repository or import the folder into Vercel.
+2. Keep Vercel Output Directory empty/default.
 3. Add the environment variables above.
 4. Deploy.
-5. Run `supabase/schema.sql` if you have not done it before.
-6. Open `/admin`, load live, update content, then save live.
+5. Open `/admin`, load live data and save once.
 
 ## Notes
 
-- Do not commit `.env.local`.
-- Do not expose `SUPABASE_SERVICE_ROLE_KEY` in frontend code.
-- Media URLs can be public HTTPS links or Google Drive share links.
-- If Supabase is not configured, the site falls back to `src/data/profile.ts`.
+- Public pages read Supabase live data when configured.
+- If Supabase is missing or not configured, pages fall back to `src/data/profile.ts`.
+- Google Drive media URLs are supported through direct thumbnail conversion.
+- Admin draft data is also stored in browser `localStorage` as a safety draft.

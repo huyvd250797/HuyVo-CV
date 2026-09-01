@@ -145,6 +145,11 @@ export const uiCopy = {
     caseStudy: {
       back: "← Back to projects",
       label: "Case Study",
+      proLabel: "Career Case Study",
+      overview: "Overview",
+      overviewTitle: "A recruiter-ready view of the project.",
+      overviewDescription: "Quick context for understanding role, scope, delivery ownership and professional value before reading the full story.",
+      stakeholders: "Stakeholders",
       projectPreview: "Project preview",
       mediaKicker: "Media — Project assets",
       mediaTitle: "Visual evidence for the project story.",
@@ -157,13 +162,27 @@ export const uiCopy = {
       problem: "Problem",
       problemTitle: "What needed to be solved.",
       contribution: "My contribution",
+      responsibilities: "Responsibilities",
+      responsibilitiesTitle: "What I owned and moved forward.",
+      responsibilitiesDescription: "A clearer view of the PM / FC / BA contribution behind the visible project outcome.",
       process: "Process",
       processTitle: "A structured path from need to delivery.",
+      timeline: "Delivery timeline",
+      timelineTitle: "How the work moved from context to outcome.",
+      challenges: "Challenges",
+      challengesTitle: "What made the work difficult.",
       solution: "Solution",
       solutionTitle: "How the solution took shape.",
       result: "Result",
       resultTitle: "What improved.",
+      impact: "Impact",
+      impactTitle: "Result, value and proof of capability.",
+      competencies: "Competencies",
+      competenciesTitle: "Capabilities demonstrated by this case study.",
+      competenciesDescription: "Skills shown through the work, not just listed as standalone keywords.",
       lessons: "Lessons learned",
+      viewResume: "View resume",
+      contactMe: "Contact me",
       exploreOther: "Explore other projects",
     },
     production: {
@@ -301,6 +320,11 @@ export const uiCopy = {
     caseStudy: {
       back: "← Quay lại danh sách dự án",
       label: "Case Study",
+      proLabel: "Case Study nghề nghiệp",
+      overview: "Tổng quan",
+      overviewTitle: "Góc nhìn dự án dễ hiểu cho nhà tuyển dụng.",
+      overviewDescription: "Tóm tắt nhanh về vai trò, phạm vi, trách nhiệm triển khai và giá trị nghề nghiệp trước khi đọc toàn bộ câu chuyện.",
+      stakeholders: "Các bên liên quan",
       projectPreview: "Ảnh xem trước dự án",
       mediaKicker: "Media — Tài nguyên dự án",
       mediaTitle: "Hình ảnh minh họa cho câu chuyện dự án.",
@@ -313,13 +337,27 @@ export const uiCopy = {
       problem: "Vấn đề",
       problemTitle: "Điều cần giải quyết.",
       contribution: "Đóng góp của tôi",
+      responsibilities: "Trách nhiệm",
+      responsibilitiesTitle: "Những phần việc tôi trực tiếp thúc đẩy.",
+      responsibilitiesDescription: "Thể hiện rõ hơn đóng góp PM / FC / BA phía sau kết quả của dự án.",
       process: "Quy trình",
       processTitle: "Lộ trình có cấu trúc từ nhu cầu đến triển khai.",
+      timeline: "Timeline triển khai",
+      timelineTitle: "Cách công việc đi từ bối cảnh đến kết quả.",
+      challenges: "Thách thức",
+      challengesTitle: "Điểm khiến dự án khó xử lý.",
       solution: "Giải pháp",
       solutionTitle: "Giải pháp được hình thành như thế nào.",
       result: "Kết quả",
       resultTitle: "Điều đã cải thiện.",
+      impact: "Tác động",
+      impactTitle: "Kết quả, giá trị và năng lực thể hiện.",
+      competencies: "Năng lực",
+      competenciesTitle: "Năng lực được chứng minh qua case study này.",
+      competenciesDescription: "Các kỹ năng được thể hiện qua cách làm, không chỉ là danh sách từ khóa.",
       lessons: "Bài học kinh nghiệm",
+      viewResume: "Xem CV",
+      contactMe: "Liên hệ",
       exploreOther: "Xem dự án khác",
     },
     production: {
@@ -407,6 +445,13 @@ export type PortfolioTranslation = Partial<{
       solution: string;
       result: string;
       lessons: string[];
+      overview: Array<Partial<{ label: string; value: string; detail: string }>>;
+      responsibilities: string[];
+      stakeholders: string[];
+      timeline: Array<Partial<{ phase: string; title: string; text: string }>>;
+      challenges: string[];
+      impact: string[];
+      competencies: string[];
     }>;
   }>>;
   blog: Record<string, Partial<{

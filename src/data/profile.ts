@@ -2,6 +2,24 @@ export type ProjectCategory = "Professional" | "Product" | "Tool";
 export type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";
 export type BlogStatus = "Draft" | "Published";
 
+export type CaseStudyOverview = { label: string; value: string; detail?: string };
+export type CaseStudyTimeline = { phase: string; title: string; text: string };
+export type ProjectCaseStudy = {
+  context: string;
+  problem: string;
+  process: string[];
+  solution: string;
+  result: string;
+  lessons: string[];
+  overview?: CaseStudyOverview[];
+  responsibilities?: string[];
+  stakeholders?: string[];
+  timeline?: CaseStudyTimeline[];
+  challenges?: string[];
+  impact?: string[];
+  competencies?: string[];
+};
+
 export type BrandMetric = { label: string; value: string; detail: string };
 export type BrandPillar = { title: string; text: string };
 export type PersonalBranding = {

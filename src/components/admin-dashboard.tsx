@@ -20,6 +20,8 @@ type ExperienceDraft = {
   responsibilities: string[];
   tags: string[];
 };
+type CaseStudyOverviewDraft = { label: string; value: string; detail?: string };
+type CaseStudyTimelineDraft = { phase: string; title: string; text: string };
 type ProjectCaseStudyDraft = {
   context: string;
   problem: string;
@@ -27,6 +29,13 @@ type ProjectCaseStudyDraft = {
   solution: string;
   result: string;
   lessons: string[];
+  overview: CaseStudyOverviewDraft[];
+  responsibilities: string[];
+  stakeholders: string[];
+  timeline: CaseStudyTimelineDraft[];
+  challenges: string[];
+  impact: string[];
+  competencies: string[];
 };
 type MediaAssetDraft = { title: string; type: MediaAssetType; url: string; caption?: string; alt?: string };
 type ProfileMediaDraft = { avatarUrl?: string; avatarAlt?: string; coverImageUrl?: string; resumeUrl?: string };
@@ -101,8 +110,8 @@ type AdminProfileDraft = {
   translations?: Record<string, unknown>;
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v160";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v160";
+const storageKey = "huyvo-portfolio-admin-draft-v170";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v170";
 const fallbackPassword = "huyvo-admin";
 
 type ContentLocale = "en" | "vi";
@@ -219,6 +228,85 @@ function cloneItem<T>(item: T): T {
   return JSON.parse(JSON.stringify(item)) as T;
 }
 
+function stringValue(value: unknown, fallback = "") {
+  return typeof value === "string" ? value : fallback;
+}
+
+function stringList(value: unknown, fallback: readonly string[] = []) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [...fallback];
+}
+
+function overviewList(value: unknown, fallback: readonly CaseStudyOverviewDraft[] = []) {
+  if (!Array.isArray(value)) return fallback.map((item) => ({ ...item }));
+  return value
+    .filter(isRecord)
+    .map((item) => ({
+      label: stringValue(item.label, "Metric"),
+      value: stringValue(item.value, "Value"),
+      detail: stringValue(item.detail, ""),
+    }));
+}
+
+function timelineList(value: unknown, fallback: readonly CaseStudyTimelineDraft[] = []) {
+  if (!Array.isArray(value)) return fallback.map((item) => ({ ...item }));
+  return value
+    .filter(isRecord)
+    .map((item) => ({
+      phase: stringValue(item.phase, "Phase"),
+      title: stringValue(item.title, "Timeline step"),
+      text: stringValue(item.text, "Describe what happened in this step."),
+    }));
+}
+
+function defaultCaseStudyOverview(project?: Partial<ProjectDraft>): CaseStudyOverviewDraft[] {
+  return [
+    { label: "Role", value: project?.role || "Project role", detail: "Main ownership and contribution in the project." },
+    { label: "Project type", value: project?.category || "Portfolio work", detail: "Context for how this work should be evaluated." },
+    { label: "Timeframe", value: project?.year || "Timeline", detail: "Use the year/period field to keep the case study grounded." },
+  ];
+}
+
+function defaultCaseStudyTimeline(process: readonly string[] = []): CaseStudyTimelineDraft[] {
+  const source = process.length ? process : ["Understand the context", "Analyze the problem", "Design the solution", "Validate the result"];
+  return source.map((item, index) => ({
+    phase: `0${index + 1}`.slice(-2),
+    title: item.split(".")[0] || `Step ${index + 1}`,
+    text: item,
+  }));
+}
+
+function normalizeCaseStudyDraft(input: unknown, project?: Partial<ProjectDraft>): ProjectCaseStudyDraft {
+  const raw = isRecord(input) ? input : {};
+  const process = stringList(raw.process, ["Understand context", "Analyze requirements", "Design solution", "Validate outcome"]);
+  const lessons = stringList(raw.lessons, ["What you learned", "What you would improve next"]);
+  const problem = stringValue(raw.problem, "What needed to be solved.");
+  const result = stringValue(raw.result, "What improved after the project.");
+
+  return {
+    context: stringValue(raw.context, "Where the work started."),
+    problem,
+    process,
+    solution: stringValue(raw.solution, "How the solution took shape."),
+    result,
+    lessons,
+    overview: overviewList(raw.overview, defaultCaseStudyOverview(project)),
+    responsibilities: stringList(raw.responsibilities, project?.contributions || ["Clarify requirements", "Coordinate delivery", "Validate outcome"]),
+    stakeholders: stringList(raw.stakeholders, ["Business users", "Customer stakeholders", "Product team", "Development team", "Testing team"]),
+    timeline: timelineList(raw.timeline, defaultCaseStudyTimeline(process)),
+    challenges: stringList(raw.challenges, [problem]),
+    impact: stringList(raw.impact, [result]),
+    competencies: stringList(raw.competencies, project?.technologies || ["Project Management", "Functional Consulting", "Business Analysis"]),
+  };
+}
+
+function emptyOverviewItem(): CaseStudyOverviewDraft {
+  return { label: "Metric", value: "Value", detail: "Why this matters for the case study." };
+}
+
+function emptyTimelineStep(index: number): CaseStudyTimelineDraft {
+  return { phase: `0${index}`.slice(-2), title: "Timeline step", text: "Describe the delivery step, decision or milestone." };
+}
+
 function moveItem<T>(items: T[], index: number, direction: -1 | 1) {
   const targetIndex = index + direction;
   if (targetIndex < 0 || targetIndex >= items.length) return items;
@@ -262,6 +350,9 @@ function validateDraft(draft: AdminProfileDraft): ValidationIssue[] {
     if (!project.title.trim()) issues.push({ level: "error", message: `Project #${index + 1} title is empty.` });
     if (!project.slug.trim()) issues.push({ level: "error", message: `Project #${index + 1} slug is empty.` });
     if (!project.summary.trim()) issues.push({ level: "warning", message: `Project #${index + 1} summary is empty.` });
+    if (!project.caseStudy.responsibilities.length) issues.push({ level: "warning", message: `Project #${index + 1} has no case-study responsibilities.` });
+    if (!project.caseStudy.timeline.length) issues.push({ level: "warning", message: `Project #${index + 1} has no delivery timeline.` });
+    if (!project.caseStudy.impact.length) issues.push({ level: "warning", message: `Project #${index + 1} has no impact/outcome notes.` });
   });
 
   const blogSlugs = draft.blog.map((post) => post.slug.trim()).filter(Boolean);
@@ -313,20 +404,22 @@ function createDraftFromProfile(): AdminProfileDraft {
       responsibilities: [...item.responsibilities],
       tags: [...item.tags],
     })),
-    projects: profile.projects.map((project) => ({
-      ...project,
-      media: {
-        ...project.media,
-        assets: project.media.assets.map((asset) => ({ ...asset })),
-      },
-      contributions: [...project.contributions],
-      technologies: [...project.technologies],
-      caseStudy: {
-        ...project.caseStudy,
-        process: [...project.caseStudy.process],
-        lessons: [...project.caseStudy.lessons],
-      },
-    })),
+    projects: profile.projects.map((project) => {
+      const projectDraft = {
+        ...project,
+        media: {
+          ...project.media,
+          assets: project.media.assets.map((asset) => ({ ...asset })),
+        },
+        contributions: [...project.contributions],
+        technologies: [...project.technologies],
+      } as unknown as ProjectDraft;
+
+      return {
+        ...projectDraft,
+        caseStudy: normalizeCaseStudyDraft(project.caseStudy, projectDraft),
+      };
+    }),
     skillGroups: profile.skillGroups.map((group) => ({ title: group.title, skills: [...group.skills] })),
     education: profile.education.map((item) => ({ ...item })),
     certifications: profile.certifications.map((item) => ({ ...item })),
@@ -373,10 +466,34 @@ function normalizeAdminDraft(input: Partial<AdminProfileDraft>): AdminProfileDra
       ...rawCareerSummary,
       highlights: Array.isArray(rawCareerSummary.highlights) ? rawCareerSummary.highlights as HighlightDraft[] : base.careerSummary.highlights,
     },
+    projects: Array.isArray(inputRecord.projects)
+      ? (inputRecord.projects as unknown[]).map((item, index) => {
+          const baseProject = base.projects[index] ?? emptyProject();
+          const rawProject = isRecord(item) ? item : {};
+          const rawMedia = isRecord(rawProject.media) ? rawProject.media : {};
+          const mergedProject = {
+            ...baseProject,
+            ...rawProject,
+            contributions: stringList(rawProject.contributions, baseProject.contributions),
+            technologies: stringList(rawProject.technologies, baseProject.technologies),
+            media: {
+              ...baseProject.media,
+              ...rawMedia,
+              assets: Array.isArray(rawMedia.assets) ? rawMedia.assets as MediaAssetDraft[] : baseProject.media.assets,
+            },
+          } as ProjectDraft;
+          return { ...mergedProject, caseStudy: normalizeCaseStudyDraft(rawProject.caseStudy, mergedProject) };
+        })
+      : base.projects,
+    blog: Array.isArray(inputRecord.blog) ? inputRecord.blog as BlogPostDraft[] : base.blog,
+    skillGroups: Array.isArray(inputRecord.skillGroups) ? inputRecord.skillGroups as SkillGroupDraft[] : base.skillGroups,
+    education: Array.isArray(inputRecord.education) ? inputRecord.education as EducationDraft[] : base.education,
+    certifications: Array.isArray(inputRecord.certifications) ? inputRecord.certifications as CertificationDraft[] : base.certifications,
+    workingProcess: Array.isArray(inputRecord.workingProcess) ? inputRecord.workingProcess as AdminProfileDraft["workingProcess"] : base.workingProcess,
     contact: {
       ...base.contact,
       ...rawContact,
-      preferredTopics: Array.isArray(rawContact.preferredTopics) ? rawContact.preferredTopics as string[] : base.contact.preferredTopics,
+      preferredTopics: stringList(rawContact.preferredTopics, base.contact.preferredTopics),
       methods: Array.isArray(rawContact.methods) ? rawContact.methods as ContactMethodDraft[] : base.contact.methods,
     },
     social: { ...base.social, ...(isRecord(inputRecord.social) ? inputRecord.social : {}) },
@@ -418,6 +535,13 @@ function emptyProject(): ProjectDraft {
       solution: "How the solution took shape.",
       result: "What improved after the project.",
       lessons: ["What you learned", "What you would improve next"],
+      overview: defaultCaseStudyOverview({ role: "Product Owner / Builder", category: "Product", year: "2026" }),
+      responsibilities: ["Clarify requirements", "Design the delivery approach", "Validate the outcome"],
+      stakeholders: ["Business users", "Product team", "Development team", "Testing team"],
+      timeline: defaultCaseStudyTimeline(["Understand context", "Analyze requirements", "Design solution", "Validate outcome"]),
+      challenges: ["Describe the main delivery or business challenge."],
+      impact: ["Describe the result, improvement or professional capability demonstrated."],
+      competencies: ["Project Management", "Functional Consulting", "Business Analysis"],
     },
   };
 }
@@ -459,7 +583,7 @@ function buildProfileSource(draft: AdminProfileDraft) {
       '"certifications": [] as Array<{\n    year: string;\n    name: string;\n    issuer: string;\n    credentialUrl?: string;\n  }>',
     );
   }
-  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\nexport type BlogStatus = "Draft" | "Published";\nexport type BrandMetric = { label: string; value: string; detail: string };\nexport type BrandPillar = { title: string; text: string };\nexport type PersonalBranding = { statement: string; signature: string; metrics: BrandMetric[]; pillars: BrandPillar[]; keywords: string[] };\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport type BlogPost = {\n  title: string;\n  slug: string;\n  date: string;\n  status: BlogStatus;\n  featured?: boolean;\n  tags: string[];\n  summary: string;\n  content: string[];\n  coverImageUrl?: string;\n  coverImageAlt?: string;\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
+  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\nexport type BlogStatus = "Draft" | "Published";\nexport type BrandMetric = { label: string; value: string; detail: string };\nexport type BrandPillar = { title: string; text: string };\nexport type PersonalBranding = { statement: string; signature: string; metrics: BrandMetric[]; pillars: BrandPillar[]; keywords: string[] };\nexport type CaseStudyOverview = { label: string; value: string; detail?: string };\nexport type CaseStudyTimeline = { phase: string; title: string; text: string };\nexport type ProjectCaseStudy = { context: string; problem: string; process: string[]; solution: string; result: string; lessons: string[]; overview?: CaseStudyOverview[]; responsibilities?: string[]; stakeholders?: string[]; timeline?: CaseStudyTimeline[]; challenges?: string[]; impact?: string[]; competencies?: string[] };\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport type BlogPost = {\n  title: string;\n  slug: string;\n  date: string;\n  status: BlogStatus;\n  featured?: boolean;\n  tags: string[];\n  summary: string;\n  content: string[];\n  coverImageUrl?: string;\n  coverImageAlt?: string;\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
 }
 
 function TextField({
@@ -494,12 +618,14 @@ function TextAreaField({
   onChange,
   rows = 4,
   hint,
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   rows?: number;
   hint?: string;
+  placeholder?: string;
 }) {
   return (
     <label className="admin-field admin-field-wide">
@@ -507,6 +633,7 @@ function TextAreaField({
       <textarea
         rows={rows}
         value={value}
+        placeholder={placeholder}
         spellCheck={false}
         wrap="soft"
         onKeyDown={(event) => event.stopPropagation()}
@@ -783,6 +910,7 @@ export function AdminDashboard() {
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
   const [analyticsMessage, setAnalyticsMessage] = useState("Analytics has not been loaded yet.");
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  const [compactAdminHeader, setCompactAdminHeader] = useState(false);
 
   const generatedSource = useMemo(() => buildProfileSource(draft), [draft]);
   const serializedDraft = useMemo(() => JSON.stringify(draft), [draft]);
@@ -831,6 +959,18 @@ export function AdminDashboard() {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
+
+  useEffect(() => {
+    if (!unlocked) return;
+
+    function handleScroll() {
+      setCompactAdminHeader(window.scrollY > 420);
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [unlocked]);
 
   async function handleUnlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -1064,6 +1204,74 @@ export function AdminDashboard() {
       projects: current.projects.map((item, itemIndex) =>
         itemIndex === index ? { ...item, caseStudy: { ...item.caseStudy, ...patch } } : item,
       ),
+    }));
+  }
+
+  function updateProjectCaseStudyOverview(projectIndex: number, overviewIndex: number, patch: Partial<CaseStudyOverviewDraft>) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => {
+        if (itemIndex !== projectIndex) return project;
+        return {
+          ...project,
+          caseStudy: {
+            ...project.caseStudy,
+            overview: project.caseStudy.overview.map((item, currentIndex) => currentIndex === overviewIndex ? { ...item, ...patch } : item),
+          },
+        };
+      }),
+    }));
+  }
+
+  function addProjectCaseStudyOverview(projectIndex: number) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => itemIndex === projectIndex
+        ? { ...project, caseStudy: { ...project.caseStudy, overview: [...project.caseStudy.overview, emptyOverviewItem()] } }
+        : project),
+    }));
+  }
+
+  function removeProjectCaseStudyOverview(projectIndex: number, overviewIndex: number) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => itemIndex === projectIndex
+        ? { ...project, caseStudy: { ...project.caseStudy, overview: project.caseStudy.overview.filter((_, currentIndex) => currentIndex !== overviewIndex) } }
+        : project),
+    }));
+  }
+
+  function updateProjectCaseStudyTimeline(projectIndex: number, timelineIndex: number, patch: Partial<CaseStudyTimelineDraft>) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => {
+        if (itemIndex !== projectIndex) return project;
+        return {
+          ...project,
+          caseStudy: {
+            ...project.caseStudy,
+            timeline: project.caseStudy.timeline.map((item, currentIndex) => currentIndex === timelineIndex ? { ...item, ...patch } : item),
+          },
+        };
+      }),
+    }));
+  }
+
+  function addProjectCaseStudyTimeline(projectIndex: number) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => itemIndex === projectIndex
+        ? { ...project, caseStudy: { ...project.caseStudy, timeline: [...project.caseStudy.timeline, emptyTimelineStep(project.caseStudy.timeline.length + 1)] } }
+        : project),
+    }));
+  }
+
+  function removeProjectCaseStudyTimeline(projectIndex: number, timelineIndex: number) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => itemIndex === projectIndex
+        ? { ...project, caseStudy: { ...project.caseStudy, timeline: project.caseStudy.timeline.filter((_, currentIndex) => currentIndex !== timelineIndex) } }
+        : project),
     }));
   }
 
@@ -1304,11 +1512,11 @@ export function AdminDashboard() {
             <a className="admin-back" href="/">← Back to portfolio</a>
             <ThemeSwitcher />
           </div>
-          <div className="admin-badge">{appVersion.label} · Advanced CMS</div>
+          <div className="admin-badge">{appVersion.label} · Case Study Pro</div>
           <h1>Portfolio CMS / Admin</h1>
           <p>
             This version connects profile, projects, blog notes, media assets and analytics to Supabase through protected Next.js API routes.
-            Use the advanced CMS controls to add, duplicate, reorder, validate and publish content without editing code.
+            Use the advanced CMS controls to shape portfolio content, publish notes and build recruiter-ready case studies without editing code.
           </p>
           <form onSubmit={handleUnlock} className="admin-login-form">
             <label>
@@ -1421,8 +1629,8 @@ export function AdminDashboard() {
         </aside>
 
         <div className="admin-main">
-          <div className="admin-current-tab">
-            <div>
+          <div className={compactAdminHeader ? "admin-current-tab compact" : "admin-current-tab"}>
+            <div className="admin-current-copy">
               <span>Editing</span>
               <h2>{activeTabInfo.label}</h2>
               <p>{activeTabInfo.description}</p>
@@ -1891,13 +2099,47 @@ export function AdminDashboard() {
                         </div>
                         <div className="admin-nested-card">
                           <h4>Case study</h4>
+                          <div className="admin-subsection-head">
+                            <strong>Overview metrics</strong>
+                            <button type="button" onClick={() => addProjectCaseStudyOverview(index)}>+ Add metric</button>
+                          </div>
+                          <div className="admin-stack compact-stack">
+                            {project.caseStudy.overview.map((item, overviewIndex) => (
+                              <div className="admin-grid three admin-row-card" key={`overview-${project.slug}-${overviewIndex}`}>
+                                <TextField label="Label" value={item.label} onChange={(value) => updateProjectCaseStudyOverview(index, overviewIndex, { label: value })} />
+                                <TextField label="Value" value={item.value} onChange={(value) => updateProjectCaseStudyOverview(index, overviewIndex, { value })} />
+                                <TextField label="Detail" value={item.detail ?? ""} onChange={(value) => updateProjectCaseStudyOverview(index, overviewIndex, { detail: value })} />
+                                <button type="button" className="danger" onClick={() => removeProjectCaseStudyOverview(index, overviewIndex)}>Delete metric</button>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="admin-subsection-head with-gap">
+                            <strong>Delivery timeline</strong>
+                            <button type="button" onClick={() => addProjectCaseStudyTimeline(index)}>+ Add timeline step</button>
+                          </div>
+                          <div className="admin-stack compact-stack">
+                            {project.caseStudy.timeline.map((item, timelineIndex) => (
+                              <div className="admin-grid three admin-row-card" key={`timeline-${project.slug}-${timelineIndex}`}>
+                                <TextField label="Phase" value={item.phase} onChange={(value) => updateProjectCaseStudyTimeline(index, timelineIndex, { phase: value })} />
+                                <TextField label="Title" value={item.title} onChange={(value) => updateProjectCaseStudyTimeline(index, timelineIndex, { title: value })} />
+                                <TextAreaField label="Text" value={item.text} rows={3} onChange={(value) => updateProjectCaseStudyTimeline(index, timelineIndex, { text: value })} />
+                                <button type="button" className="danger" onClick={() => removeProjectCaseStudyTimeline(index, timelineIndex)}>Delete timeline step</button>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="admin-subsection-head with-gap"><strong>Story blocks</strong></div>
                           <div className="admin-grid two">
                             <TextAreaField label="Context" value={project.caseStudy.context} rows={3} onChange={(value) => updateProjectCaseStudy(index, { context: value })} />
                             <TextAreaField label="Problem" value={project.caseStudy.problem} rows={3} onChange={(value) => updateProjectCaseStudy(index, { problem: value })} />
+                            <LineListField label="My responsibilities" value={project.caseStudy.responsibilities} onChange={(value) => updateProjectCaseStudy(index, { responsibilities: value })} />
+                            <LineListField label="Stakeholders" value={project.caseStudy.stakeholders} onChange={(value) => updateProjectCaseStudy(index, { stakeholders: value })} />
                             <LineListField label="Process" value={project.caseStudy.process} onChange={(value) => updateProjectCaseStudy(index, { process: value })} />
-                            <LineListField label="Lessons" value={project.caseStudy.lessons} onChange={(value) => updateProjectCaseStudy(index, { lessons: value })} />
+                            <LineListField label="Challenges" value={project.caseStudy.challenges} onChange={(value) => updateProjectCaseStudy(index, { challenges: value })} />
                             <TextAreaField label="Solution" value={project.caseStudy.solution} rows={3} onChange={(value) => updateProjectCaseStudy(index, { solution: value })} />
                             <TextAreaField label="Result" value={project.caseStudy.result} rows={3} onChange={(value) => updateProjectCaseStudy(index, { result: value })} />
+                            <LineListField label="Impact / outcomes" value={project.caseStudy.impact} onChange={(value) => updateProjectCaseStudy(index, { impact: value })} />
+                            <LineListField label="Competencies shown" value={project.caseStudy.competencies} onChange={(value) => updateProjectCaseStudy(index, { competencies: value })} />
+                            <LineListField label="Lessons" value={project.caseStudy.lessons} onChange={(value) => updateProjectCaseStudy(index, { lessons: value })} />
                           </div>
                         </div>
                       </>
@@ -1913,13 +2155,45 @@ export function AdminDashboard() {
                         </div>
                         <div className="admin-nested-card vi-card">
                           <h4>Case study — Tiếng Việt</h4>
+                          <div className="admin-subsection-head">
+                            <strong>VI Overview metrics</strong>
+                            <small>Nhập bản dịch theo từng metric đang có ở English gốc.</small>
+                          </div>
+                          <div className="admin-stack compact-stack">
+                            {project.caseStudy.overview.map((item, overviewIndex) => (
+                              <div className="admin-grid three admin-row-card" key={`vi-overview-${project.slug}-${overviewIndex}`}>
+                                <TextField label="VI Label" value={getViText(["projects", project.slug, "caseStudy", "overview", overviewIndex, "label"])} placeholder={item.label} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "overview", overviewIndex, "label"], value)} />
+                                <TextField label="VI Value" value={getViText(["projects", project.slug, "caseStudy", "overview", overviewIndex, "value"])} placeholder={item.value} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "overview", overviewIndex, "value"], value)} />
+                                <TextField label="VI Detail" value={getViText(["projects", project.slug, "caseStudy", "overview", overviewIndex, "detail"])} placeholder={item.detail ?? ""} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "overview", overviewIndex, "detail"], value)} />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="admin-subsection-head with-gap">
+                            <strong>VI Delivery timeline</strong>
+                            <small>Thêm/xóa timeline step ở English gốc, sau đó nhập bản dịch tại đây.</small>
+                          </div>
+                          <div className="admin-stack compact-stack">
+                            {project.caseStudy.timeline.map((item, timelineIndex) => (
+                              <div className="admin-grid three admin-row-card" key={`vi-timeline-${project.slug}-${timelineIndex}`}>
+                                <TextField label="VI Phase" value={getViText(["projects", project.slug, "caseStudy", "timeline", timelineIndex, "phase"])} placeholder={item.phase} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "timeline", timelineIndex, "phase"], value)} />
+                                <TextField label="VI Title" value={getViText(["projects", project.slug, "caseStudy", "timeline", timelineIndex, "title"])} placeholder={item.title} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "timeline", timelineIndex, "title"], value)} />
+                                <TextAreaField label="VI Text" value={getViText(["projects", project.slug, "caseStudy", "timeline", timelineIndex, "text"])} rows={3} placeholder={item.text} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "timeline", timelineIndex, "text"], value)} />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="admin-subsection-head with-gap"><strong>VI Story blocks</strong></div>
                           <div className="admin-grid two">
                             <TextAreaField label="VI Context" value={getViText(["projects", project.slug, "caseStudy", "context"])} rows={3} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "context"], value)} />
                             <TextAreaField label="VI Problem" value={getViText(["projects", project.slug, "caseStudy", "problem"])} rows={3} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "problem"], value)} />
+                            <LineListField label="VI My responsibilities" value={getViList(["projects", project.slug, "caseStudy", "responsibilities"])} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "responsibilities"], value)} />
+                            <LineListField label="VI Stakeholders" value={getViList(["projects", project.slug, "caseStudy", "stakeholders"])} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "stakeholders"], value)} />
                             <LineListField label="VI Process" value={getViList(["projects", project.slug, "caseStudy", "process"])} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "process"], value)} />
-                            <LineListField label="VI Lessons" value={getViList(["projects", project.slug, "caseStudy", "lessons"])} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "lessons"], value)} />
+                            <LineListField label="VI Challenges" value={getViList(["projects", project.slug, "caseStudy", "challenges"])} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "challenges"], value)} />
                             <TextAreaField label="VI Solution" value={getViText(["projects", project.slug, "caseStudy", "solution"])} rows={3} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "solution"], value)} />
                             <TextAreaField label="VI Result" value={getViText(["projects", project.slug, "caseStudy", "result"])} rows={3} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "result"], value)} />
+                            <LineListField label="VI Impact / outcomes" value={getViList(["projects", project.slug, "caseStudy", "impact"])} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "impact"], value)} />
+                            <LineListField label="VI Competencies shown" value={getViList(["projects", project.slug, "caseStudy", "competencies"])} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "competencies"], value)} />
+                            <LineListField label="VI Lessons" value={getViList(["projects", project.slug, "caseStudy", "lessons"])} onChange={(value) => updateViTranslation(["projects", project.slug, "caseStudy", "lessons"], value)} />
                           </div>
                         </div>
                       </>
@@ -2285,7 +2559,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.6.0 adds public polish, personal branding content, brand positioning blocks and production-ready UI refinements.">
+            <AdminSection title="Export backup" description="V1.7.0 adds Career Case Study Pro blocks, sticky compact admin editing header and stronger case-study storytelling controls.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>
