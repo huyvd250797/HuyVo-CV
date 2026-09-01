@@ -1,5 +1,5 @@
 export const appVersion = {
-  number: "1.4.0",
-  label: "V1.4.0",
-  name: "Blog / Notes",
+  number: "1.5.0",
+  label: "V1.5.0",
+  name: "Advanced Admin CMS",
 } as const;

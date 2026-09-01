@@ -9,6 +9,7 @@ import { ThemeSwitcher } from "./theme-switcher";
 
 type AdminTab = "profile" | "media" | "language" | "experience" | "projects" | "skills" | "credentials" | "blog" | "analytics" | "export";
 type CmsSource = "supabase" | "source";
+type ValidationIssue = { level: "error" | "warning"; message: string };
 
 type HighlightDraft = { label: string; value: string };
 type ExperienceDraft = {
@@ -96,8 +97,8 @@ type AdminProfileDraft = {
   translations?: Record<string, unknown>;
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v140";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v140";
+const storageKey = "huyvo-portfolio-admin-draft-v150";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v150";
 const fallbackPassword = "huyvo-admin";
 
 type ContentLocale = "en" | "vi";
@@ -208,6 +209,64 @@ function splitLines(value: string) {
 
 function joinLines(value: readonly string[]) {
   return value.join("\n");
+}
+
+function cloneItem<T>(item: T): T {
+  return JSON.parse(JSON.stringify(item)) as T;
+}
+
+function moveItem<T>(items: T[], index: number, direction: -1 | 1) {
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= items.length) return items;
+  const next = [...items];
+  const [item] = next.splice(index, 1);
+  next.splice(targetIndex, 0, item);
+  return next;
+}
+
+function makeUniqueSlug(baseSlug: string, existingSlugs: string[]) {
+  const safeBase = slugify(baseSlug || "item");
+  let candidate = safeBase;
+  let suffix = 2;
+
+  while (existingSlugs.includes(candidate)) {
+    candidate = `${safeBase}-${suffix}`;
+    suffix += 1;
+  }
+
+  return candidate;
+}
+
+function validateDraft(draft: AdminProfileDraft): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!draft.name.trim()) issues.push({ level: "error", message: "Profile name is required." });
+  if (!draft.role.trim()) issues.push({ level: "error", message: "Profile role is required." });
+  if (!emailPattern.test(draft.email.trim())) issues.push({ level: "warning", message: "Email looks invalid or still needs checking." });
+  if (draft.email.trim() === "hello@example.com") issues.push({ level: "warning", message: "Replace placeholder email before publishing." });
+  if (!draft.headline.trim()) issues.push({ level: "warning", message: "Hero headline is empty." });
+  if (!draft.about.length) issues.push({ level: "warning", message: "About paragraphs are empty." });
+  if (!draft.projects.length) issues.push({ level: "error", message: "At least one project is required." });
+
+  const projectSlugs = draft.projects.map((project) => project.slug.trim()).filter(Boolean);
+  const duplicateProjectSlugs = projectSlugs.filter((slug, index) => projectSlugs.indexOf(slug) !== index);
+  if (duplicateProjectSlugs.length) issues.push({ level: "error", message: `Duplicate project slug: ${Array.from(new Set(duplicateProjectSlugs)).join(", ")}.` });
+  draft.projects.forEach((project, index) => {
+    if (!project.title.trim()) issues.push({ level: "error", message: `Project #${index + 1} title is empty.` });
+    if (!project.slug.trim()) issues.push({ level: "error", message: `Project #${index + 1} slug is empty.` });
+    if (!project.summary.trim()) issues.push({ level: "warning", message: `Project #${index + 1} summary is empty.` });
+  });
+
+  const blogSlugs = draft.blog.map((post) => post.slug.trim()).filter(Boolean);
+  const duplicateBlogSlugs = blogSlugs.filter((slug, index) => blogSlugs.indexOf(slug) !== index);
+  if (duplicateBlogSlugs.length) issues.push({ level: "error", message: `Duplicate blog slug: ${Array.from(new Set(duplicateBlogSlugs)).join(", ")}.` });
+  draft.blog.forEach((post, index) => {
+    if (!post.title.trim()) issues.push({ level: "warning", message: `Blog note #${index + 1} title is empty.` });
+    if (post.status === "Published" && !post.content.length) issues.push({ level: "warning", message: `Published blog note #${index + 1} has no content paragraphs.` });
+  });
+
+  return issues;
 }
 
 function slugify(value: string) {
@@ -336,6 +395,10 @@ function emptySkillGroup(): SkillGroupDraft {
   return { title: "New Skill Group", skills: ["Skill one", "Skill two"] };
 }
 
+function emptyWorkingProcessStep(index: number) {
+  return { index: String(index), title: "New step", text: "Describe this step in your working process." };
+}
+
 function buildProfileSource(draft: AdminProfileDraft) {
   let body = JSON.stringify(draft, null, 2);
   if (draft.education.length === 0) {
@@ -367,7 +430,14 @@ function TextField({
   return (
     <label className="admin-field">
       <span>{label}</span>
-      <input value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
+      <input
+        value={value}
+        placeholder={placeholder}
+        autoComplete="off"
+        spellCheck={false}
+        onKeyDown={(event) => event.stopPropagation()}
+        onChange={(event) => onChange(event.target.value)}
+      />
     </label>
   );
 }
@@ -388,7 +458,14 @@ function TextAreaField({
   return (
     <label className="admin-field admin-field-wide">
       <span>{label}</span>
-      <textarea rows={rows} value={value} onChange={(event) => onChange(event.target.value)} />
+      <textarea
+        rows={rows}
+        value={value}
+        spellCheck={false}
+        wrap="soft"
+        onKeyDown={(event) => event.stopPropagation()}
+        onChange={(event) => onChange(event.target.value)}
+      />
       {hint && <small>{hint}</small>}
     </label>
   );
@@ -419,6 +496,9 @@ function LineListField({
         rows={rows}
         value={text}
         onFocus={() => setFocused(true)}
+        onKeyDown={(event) => event.stopPropagation()}
+        spellCheck={false}
+        wrap="soft"
         onChange={(event) => {
           const next = event.target.value;
           setText(next);
@@ -431,7 +511,7 @@ function LineListField({
           onChange(splitLines(cleaned));
         }}
       />
-      <small>Mỗi dòng là một mục. Có thể bấm Enter để xuống hàng; dòng trống sẽ được bỏ qua khi rời ô nhập.</small>
+      <small>Mỗi dòng là một mục. Enter xuống hàng bình thường. Dòng trống chỉ được dọn khi rời ô nhập để không làm giật nội dung khi đang gõ.</small>
     </label>
   );
 }
@@ -526,6 +606,70 @@ function AdminSection({ title, description, children }: { title: string; descrip
   );
 }
 
+function ItemActions({
+  onMoveUp,
+  onMoveDown,
+  onDuplicate,
+  onRemove,
+  disableMoveUp,
+  disableMoveDown,
+  removeLabel = "Delete",
+}: {
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onDuplicate?: () => void;
+  onRemove?: () => void;
+  disableMoveUp?: boolean;
+  disableMoveDown?: boolean;
+  removeLabel?: string;
+}) {
+  return (
+    <div className="admin-item-actions" aria-label="Item actions">
+      {onMoveUp && <button type="button" onClick={onMoveUp} disabled={disableMoveUp}>↑ Move</button>}
+      {onMoveDown && <button type="button" onClick={onMoveDown} disabled={disableMoveDown}>↓ Move</button>}
+      {onDuplicate && <button type="button" onClick={onDuplicate}>Duplicate</button>}
+      {onRemove && <button type="button" className="danger" onClick={onRemove}>{removeLabel}</button>}
+    </div>
+  );
+}
+
+function ValidationPanel({ issues }: { issues: ValidationIssue[] }) {
+  const errorCount = issues.filter((issue) => issue.level === "error").length;
+  const warningCount = issues.length - errorCount;
+
+  return (
+    <div className={issues.length ? "admin-validation-panel has-issues" : "admin-validation-panel"}>
+      <div>
+        <span>Content health</span>
+        <strong>{issues.length ? `${errorCount} error · ${warningCount} warning` : "Ready to publish"}</strong>
+        <p>{issues.length ? "Fix red errors before publishing. Warnings are suggestions for a cleaner CV." : "No required data issue detected in the current draft."}</p>
+      </div>
+      {issues.length > 0 && (
+        <ul>
+          {issues.slice(0, 8).map((issue, index) => (
+            <li key={`${issue.message}-${index}`} className={issue.level}>{issue.message}</li>
+          ))}
+          {issues.length > 8 && <li>+ {issues.length - 8} more issue(s)</li>}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function AdminStatsPanel({ draft, isDirty }: { draft: AdminProfileDraft; isDirty: boolean }) {
+  const publishedBlogCount = draft.blog.filter((post) => post.status === "Published").length;
+  const mediaCount = Number(Boolean(draft.media.avatarUrl)) + draft.projects.reduce((count, project) => count + Number(Boolean(project.media.thumbnailUrl)) + project.media.assets.filter((asset) => Boolean(asset.url)).length, 0);
+
+  return (
+    <div className="admin-quick-stats">
+      <article><span>Draft status</span><strong>{isDirty ? "Unsaved changes" : "Saved state"}</strong><small>{isDirty ? "Save draft or Save live before leaving." : "No local change since last save/load."}</small></article>
+      <article><span>Projects</span><strong>{draft.projects.length}</strong><small>{draft.projects.filter((project) => project.featured).length} featured</small></article>
+      <article><span>Blog notes</span><strong>{draft.blog.length}</strong><small>{publishedBlogCount} published</small></article>
+      <article><span>Media assets</span><strong>{mediaCount}</strong><small>Avatar, thumbnails and galleries</small></article>
+    </div>
+  );
+}
+
 function TranslationsJsonField({
   value,
   onChange,
@@ -560,6 +704,7 @@ function TranslationsJsonField({
           rows={18}
           value={text}
           onFocus={() => setFocused(true)}
+          onKeyDown={(event) => event.stopPropagation()}
           onChange={(event) => setText(event.target.value)}
           onBlur={() => setFocused(false)}
           spellCheck={false}
@@ -577,6 +722,7 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<AdminTab>("profile");
   const [contentLocale, setContentLocale] = useState<ContentLocale>("en");
   const [draft, setDraft] = useState<AdminProfileDraft>(() => createDraftFromProfile());
+  const [savedSnapshot, setSavedSnapshot] = useState(() => JSON.stringify(createDraftFromProfile()));
   const [message, setMessage] = useState("Ready");
   const [cmsSource, setCmsSource] = useState<CmsSource>("source");
   const [cmsReason, setCmsReason] = useState("Source fallback is active until Supabase is configured or live data is saved.");
@@ -593,6 +739,10 @@ export function AdminDashboard() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   const generatedSource = useMemo(() => buildProfileSource(draft), [draft]);
+  const serializedDraft = useMemo(() => JSON.stringify(draft), [draft]);
+  const validationIssues = useMemo(() => validateDraft(draft), [draft]);
+  const hasBlockingErrors = validationIssues.some((issue) => issue.level === "error");
+  const isDirty = serializedDraft !== savedSnapshot;
   const activeTabInfo = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
   const isVietnameseEditor = contentLocale === "vi" && localizedEditorTabs.includes(activeTab);
   const viTranslation = useMemo(() => readNestedValue(draft.translations, ["vi"]) || {}, [draft.translations]);
@@ -602,7 +752,9 @@ export function AdminDashboard() {
       const saved = window.localStorage.getItem(storageKey);
       const session = window.sessionStorage.getItem(sessionKey);
       if (saved) {
-        setDraft(JSON.parse(saved) as AdminProfileDraft);
+        const parsedDraft = JSON.parse(saved) as AdminProfileDraft;
+        setDraft(parsedDraft);
+        setSavedSnapshot(JSON.stringify(parsedDraft));
         setMessage("Loaded browser draft");
       }
       if (session === "true") {
@@ -622,6 +774,17 @@ export function AdminDashboard() {
       }
     }
   }, [unlocked]);
+
+  useEffect(() => {
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      if (!isDirty) return;
+      event.preventDefault();
+      event.returnValue = "";
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   async function handleUnlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -649,13 +812,17 @@ export function AdminDashboard() {
   }
 
   function saveDraft() {
+    const snapshot = JSON.stringify(draft);
     window.localStorage.setItem(storageKey, JSON.stringify(draft, null, 2));
+    setSavedSnapshot(snapshot);
     setMessage("Draft saved to this browser");
   }
 
   function resetDraft() {
+    const sourceDraft = createDraftFromProfile();
     window.localStorage.removeItem(storageKey);
-    setDraft(createDraftFromProfile());
+    setDraft(sourceDraft);
+    setSavedSnapshot(JSON.stringify(sourceDraft));
     setMessage("Draft reset to source data");
   }
 
@@ -669,7 +836,9 @@ export function AdminDashboard() {
         throw new Error(result.message || "Could not load CMS profile.");
       }
 
-      setDraft(result.profile as AdminProfileDraft);
+      const loadedProfile = result.profile as AdminProfileDraft;
+      setDraft(loadedProfile);
+      setSavedSnapshot(JSON.stringify(loadedProfile));
       setCmsSource(result.source as CmsSource);
       setCmsReason(result.reason || (result.source === "supabase" ? "Loaded live profile from Supabase." : "Using source fallback profile."));
       setCmsUpdatedAt(result.updatedAt ?? null);
@@ -693,6 +862,11 @@ export function AdminDashboard() {
       return;
     }
 
+    if (hasBlockingErrors) {
+      setMessage("Fix required content errors before Save live.");
+      return;
+    }
+
     setSavingLive(true);
     try {
       const response = await fetch("/api/admin/profile", {
@@ -710,6 +884,7 @@ export function AdminDashboard() {
       }
 
       window.localStorage.setItem(storageKey, JSON.stringify(draft, null, 2));
+      setSavedSnapshot(JSON.stringify(draft));
       setCmsSource("supabase");
       setCmsReason("Saved live profile to Supabase. Public pages have been revalidated.");
       setCmsUpdatedAt(new Date().toISOString());
@@ -859,6 +1034,144 @@ export function AdminDashboard() {
     }));
   }
 
+  function moveExperience(index: number, direction: -1 | 1) {
+    setDraft((current) => ({ ...current, experience: moveItem(current.experience, index, direction) }));
+  }
+
+  function duplicateExperience(index: number) {
+    setDraft((current) => ({ ...current, experience: [...current.experience.slice(0, index + 1), cloneItem(current.experience[index]), ...current.experience.slice(index + 1)] }));
+  }
+
+  function removeExperience(index: number) {
+    setDraft((current) => ({ ...current, experience: current.experience.filter((_, itemIndex) => itemIndex !== index) }));
+  }
+
+  function moveProject(index: number, direction: -1 | 1) {
+    setDraft((current) => ({ ...current, projects: moveItem(current.projects, index, direction) }));
+  }
+
+  function duplicateProject(index: number) {
+    setDraft((current) => {
+      const clone = cloneItem(current.projects[index]);
+      clone.title = `${clone.title} Copy`;
+      clone.slug = makeUniqueSlug(`${clone.slug || clone.title}-copy`, current.projects.map((project) => project.slug));
+      clone.featured = false;
+      return { ...current, projects: [...current.projects.slice(0, index + 1), clone, ...current.projects.slice(index + 1)] };
+    });
+  }
+
+  function removeProject(index: number) {
+    setDraft((current) => ({ ...current, projects: current.projects.filter((_, itemIndex) => itemIndex !== index) }));
+  }
+
+  function moveSkillGroup(index: number, direction: -1 | 1) {
+    setDraft((current) => ({ ...current, skillGroups: moveItem(current.skillGroups, index, direction) }));
+  }
+
+  function duplicateSkillGroup(index: number) {
+    setDraft((current) => {
+      const clone = cloneItem(current.skillGroups[index]);
+      clone.title = `${clone.title} Copy`;
+      return { ...current, skillGroups: [...current.skillGroups.slice(0, index + 1), clone, ...current.skillGroups.slice(index + 1)] };
+    });
+  }
+
+  function removeSkillGroup(index: number) {
+    setDraft((current) => ({ ...current, skillGroups: current.skillGroups.filter((_, itemIndex) => itemIndex !== index) }));
+  }
+
+  function moveEducation(index: number, direction: -1 | 1) {
+    setDraft((current) => ({ ...current, education: moveItem(current.education, index, direction) }));
+  }
+
+  function duplicateEducation(index: number) {
+    setDraft((current) => ({ ...current, education: [...current.education.slice(0, index + 1), cloneItem(current.education[index]), ...current.education.slice(index + 1)] }));
+  }
+
+  function removeEducation(index: number) {
+    setDraft((current) => ({ ...current, education: current.education.filter((_, itemIndex) => itemIndex !== index) }));
+  }
+
+  function moveCertification(index: number, direction: -1 | 1) {
+    setDraft((current) => ({ ...current, certifications: moveItem(current.certifications, index, direction) }));
+  }
+
+  function duplicateCertification(index: number) {
+    setDraft((current) => ({ ...current, certifications: [...current.certifications.slice(0, index + 1), cloneItem(current.certifications[index]), ...current.certifications.slice(index + 1)] }));
+  }
+
+  function removeCertification(index: number) {
+    setDraft((current) => ({ ...current, certifications: current.certifications.filter((_, itemIndex) => itemIndex !== index) }));
+  }
+
+  function moveContactMethod(index: number, direction: -1 | 1) {
+    setDraft((current) => ({ ...current, contact: { ...current.contact, methods: moveItem(current.contact.methods, index, direction) } }));
+  }
+
+  function duplicateContactMethod(index: number) {
+    setDraft((current) => ({ ...current, contact: { ...current.contact, methods: [...current.contact.methods.slice(0, index + 1), cloneItem(current.contact.methods[index]), ...current.contact.methods.slice(index + 1)] } }));
+  }
+
+  function removeContactMethod(index: number) {
+    setDraft((current) => ({ ...current, contact: { ...current.contact, methods: current.contact.methods.filter((_, itemIndex) => itemIndex !== index) } }));
+  }
+
+  function moveBlog(index: number, direction: -1 | 1) {
+    setDraft((current) => ({ ...current, blog: moveItem(current.blog, index, direction) }));
+  }
+
+  function duplicateBlog(index: number) {
+    setDraft((current) => {
+      const clone = cloneItem(current.blog[index]);
+      clone.title = `${clone.title} Copy`;
+      clone.slug = makeUniqueSlug(`${clone.slug || clone.title}-copy`, current.blog.map((post) => post.slug));
+      clone.status = "Draft";
+      clone.featured = false;
+      return { ...current, blog: [...current.blog.slice(0, index + 1), clone, ...current.blog.slice(index + 1)] };
+    });
+  }
+
+  function removeBlog(index: number) {
+    setDraft((current) => ({ ...current, blog: current.blog.filter((_, itemIndex) => itemIndex !== index) }));
+  }
+
+  function moveProjectAsset(projectIndex: number, assetIndex: number, direction: -1 | 1) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => itemIndex === projectIndex
+        ? { ...project, media: { ...project.media, assets: moveItem(project.media.assets, assetIndex, direction) } }
+        : project),
+    }));
+  }
+
+  function duplicateProjectAsset(projectIndex: number, assetIndex: number) {
+    setDraft((current) => ({
+      ...current,
+      projects: current.projects.map((project, itemIndex) => itemIndex === projectIndex
+        ? { ...project, media: { ...project.media, assets: [...project.media.assets.slice(0, assetIndex + 1), cloneItem(project.media.assets[assetIndex]), ...project.media.assets.slice(assetIndex + 1)] } }
+        : project),
+    }));
+  }
+
+  function updateWorkingProcess(index: number, patch: Partial<{ index: string; title: string; text: string }>) {
+    setDraft((current) => ({
+      ...current,
+      workingProcess: current.workingProcess.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item),
+    }));
+  }
+
+  function moveWorkingProcess(index: number, direction: -1 | 1) {
+    setDraft((current) => ({ ...current, workingProcess: moveItem(current.workingProcess, index, direction) }));
+  }
+
+  function duplicateWorkingProcess(index: number) {
+    setDraft((current) => ({ ...current, workingProcess: [...current.workingProcess.slice(0, index + 1), cloneItem(current.workingProcess[index]), ...current.workingProcess.slice(index + 1)] }));
+  }
+
+  function removeWorkingProcess(index: number) {
+    setDraft((current) => ({ ...current, workingProcess: current.workingProcess.filter((_, itemIndex) => itemIndex !== index) }));
+  }
+
   function updateProfileMedia(patch: Partial<ProfileMediaDraft>) {
     setDraft((current) => ({ ...current, media: { ...current.media, ...patch } }));
   }
@@ -914,17 +1227,17 @@ export function AdminDashboard() {
 
   if (!unlocked) {
     return (
-      <main className="admin-page admin-login-page">
+      <main className="admin-page admin-login-page" onKeyDown={(event) => event.stopPropagation()}>
         <div className="admin-login-card">
           <div className="admin-login-head">
             <a className="admin-back" href="/">← Back to portfolio</a>
             <ThemeSwitcher />
           </div>
-          <div className="admin-badge">{appVersion.label} · Blog CMS</div>
+          <div className="admin-badge">{appVersion.label} · Advanced CMS</div>
           <h1>Portfolio CMS / Admin</h1>
           <p>
-            This version connects profile, blog notes, media assets and analytics to Supabase through protected Next.js API routes.
-            Create professional notes in Blog / Notes, then click <strong>Save live</strong> to update the portfolio without editing code.
+            This version connects profile, projects, blog notes, media assets and analytics to Supabase through protected Next.js API routes.
+            Use the advanced CMS controls to add, duplicate, reorder, validate and publish content without editing code.
           </p>
           <form onSubmit={handleUnlock} className="admin-login-form">
             <label>
@@ -934,6 +1247,7 @@ export function AdminDashboard() {
                 value={password}
                 autoFocus
                 placeholder="Enter admin password"
+                onKeyDown={(event) => event.stopPropagation()}
                 onChange={(event) => setPassword(event.target.value)}
               />
             </label>
@@ -947,7 +1261,7 @@ export function AdminDashboard() {
   }
 
   return (
-    <main className="admin-page">
+    <main className="admin-page" onKeyDown={(event) => event.stopPropagation()}>
       <header className="admin-topbar">
         <div>
           <a className="admin-back" href="/">← Portfolio</a>
@@ -962,17 +1276,18 @@ export function AdminDashboard() {
               type="password"
               value={livePassword}
               placeholder="ADMIN_PASSWORD"
+              onKeyDown={(event) => event.stopPropagation()}
               onChange={(event) => setLivePassword(event.target.value)}
             />
           </label>
           <button type="button" onClick={loadLiveProfile} disabled={loadingLive}>{loadingLive ? "Loading..." : "Load live"}</button>
           <button type="button" onClick={saveDraft}>Save draft</button>
-          <button type="button" className="primary" onClick={saveLiveProfile} disabled={savingLive}>{savingLive ? "Saving..." : "Save live"}</button>
+          <button type="button" className="primary" onClick={saveLiveProfile} disabled={savingLive || hasBlockingErrors}>{savingLive ? "Saving..." : "Save live"}</button>
         </div>
       </header>
 
       <div className="admin-status">
-        <span>{message}</span>
+        <span>{message}{isDirty ? " · Unsaved changes" : ""}</span>
         <button type="button" onClick={resetDraft}>Reset to source data</button>
       </div>
 
@@ -1016,6 +1331,9 @@ export function AdminDashboard() {
         </ul>
       </div>
 
+      <AdminStatsPanel draft={draft} isDirty={isDirty} />
+      <ValidationPanel issues={validationIssues} />
+
       <div className="admin-layout">
         <aside className="admin-sidebar" aria-label="Admin sections">
           {tabs.map((tab) => (
@@ -1037,6 +1355,11 @@ export function AdminDashboard() {
               <span>Editing</span>
               <h2>{activeTabInfo.label}</h2>
               <p>{activeTabInfo.description}</p>
+            </div>
+            <div className="admin-current-actions">
+              <span className={isDirty ? "admin-dirty-badge active" : "admin-dirty-badge"}>{isDirty ? "Unsaved" : "Saved"}</span>
+              <button type="button" onClick={saveDraft}>Save draft</button>
+              <button type="button" className="primary" onClick={saveLiveProfile} disabled={savingLive || hasBlockingErrors}>{savingLive ? "Saving..." : "Save live"}</button>
             </div>
             {localizedEditorTabs.includes(activeTab) && (
               <div className="admin-locale-toggle" aria-label="Content language editor">
@@ -1088,10 +1411,32 @@ export function AdminDashboard() {
                     <div className="admin-mini-grid">
                       {draft.careerSummary.highlights.map((item, index) => (
                         <div className="admin-inline-pair" key={`${item.label}-${index}`}>
-                          <input value={item.label} onChange={(event) => setDraft((current) => ({ ...current, careerSummary: { ...current.careerSummary, highlights: current.careerSummary.highlights.map((highlight, highlightIndex) => highlightIndex === index ? { ...highlight, label: event.target.value } : highlight) } }))} />
-                          <input value={item.value} onChange={(event) => setDraft((current) => ({ ...current, careerSummary: { ...current.careerSummary, highlights: current.careerSummary.highlights.map((highlight, highlightIndex) => highlightIndex === index ? { ...highlight, value: event.target.value } : highlight) } }))} />
+                          <input value={item.label} autoComplete="off" spellCheck={false} onKeyDown={(event) => event.stopPropagation()} onChange={(event) => setDraft((current) => ({ ...current, careerSummary: { ...current.careerSummary, highlights: current.careerSummary.highlights.map((highlight, highlightIndex) => highlightIndex === index ? { ...highlight, label: event.target.value } : highlight) } }))} />
+                          <input value={item.value} autoComplete="off" spellCheck={false} onKeyDown={(event) => event.stopPropagation()} onChange={(event) => setDraft((current) => ({ ...current, careerSummary: { ...current.careerSummary, highlights: current.careerSummary.highlights.map((highlight, highlightIndex) => highlightIndex === index ? { ...highlight, value: event.target.value } : highlight) } }))} />
                         </div>
                       ))}
+                    </div>
+                  </div>
+                  <div className="admin-nested-card">
+                    <h3>Working process</h3>
+                    <div className="admin-stack compact-stack">
+                      {draft.workingProcess.map((step, index) => (
+                        <div className="admin-grid two admin-row-card" key={`${step.index}-${step.title}-${index}`}>
+                          <TextField label="Step index" value={step.index} onChange={(value) => updateWorkingProcess(index, { index: value })} />
+                          <TextField label="Step title" value={step.title} onChange={(value) => updateWorkingProcess(index, { title: value })} />
+                          <TextAreaField label="Step description" value={step.text} rows={3} onChange={(value) => updateWorkingProcess(index, { text: value })} />
+                          <ItemActions
+                            onMoveUp={() => moveWorkingProcess(index, -1)}
+                            onMoveDown={() => moveWorkingProcess(index, 1)}
+                            onDuplicate={() => duplicateWorkingProcess(index)}
+                            onRemove={() => removeWorkingProcess(index)}
+                            disableMoveUp={index === 0}
+                            disableMoveDown={index === draft.workingProcess.length - 1}
+                            removeLabel="Delete step"
+                          />
+                        </div>
+                      ))}
+                      <button type="button" className="admin-add-button" onClick={() => setDraft((current) => ({ ...current, workingProcess: [...current.workingProcess, emptyWorkingProcessStep(current.workingProcess.length + 1)] }))}>+ Add working step</button>
                     </div>
                   </div>
                 </>
@@ -1120,8 +1465,20 @@ export function AdminDashboard() {
                     <div className="admin-mini-grid">
                       {draft.careerSummary.highlights.map((item, index) => (
                         <div className="admin-inline-pair" key={`vi-${item.label}-${index}`}>
-                          <input aria-label={`VI highlight label ${index + 1}`} placeholder={item.label} value={getViText(["careerSummary", "highlights", index, "label"])} onChange={(event) => updateViTranslation(["careerSummary", "highlights", index, "label"], event.target.value)} />
-                          <input aria-label={`VI highlight value ${index + 1}`} placeholder={item.value} value={getViText(["careerSummary", "highlights", index, "value"])} onChange={(event) => updateViTranslation(["careerSummary", "highlights", index, "value"], event.target.value)} />
+                          <input autoComplete="off" spellCheck={false} onKeyDown={(event) => event.stopPropagation()} aria-label={`VI highlight label ${index + 1}`} placeholder={item.label} value={getViText(["careerSummary", "highlights", index, "label"])} onChange={(event) => updateViTranslation(["careerSummary", "highlights", index, "label"], event.target.value)} />
+                          <input autoComplete="off" spellCheck={false} onKeyDown={(event) => event.stopPropagation()} aria-label={`VI highlight value ${index + 1}`} placeholder={item.value} value={getViText(["careerSummary", "highlights", index, "value"])} onChange={(event) => updateViTranslation(["careerSummary", "highlights", index, "value"], event.target.value)} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="admin-nested-card vi-card">
+                    <h3>Working process — Tiếng Việt</h3>
+                    <div className="admin-stack compact-stack">
+                      {draft.workingProcess.map((step, index) => (
+                        <div className="admin-grid two admin-row-card" key={`vi-working-${step.index}-${index}`}>
+                          <div className="admin-translation-reference small"><strong>Source step</strong><span>{step.index}</span></div>
+                          <TextField label="VI Step title" value={getViText(["workingProcess", step.index, "title"])} placeholder={step.title} onChange={(value) => updateViTranslation(["workingProcess", step.index, "title"], value)} />
+                          <TextAreaField label="VI Step description" value={getViText(["workingProcess", step.index, "text"])} rows={3} onChange={(value) => updateViTranslation(["workingProcess", step.index, "text"], value)} />
                         </div>
                       ))}
                     </div>
@@ -1201,7 +1558,15 @@ export function AdminDashboard() {
                               </div>
                               <TextField label="Alt text" value={asset.alt ?? ""} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { alt: value })} />
                               <TextAreaField label="Caption" value={asset.caption ?? ""} rows={3} onChange={(value) => updateProjectAsset(projectIndex, assetIndex, { caption: value })} />
-                              <button type="button" onClick={() => removeProjectAsset(projectIndex, assetIndex)}>Remove asset</button>
+                              <ItemActions
+                                onMoveUp={() => moveProjectAsset(projectIndex, assetIndex, -1)}
+                                onMoveDown={() => moveProjectAsset(projectIndex, assetIndex, 1)}
+                                onDuplicate={() => duplicateProjectAsset(projectIndex, assetIndex)}
+                                onRemove={() => removeProjectAsset(projectIndex, assetIndex)}
+                                disableMoveUp={assetIndex === 0}
+                                disableMoveDown={assetIndex === project.media.assets.length - 1}
+                                removeLabel="Delete asset"
+                              />
                             </div>
                           ))}
                           {project.media.assets.length === 0 && <p className="admin-empty-note">No gallery assets yet. Add screenshots, diagrams or public document links for this project.</p>}
@@ -1309,7 +1674,16 @@ export function AdminDashboard() {
                           <h3>{isVietnameseEditor ? getViText(["experience", viKey, "role"]) || item.role || `Experience ${index + 1}` : item.role || `Experience ${index + 1}`}</h3>
                           {isVietnameseEditor && <small>English source: {item.organization} · {item.role}</small>}
                         </div>
-                        {!isVietnameseEditor && <button type="button" onClick={() => setDraft((current) => ({ ...current, experience: current.experience.filter((_, itemIndex) => itemIndex !== index) }))}>Remove</button>}
+                        {!isVietnameseEditor && (
+                          <ItemActions
+                            onMoveUp={() => moveExperience(index, -1)}
+                            onMoveDown={() => moveExperience(index, 1)}
+                            onDuplicate={() => duplicateExperience(index)}
+                            onRemove={() => removeExperience(index)}
+                            disableMoveUp={index === 0}
+                            disableMoveDown={index === draft.experience.length - 1}
+                          />
+                        )}
                       </div>
                       {!isVietnameseEditor ? (
                         <div className="admin-grid two">
@@ -1357,8 +1731,15 @@ export function AdminDashboard() {
                       </div>
                       {!isVietnameseEditor && (
                         <div>
-                          <button type="button" onClick={() => updateProject(index, { slug: slugify(project.title) })}>Auto slug</button>
-                          <button type="button" onClick={() => setDraft((current) => ({ ...current, projects: current.projects.filter((_, itemIndex) => itemIndex !== index) }))}>Remove</button>
+                          <button type="button" onClick={() => updateProject(index, { slug: makeUniqueSlug(project.title, draft.projects.filter((_, itemIndex) => itemIndex !== index).map((item) => item.slug)) })}>Auto slug</button>
+                          <ItemActions
+                            onMoveUp={() => moveProject(index, -1)}
+                            onMoveDown={() => moveProject(index, 1)}
+                            onDuplicate={() => duplicateProject(index)}
+                            onRemove={() => removeProject(index)}
+                            disableMoveUp={index === 0}
+                            disableMoveDown={index === draft.projects.length - 1}
+                          />
                         </div>
                       )}
                     </div>
@@ -1446,7 +1827,16 @@ export function AdminDashboard() {
                           <h3>{isVietnameseEditor ? getViText(["skillGroups", viKey, "title"]) || group.title : group.title}</h3>
                           {isVietnameseEditor && <small>English source: {group.title}</small>}
                         </div>
-                        {!isVietnameseEditor && <button type="button" onClick={() => setDraft((current) => ({ ...current, skillGroups: current.skillGroups.filter((_, itemIndex) => itemIndex !== index) }))}>Remove</button>}
+                        {!isVietnameseEditor && (
+                          <ItemActions
+                            onMoveUp={() => moveSkillGroup(index, -1)}
+                            onMoveDown={() => moveSkillGroup(index, 1)}
+                            onDuplicate={() => duplicateSkillGroup(index)}
+                            onRemove={() => removeSkillGroup(index)}
+                            disableMoveUp={index === 0}
+                            disableMoveDown={index === draft.skillGroups.length - 1}
+                          />
+                        )}
                       </div>
                       {!isVietnameseEditor ? (
                         <div className="admin-grid two">
@@ -1487,7 +1877,15 @@ export function AdminDashboard() {
                           <TextField label="Institution" value={item.institution} onChange={(value) => updateEducation(index, { institution: value })} />
                           <TextField label="Degree" value={item.degree} onChange={(value) => updateEducation(index, { degree: value })} />
                           <TextField label="Note" value={item.note ?? ""} onChange={(value) => updateEducation(index, { note: value })} />
-                          <button type="button" onClick={() => setDraft((current) => ({ ...current, education: current.education.filter((_, itemIndex) => itemIndex !== index) }))}>Remove education</button>
+                          <ItemActions
+                            onMoveUp={() => moveEducation(index, -1)}
+                            onMoveDown={() => moveEducation(index, 1)}
+                            onDuplicate={() => duplicateEducation(index)}
+                            onRemove={() => removeEducation(index)}
+                            disableMoveUp={index === 0}
+                            disableMoveDown={index === draft.education.length - 1}
+                            removeLabel="Delete education"
+                          />
                         </div>
                       ))}
                       <button type="button" className="admin-add-button" onClick={() => setDraft((current) => ({ ...current, education: [...current.education, { period: "2026", institution: "Institution", degree: "Degree / Program", note: "" }] }))}>+ Add education</button>
@@ -1503,7 +1901,15 @@ export function AdminDashboard() {
                           <TextField label="Name" value={item.name} onChange={(value) => updateCertification(index, { name: value })} />
                           <TextField label="Issuer" value={item.issuer} onChange={(value) => updateCertification(index, { issuer: value })} />
                           <TextField label="Credential URL" value={item.credentialUrl ?? ""} onChange={(value) => updateCertification(index, { credentialUrl: value })} />
-                          <button type="button" onClick={() => setDraft((current) => ({ ...current, certifications: current.certifications.filter((_, itemIndex) => itemIndex !== index) }))}>Remove certification</button>
+                          <ItemActions
+                            onMoveUp={() => moveCertification(index, -1)}
+                            onMoveDown={() => moveCertification(index, 1)}
+                            onDuplicate={() => duplicateCertification(index)}
+                            onRemove={() => removeCertification(index)}
+                            disableMoveUp={index === 0}
+                            disableMoveDown={index === draft.certifications.length - 1}
+                            removeLabel="Delete certification"
+                          />
                         </div>
                       ))}
                       <button type="button" className="admin-add-button" onClick={() => setDraft((current) => ({ ...current, certifications: [...current.certifications, { year: "2026", name: "Certification", issuer: "Issuer", credentialUrl: "" }] }))}>+ Add certification</button>
@@ -1529,8 +1935,18 @@ export function AdminDashboard() {
                           <TextField label="Value" value={method.value} onChange={(value) => updateContactMethod(index, { value })} />
                           <TextField label="Href" value={method.href} onChange={(value) => updateContactMethod(index, { href: value })} />
                           <TextAreaField label="Description" value={method.description} rows={3} onChange={(value) => updateContactMethod(index, { description: value })} />
+                          <ItemActions
+                            onMoveUp={() => moveContactMethod(index, -1)}
+                            onMoveDown={() => moveContactMethod(index, 1)}
+                            onDuplicate={() => duplicateContactMethod(index)}
+                            onRemove={() => removeContactMethod(index)}
+                            disableMoveUp={index === 0}
+                            disableMoveDown={index === draft.contact.methods.length - 1}
+                            removeLabel="Delete contact"
+                          />
                         </div>
                       ))}
+                      <button type="button" className="admin-add-button" onClick={() => setDraft((current) => ({ ...current, contact: { ...current.contact, methods: [...current.contact.methods, { label: "New contact", value: "Value", href: "#", description: "Contact description" }] } }))}>+ Add contact method</button>
                     </div>
                   </div>
                 </>
@@ -1617,7 +2033,14 @@ export function AdminDashboard() {
                           <small>{post.slug} · {post.status} · {post.date}</small>
                         </div>
                         {!isVietnameseEditor && (
-                          <button type="button" onClick={() => setDraft((current) => ({ ...current, blog: current.blog.filter((_, itemIndex) => itemIndex !== index) }))}>Remove</button>
+                          <ItemActions
+                            onMoveUp={() => moveBlog(index, -1)}
+                            onMoveDown={() => moveBlog(index, 1)}
+                            onDuplicate={() => duplicateBlog(index)}
+                            onRemove={() => removeBlog(index)}
+                            disableMoveUp={index === 0}
+                            disableMoveDown={index === draft.blog.length - 1}
+                          />
                         )}
                       </div>
 
@@ -1739,7 +2162,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.4.0 writes live profile, multilingual translations, blog notes and media data to Supabase, tracks visitor insights and keeps export as a production backup.">
+            <AdminSection title="Export backup" description="V1.5.0 adds advanced CMS operations, validation, unsaved-change protection, safer text inputs and backup exports for production use.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>

@@ -1,40 +1,46 @@
-# HuyVo Portfolio V1.4.0 – Blog / Notes
+# HuyVo Portfolio V1.5.0 – Advanced Admin CMS
 
-Professional portfolio/CV web app built with Next.js, TypeScript and CSS. V1.4.0 extends the production portfolio with a bilingual Blog / Notes module for publishing professional notes from the Admin CMS.
+Professional portfolio/CV web app built with Next.js, TypeScript and CSS. V1.5.0 upgrades the Admin CMS experience so it is easier to maintain real CV content in production.
 
-## Main features
+## Highlights
 
-- Portfolio landing page
-- ATS-friendly Resume page
-- Project case-study pages
-- Contact page and mailto form
-- Supabase CMS Admin
-- Analytics & visitor insights
+- Public portfolio, resume, contact, project case studies and blog notes
+- Supabase-powered live CMS with source fallback
+- Bilingual English/Vietnamese content support
+- Analytics dashboard for visitor insights
 - Media/project assets with Google Drive URL support
-- Admin dark/light/system theme
-- English/Vietnamese public routes
-- Blog / Notes public pages
-- Blog / Notes Admin editor with English/Tiếng Việt toggle
-- SEO, sitemap, robots, manifest, OpenGraph and JSON-LD
+- Advanced Admin CMS controls for adding, duplicating, deleting and reordering content
+- Safer text fields and textarea editing behavior
+- Production validation and unsaved-change protection
 
-## New in V1.4.0
+## New in V1.5.0
 
-- Added public Blog / Notes pages:
-  - `/blog`
-  - `/blog/[slug]`
-  - `/en/blog`
-  - `/vi/blog`
-  - `/en/blog/[slug]`
-  - `/vi/blog/[slug]`
-- Added Blog preview section on the landing page.
-- Added Blog / Notes tab inside `/admin`.
-- Blog posts support title, slug, date, status, featured, tags, summary, content paragraphs and cover image URL.
-- Only `Published` blog posts appear on public pages.
-- Blog supports English source content and Vietnamese translation fields through the existing Admin language toggle.
-- Added blog SEO metadata, sitemap entries and JSON-LD BlogPosting data.
-- Blog content is stored in the existing `portfolio_profiles.data` JSON column, so no new Supabase table is required.
+- Version updated to `1.5.0`
+- Admin storage/session keys updated to V1.5.0
+- Added content health validation panel
+- Added quick CMS statistics panel
+- Added unsaved-change indicator
+- Added browser warning when leaving with unsaved changes
+- Added section-level Save draft / Save live actions
+- Added duplicate/reorder/delete controls for:
+  - Experience
+  - Projects
+  - Project gallery assets
+  - Skill groups
+  - Education
+  - Certifications
+  - Contact method cards
+  - Blog / Notes
+- Blog/project duplicate actions auto-generate unique slugs
+- Save live is blocked when required errors exist
+- Improved all shared text inputs/textareas:
+  - Enter/newline behavior stays stable
+  - no aggressive trimming while typing
+  - stop admin shortcut/key bubbling from text controls
+  - safer multiline wrapping
+- Updated README, VERSION and deployment notes
 
-## Run locally
+## Local development
 
 ```bash
 npm install
@@ -44,24 +50,22 @@ npm run dev
 Open:
 
 ```text
-http://localhost:3000/en
-http://localhost:3000/vi
-http://localhost:3000/blog
+http://localhost:3000
+```
+
+Admin:
+
+```text
 http://localhost:3000/admin
 ```
 
-## Build
+Local fallback password:
 
-```bash
-npm run build
-npm run start
+```text
+huyvo-admin
 ```
 
-## Vercel deploy
-
-Import the project to Vercel and keep Output Directory empty/default. Do not set Output Directory to `out`.
-
-## Environment variables
+## Vercel environment variables
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
@@ -76,31 +80,24 @@ ANALYTICS_MAX_ROWS=5000
 
 ## Supabase setup
 
-Run this file in Supabase SQL Editor:
+Run:
 
 ```text
 supabase/schema.sql
 ```
 
-V1.4.0 does not require a new Supabase table. Blog posts are saved inside:
+V1.5.0 does not require a new Supabase table. It keeps using:
 
 ```text
-portfolio_profiles.data.blog
-portfolio_profiles.data.translations.vi.blog
+portfolio_profiles
+portfolio_events
 ```
 
-## Admin workflow
+## Deploy on Vercel
 
-```text
-/admin
-↓
-Login with ADMIN_PASSWORD
-↓
-Open Blog / Notes
-↓
-Create or edit English source notes
-↓
-Switch to Tiếng Việt to translate each note in-place
-↓
-Save live
-```
+1. Upload/import the project to GitHub.
+2. Create a Vercel project.
+3. Keep Output Directory empty/default.
+4. Add environment variables.
+5. Deploy.
+6. Open `/admin`, load live data, edit content, then Save live.
