@@ -7,7 +7,7 @@ import type { AnalyticsSummary } from "@/lib/portfolio-analytics";
 import { mediaPreviewUrl, mediaUrlInfo } from "@/lib/media-url";
 import { ThemeSwitcher } from "./theme-switcher";
 
-type AdminTab = "profile" | "media" | "experience" | "projects" | "skills" | "credentials" | "analytics" | "export";
+type AdminTab = "profile" | "media" | "language" | "experience" | "projects" | "skills" | "credentials" | "analytics" | "export";
 type CmsSource = "supabase" | "source";
 
 type HighlightDraft = { label: string; value: string };
@@ -80,15 +80,17 @@ type AdminProfileDraft = {
     methods: ContactMethodDraft[];
   };
   social: { linkedin: string; github: string };
+  translations?: Record<string, unknown>;
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v121";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v121";
+const storageKey = "huyvo-portfolio-admin-draft-v130";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v130";
 const fallbackPassword = "huyvo-admin";
 
 const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
   { id: "profile", label: "Profile", description: "Core identity, headline, about and contact basics." },
   { id: "media", label: "Media", description: "Avatar, resume file, project thumbnails and case-study assets." },
+  { id: "language", label: "Language", description: "Vietnamese/English localized content and route support." },
   { id: "experience", label: "Experience", description: "Career timeline and responsibilities." },
   { id: "projects", label: "Projects", description: "Portfolio cards and case study content." },
   { id: "skills", label: "Skills", description: "Skill groups used across portfolio and resume." },
@@ -167,6 +169,7 @@ function createDraftFromProfile(): AdminProfileDraft {
       methods: profile.contact.methods.map((item) => ({ ...item })),
     },
     social: { ...profile.social },
+    translations: JSON.parse(JSON.stringify((profile as unknown as { translations?: Record<string, unknown> }).translations || {})),
   };
 }
 
@@ -282,14 +285,34 @@ function LineListField({
   onChange: (value: string[]) => void;
   rows?: number;
 }) {
+  const [text, setText] = useState(joinLines(value));
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) setText(joinLines(value));
+  }, [focused, value]);
+
   return (
-    <TextAreaField
-      label={label}
-      value={joinLines(value)}
-      rows={rows}
-      hint="Mỗi dòng là một mục. Dòng trống sẽ được bỏ qua."
-      onChange={(text) => onChange(splitLines(text))}
-    />
+    <label className="admin-field admin-field-wide">
+      <span>{label}</span>
+      <textarea
+        rows={rows}
+        value={text}
+        onFocus={() => setFocused(true)}
+        onChange={(event) => {
+          const next = event.target.value;
+          setText(next);
+          onChange(splitLines(next));
+        }}
+        onBlur={() => {
+          setFocused(false);
+          const cleaned = joinLines(splitLines(text));
+          setText(cleaned);
+          onChange(splitLines(cleaned));
+        }}
+      />
+      <small>Mỗi dòng là một mục. Có thể bấm Enter để xuống hàng; dòng trống sẽ được bỏ qua khi rời ô nhập.</small>
+    </label>
   );
 }
 
@@ -368,6 +391,51 @@ function AdminSection({ title, description, children }: { title: string; descrip
       </div>
       {children}
     </section>
+  );
+}
+
+function TranslationsJsonField({
+  value,
+  onChange,
+  onStatus,
+}: {
+  value?: Record<string, unknown>;
+  onChange: (value: Record<string, unknown>) => void;
+  onStatus: (value: string) => void;
+}) {
+  const [text, setText] = useState(JSON.stringify(value || {}, null, 2));
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) setText(JSON.stringify(value || {}, null, 2));
+  }, [focused, value]);
+
+  function applyJson() {
+    try {
+      const parsed = JSON.parse(text) as Record<string, unknown>;
+      onChange(parsed);
+      onStatus("Language translations updated. Click Save live to publish multilingual content.");
+    } catch (error) {
+      onStatus(error instanceof Error ? `Invalid translations JSON: ${error.message}` : "Invalid translations JSON.");
+    }
+  }
+
+  return (
+    <div className="admin-stack">
+      <label className="admin-field admin-field-wide">
+        <span>Translations JSON</span>
+        <textarea
+          rows={18}
+          value={text}
+          onFocus={() => setFocused(true)}
+          onChange={(event) => setText(event.target.value)}
+          onBlur={() => setFocused(false)}
+          spellCheck={false}
+        />
+        <small>Nhập nội dung đa ngôn ngữ theo JSON. Có thể xuống hàng bình thường trong textarea; bấm Apply JSON trước khi Save live.</small>
+      </label>
+      <button type="button" className="admin-add-button" onClick={applyJson}>Apply translations JSON</button>
+    </div>
   );
 }
 
@@ -777,6 +845,7 @@ export function AdminDashboard() {
           <li className={analytics?.enabled ? "done" : ""}>Analytics tracking enabled</li>
           <li className={draft.projects.some((project) => project.media.thumbnailUrl || project.media.assets.some((asset) => asset.url)) ? "done" : ""}>Project media configured</li>
           <li className={draft.media.avatarUrl || draft.projects.some((project) => project.media.thumbnailUrl || project.media.assets.some((asset) => asset.url)) ? "done" : ""}>Google Drive/direct media supported</li>
+          <li className={draft.translations?.vi ? "done" : ""}>Vietnamese translation overrides configured</li>
         </ul>
       </div>
 
@@ -906,6 +975,26 @@ export function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </AdminSection>
+          )}
+
+          {activeTab === "language" && (
+            <AdminSection title="Multi-language portfolio" description="Manage localized content for /en and /vi pages. English uses the main profile fields; Vietnamese can override text through translations.vi.">
+              <div className="admin-stack">
+                <div className="admin-nested-card">
+                  <h3>Public language routes</h3>
+                  <p className="admin-muted-text">The public portfolio now supports <code>/en</code>, <code>/vi</code>, <code>/en/resume</code>, <code>/vi/resume</code>, <code>/en/contact</code>, <code>/vi/contact</code> and localized project case studies.</p>
+                </div>
+                <div className="admin-nested-card">
+                  <h3>Translation overrides</h3>
+                  <p className="admin-muted-text">Only fields present in the JSON override the default English source. Missing Vietnamese fields automatically fall back to the main profile data.</p>
+                  <TranslationsJsonField
+                    value={draft.translations}
+                    onStatus={setMessage}
+                    onChange={(translations) => setDraft((current) => ({ ...current, translations }))}
+                  />
+                </div>
               </div>
             </AdminSection>
           )}
@@ -1120,7 +1209,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.2.1 writes live profile and media data to Supabase, supports Google Drive media links, tracks visitor insights and keeps export as a production backup.">
+            <AdminSection title="Export backup" description="V1.3.0 writes live profile, multilingual translations and media data to Supabase, tracks visitor insights and keeps export as a production backup.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>

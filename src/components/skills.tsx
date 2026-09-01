@@ -1,15 +1,17 @@
 import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
+import { getLocale, getUiCopy, type Locale } from "@/data/i18n";
 
-export function Skills({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+export function Skills({ profileData = fallbackProfile, locale = "en" }: { profileData?: PortfolioProfile; locale?: Locale }) {
   const profile = profileData;
+  const copy = getUiCopy(getLocale(locale));
 
   return (
     <section className="section skills" id="skills">
       <div className="container">
-        <div className="section-label"><span>05</span> Skills</div>
+        <div className="section-label"><span>05</span> {copy.sections.skills}</div>
         <div className="skills-heading">
-          <h2>Capabilities built around real implementation work.</h2>
-          <p>No arbitrary percentage bars — just the areas I use to understand, shape and deliver software solutions.</p>
+          <h2>{copy.sections.skillsTitle}</h2>
+          <p>{copy.sections.skillsDescription}</p>
         </div>
         <div className="skill-groups">
           {profile.skillGroups.map((group, groupIndex) => (

@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminPasswordValid, readPortfolioProfile, savePortfolioProfile } from "@/lib/portfolio-cms";
 import type { PortfolioProfile } from "@/data/profile";
+import { locales, localizedPath } from "@/data/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -24,12 +25,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ message: "Missing profile payload." }, { status: 400 });
     }
 
-    const saved = await savePortfolioProfile(body.profile);
+    const profilePayload = body.profile;
+    const saved = await savePortfolioProfile(profilePayload);
 
     revalidatePath("/");
     revalidatePath("/resume");
     revalidatePath("/contact");
-    body.profile.projects.forEach((project) => revalidatePath(`/projects/${project.slug}`));
+    profilePayload.projects.forEach((project) => revalidatePath(`/projects/${project.slug}`));
+
+    locales.forEach((locale) => {
+      revalidatePath(localizedPath(locale));
+      revalidatePath(localizedPath(locale, "/resume"));
+      revalidatePath(localizedPath(locale, "/contact"));
+      profilePayload.projects.forEach((project) => revalidatePath(localizedPath(locale, `/projects/${project.slug}`)));
+    });
+
     revalidatePath("/sitemap.xml");
 
     return NextResponse.json({ message: "Saved to Supabase", saved });

@@ -1,15 +1,17 @@
 import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
+import { getLocale, getUiCopy, type Locale } from "@/data/i18n";
 
-export function Experience({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+export function Experience({ profileData = fallbackProfile, locale = "en" }: { profileData?: PortfolioProfile; locale?: Locale }) {
   const profile = profileData;
+  const copy = getUiCopy(getLocale(locale));
 
   return (
     <section className="section experience" id="experience">
       <div className="container">
-        <div className="section-label"><span>03</span> Experience</div>
+        <div className="section-label"><span>03</span> {copy.sections.experience}</div>
         <div className="experience-heading">
-          <h2>Where strategy meets delivery.</h2>
-          <p>Selected professional experience focused on software implementation, functional analysis and cross-team execution.</p>
+          <h2>{copy.sections.experienceTitle}</h2>
+          <p>{copy.sections.experienceDescription}</p>
         </div>
         <div className="timeline">
           {profile.experience.map((item) => (

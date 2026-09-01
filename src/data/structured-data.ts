@@ -1,10 +1,13 @@
 import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
-import { absoluteUrl, siteConfig } from "@/data/seo";
+import { absoluteUrl, siteConfigFor } from "@/data/seo";
+import { getLocale, localizedPath, type Locale } from "@/data/i18n";
 import { mediaPreviewUrl, mediaViewUrl } from "@/lib/media-url";
 
 type Project = PortfolioProfile["projects"][number];
 
-export function personJsonLdFor(profile: PortfolioProfile = fallbackProfile) {
+export function personJsonLdFor(profile: PortfolioProfile = fallbackProfile, localeInput?: string | null) {
+  const locale = getLocale(localeInput);
+  const config = siteConfigFor(locale);
   const sameAs = [profile.social.linkedin, profile.social.github].filter((url) => url && url !== "#");
 
   return {
@@ -14,8 +17,9 @@ export function personJsonLdFor(profile: PortfolioProfile = fallbackProfile) {
     jobTitle: profile.role,
     description: profile.description,
     email: `mailto:${profile.email}`,
-    url: siteConfig.url,
+    url: absoluteUrl(localizedPath(locale)),
     image: profile.media?.avatarUrl ? absoluteUrl(mediaPreviewUrl(profile.media.avatarUrl)) : undefined,
+    inLanguage: locale,
     address: {
       "@type": "PostalAddress",
       addressLocality: "Ho Chi Minh City",
@@ -26,16 +30,20 @@ export function personJsonLdFor(profile: PortfolioProfile = fallbackProfile) {
       ...profile.skillGroups.flatMap((group) => group.skills),
     ],
     sameAs,
+    mainEntityOfPage: config.url,
   };
 }
 
-export function websiteJsonLdFor(profile: PortfolioProfile = fallbackProfile) {
+export function websiteJsonLdFor(profile: PortfolioProfile = fallbackProfile, localeInput?: string | null) {
+  const locale = getLocale(localeInput);
+  const config = siteConfigFor(locale);
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: siteConfig.name,
-    url: siteConfig.url,
-    description: siteConfig.description,
+    name: config.name,
+    url: absoluteUrl(localizedPath(locale)),
+    description: config.description,
+    inLanguage: locale,
     author: {
       "@type": "Person",
       name: profile.name,
@@ -46,17 +54,19 @@ export function websiteJsonLdFor(profile: PortfolioProfile = fallbackProfile) {
 export const personJsonLd = personJsonLdFor();
 export const websiteJsonLd = websiteJsonLdFor();
 
-export function projectJsonLd(project: Project, profile: PortfolioProfile = fallbackProfile) {
+export function projectJsonLd(project: Project, profile: PortfolioProfile = fallbackProfile, localeInput?: string | null) {
+  const locale = getLocale(localeInput);
   return {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
     name: project.title,
     headline: project.title,
     description: project.summary,
-    url: absoluteUrl(`/projects/${project.slug}`),
+    url: absoluteUrl(localizedPath(locale, `/projects/${project.slug}`)),
     datePublished: project.year === "Current" ? undefined : project.year,
     keywords: project.technologies.join(", "),
     image: project.media?.thumbnailUrl ? absoluteUrl(mediaPreviewUrl(project.media.thumbnailUrl)) : undefined,
+    inLanguage: locale,
     associatedMedia: project.media?.assets?.filter((asset) => asset.url).map((asset) => ({
       "@type": asset.type === "Video" ? "VideoObject" : "MediaObject",
       name: asset.title,

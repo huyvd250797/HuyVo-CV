@@ -1,5 +1,5 @@
 export const appVersion = {
-  number: "1.2.1",
-  label: "V1.2.1",
-  name: "Google Drive Media URL Support",
+  number: "1.3.0",
+  label: "V1.3.0",
+  name: "Multi-language Portfolio",
 } as const;

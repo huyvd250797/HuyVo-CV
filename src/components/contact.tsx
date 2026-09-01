@@ -1,8 +1,11 @@
 import { ContactForm } from "@/components/contact-form";
 import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
+import { getLocale, getUiCopy, type Locale } from "@/data/i18n";
 
-export function Contact({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+export function Contact({ profileData = fallbackProfile, locale = "en" }: { profileData?: PortfolioProfile; locale?: Locale }) {
   const profile = profileData;
+  const activeLocale = getLocale(locale);
+  const copy = getUiCopy(activeLocale);
   const contactMethods = profile.contact.methods.map((method) =>
     method.label === "Email" ? { ...method, value: profile.email, href: `mailto:${profile.email}` } : method
   );
@@ -11,7 +14,7 @@ export function Contact({ profileData = fallbackProfile }: { profileData?: Portf
     <section className="section contact contact-v060" id="contact">
       <div className="container contact-shell">
         <div className="contact-content">
-          <div className="section-label light"><span>07</span> Contact</div>
+          <div className="section-label light"><span>07</span> {copy.sections.contact}</div>
           <p className="contact-kicker">{profile.contact.subtitle}</p>
           <h2>{profile.contact.title}</h2>
           <p className="contact-description">{profile.contact.description}</p>
@@ -27,17 +30,17 @@ export function Contact({ profileData = fallbackProfile }: { profileData?: Portf
           </div>
 
           <div className="contact-note">
-            <span>Profile status</span>
+            <span>{copy.contact.profileStatus}</span>
             <p>{profile.availability}</p>
           </div>
         </div>
 
-        <aside className="contact-panel" aria-label="Send a message">
+        <aside className="contact-panel" aria-label={copy.contact.panelLabel}>
           <div className="contact-panel-head">
-            <span>Quick message</span>
+            <span>{copy.contact.quickMessage}</span>
             <p>{profile.contact.responseNote}</p>
           </div>
-          <ContactForm profileData={profile} />
+          <ContactForm profileData={profile} locale={activeLocale} />
         </aside>
       </div>
     </section>

@@ -3,13 +3,15 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
+import { getLocale, getUiCopy, type Locale } from "@/data/i18n";
 
-export function ContactForm({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+export function ContactForm({ profileData = fallbackProfile, locale = "en" }: { profileData?: PortfolioProfile; locale?: Locale }) {
   const profile = profileData;
+  const copy = getUiCopy(getLocale(locale));
   const [form, setForm] = useState(() => ({
     name: "",
     email: "",
-    topic: profile.contact.preferredTopics[0] ?? "General message",
+    topic: profile.contact.preferredTopics[0] ?? copy.contact.fallbackTopic,
     message: "",
   }));
   const [submitted, setSubmitted] = useState(false);
@@ -22,13 +24,13 @@ export function ContactForm({ profileData = fallbackProfile }: { profileData?: P
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const subject = `Portfolio contact — ${form.topic}`;
+    const subject = `${copy.contact.subjectPrefix} — ${form.topic}`;
     const body = [
-      `Name: ${form.name || "Not provided"}`,
-      `Email: ${form.email || "Not provided"}`,
-      `Topic: ${form.topic}`,
+      `${copy.contact.name}: ${form.name || copy.contact.notProvided}`,
+      `${copy.contact.email}: ${form.email || copy.contact.notProvided}`,
+      `${copy.contact.topic}: ${form.topic}`,
       "",
-      form.message || "Please add your message here.",
+      form.message || copy.contact.bodyMessageFallback,
     ].join("\n");
 
     window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -39,23 +41,23 @@ export function ContactForm({ profileData = fallbackProfile }: { profileData?: P
     <form className="contact-form" onSubmit={handleSubmit}>
       <div className="form-row">
         <label>
-          <span>Name</span>
+          <span>{copy.contact.name}</span>
           <input
             type="text"
             name="name"
             autoComplete="name"
-            placeholder="Your name"
+            placeholder={copy.contact.namePlaceholder}
             value={form.name}
             onChange={(event) => updateField("name", event.target.value)}
           />
         </label>
         <label>
-          <span>Email</span>
+          <span>{copy.contact.email}</span>
           <input
             type="email"
             name="email"
             autoComplete="email"
-            placeholder="you@company.com"
+            placeholder={copy.contact.emailPlaceholder}
             value={form.email}
             onChange={(event) => updateField("email", event.target.value)}
           />
@@ -63,7 +65,7 @@ export function ContactForm({ profileData = fallbackProfile }: { profileData?: P
       </div>
 
       <label>
-        <span>Topic</span>
+        <span>{copy.contact.topic}</span>
         <select
           name="topic"
           value={form.topic}
@@ -76,19 +78,19 @@ export function ContactForm({ profileData = fallbackProfile }: { profileData?: P
       </label>
 
       <label>
-        <span>Message</span>
+        <span>{copy.contact.message}</span>
         <textarea
           name="message"
           rows={6}
-          placeholder="Short context, goal, timeline or opportunity details..."
+          placeholder={copy.contact.messagePlaceholder}
           value={form.message}
           onChange={(event) => updateField("message", event.target.value)}
         />
       </label>
 
       <div className="contact-form-actions">
-        <button type="submit" data-track-event="contact_click" data-track-label="Contact form mailto">Open email draft ↗</button>
-        <p>{submitted ? "Your email app should open with a prepared message." : "No backend required — this creates a mailto draft."}</p>
+        <button type="submit" data-track-event="contact_click" data-track-label="Contact form mailto">{copy.contact.openDraft} ↗</button>
+        <p>{submitted ? copy.contact.opened : copy.contact.noBackend}</p>
       </div>
     </form>
   );

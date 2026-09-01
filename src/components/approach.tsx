@@ -1,15 +1,17 @@
 import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
+import { getLocale, getUiCopy, type Locale } from "@/data/i18n";
 
-export function Approach({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
+export function Approach({ profileData = fallbackProfile, locale = "en" }: { profileData?: PortfolioProfile; locale?: Locale }) {
   const profile = profileData;
+  const copy = getUiCopy(getLocale(locale));
 
   return (
     <section className="section approach" id="approach">
       <div className="container">
-        <div className="section-label"><span>06</span> Working process</div>
+        <div className="section-label"><span>06</span> {copy.sections.process}</div>
         <div className="approach-heading">
-          <h2>From requirement to result.</h2>
-          <p>A practical six-step process for keeping complex implementation work clear, aligned and deliverable.</p>
+          <h2>{copy.sections.processTitle}</h2>
+          <p>{copy.sections.processDescription}</p>
         </div>
         <div className="approach-grid process-grid">
           {profile.workingProcess.map((item) => (
