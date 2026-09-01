@@ -1,6 +1,6 @@
-# HuyVo Portfolio V1.3.0 – Multi-language Portfolio
+# HuyVo Portfolio V1.3.1 – Admin Translation Toggle UX
 
-Professional portfolio/CV web app built with Next.js, TypeScript and CSS. This version adds English/Vietnamese public pages, localized Resume/Contact/Case Study routes, language switching and a textarea editing fix for Admin.
+Professional portfolio/CV web app built with Next.js, TypeScript and CSS. This patch improves the Admin multilingual editing experience with an English/Tiếng Việt toggle in content tabs, while keeping the English source data untouched.
 
 ## Main features
 
@@ -15,7 +15,15 @@ Professional portfolio/CV web app built with Next.js, TypeScript and CSS. This v
 - English/Vietnamese public routes
 - SEO, sitemap, robots, manifest, OpenGraph and JSON-LD
 
-## New in V1.3.0
+## New in V1.3.1
+
+- Added an Admin content toggle: **English gốc / Tiếng Việt**.
+- Vietnamese fields now appear directly inside Profile, Media, Experience, Projects, Skills and Credentials tabs.
+- Removed the need to edit raw translation JSON for normal bilingual content updates.
+- English source data remains unchanged when editing in Tiếng Việt mode.
+- Empty Vietnamese fields continue to fall back to English source content.
+
+## From V1.3.0
 
 - `/en` and `/vi` landing pages
 - `/en/resume` and `/vi/resume`
@@ -74,7 +82,7 @@ Run this file in Supabase SQL Editor:
 supabase/schema.sql
 ```
 
-V1.3.0 does not require a new table compared with V1.2.x/V1.1.x. Multilingual content is stored inside `portfolio_profiles.data.translations`.
+V1.3.1 does not require a new table compared with V1.2.x/V1.1.x. Multilingual content is stored inside `portfolio_profiles.data.translations`.
 
 ## Editing multilingual content
 

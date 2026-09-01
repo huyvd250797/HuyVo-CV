@@ -319,6 +319,9 @@ export type PortfolioTranslation = Partial<{
   description: string;
   availability: string;
   location: string;
+  media: Partial<{
+    avatarAlt: string;
+  }>;
   specialties: string[];
   about: string[];
   careerSummary: Partial<{
@@ -388,7 +391,7 @@ export function localizeProfile(profile: PortfolioProfile, localeInput?: string 
   const localized = {
     ...(profile as AnyRecord),
     ...translation,
-    media: { ...(profile.media as AnyRecord) },
+    media: { ...(profile.media as AnyRecord), ...(translation.media || {}) },
     social: { ...(profile.social as AnyRecord) },
     careerSummary: {
       ...(profile.careerSummary as AnyRecord),

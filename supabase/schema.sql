@@ -1,4 +1,4 @@
--- HuyVo Portfolio V1.3.0 — Multi-language Portfolio
+-- HuyVo Portfolio V1.3.1 — Admin Translation Toggle UX
 -- Run this in Supabase SQL Editor before using Save live, Media assets and Analytics in /admin.
 
 create table if not exists public.portfolio_profiles (
