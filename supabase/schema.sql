@@ -1,5 +1,5 @@
--- HuyVo Portfolio V1.3.1 — Admin Translation Toggle UX
--- Run this in Supabase SQL Editor before using Save live, Media assets and Analytics in /admin.
+-- HuyVo Portfolio V1.4.0 — Blog / Notes
+-- Run this in Supabase SQL Editor before using Save live, Blog / Notes, Media assets and Analytics in /admin.
 
 create table if not exists public.portfolio_profiles (
   id text primary key,
@@ -15,7 +15,7 @@ create policy "portfolio_profiles_public_read"
   for select
   using (true);
 
--- Media fields are stored inside portfolio_profiles.data JSONB; no extra media table is required for URL-based assets.
+-- Blog notes, media fields and multilingual content are stored inside portfolio_profiles.data JSONB; no extra blog/media table is required for URL-based content.
 -- No insert/update policy is created for anon users on portfolio_profiles.
 -- Writes are performed only through the Next.js API route using SUPABASE_SERVICE_ROLE_KEY.
 

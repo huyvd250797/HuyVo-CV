@@ -11,12 +11,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl(localizedPath(locale)), lastModified: now, changeFrequency: "monthly" as const, priority: locale === "en" ? 1 : 0.95 },
     { url: absoluteUrl(localizedPath(locale, "/resume")), lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
     { url: absoluteUrl(localizedPath(locale, "/contact")), lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: absoluteUrl(localizedPath(locale, "/blog")), lastModified: now, changeFrequency: "weekly" as const, priority: 0.75 },
   ]);
 
   const legacyRoutes: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: absoluteUrl("/resume"), lastModified: now, changeFrequency: "monthly", priority: 0.65 },
     { url: absoluteUrl("/contact"), lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: absoluteUrl("/blog"), lastModified: now, changeFrequency: "weekly", priority: 0.6 },
   ];
 
   const projectRoutes: MetadataRoute.Sitemap = locales.flatMap((locale) => profile.projects.map((project) => ({
@@ -26,5 +28,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: project.featured ? 0.8 : 0.65,
   })));
 
-  return [...localizedStaticRoutes, ...legacyRoutes, ...projectRoutes];
+  const blogRoutes: MetadataRoute.Sitemap = locales.flatMap((locale) => profile.blog
+    .filter((post) => post.status === "Published")
+    .map((post) => ({
+      url: absoluteUrl(localizedPath(locale, `/blog/${post.slug}`)),
+      lastModified: post.date ? new Date(post.date) : now,
+      changeFrequency: "monthly" as const,
+      priority: post.featured ? 0.75 : 0.55,
+    })));
+
+  return [...localizedStaticRoutes, ...legacyRoutes, ...projectRoutes, ...blogRoutes];
 }

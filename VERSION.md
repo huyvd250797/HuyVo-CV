@@ -2,32 +2,25 @@
 
 ## Current version
 
-**V1.3.1 – Admin Translation Toggle UX**
+**V1.4.0 – Blog / Notes**
 
 ## Highlights
 
-- Added Admin **English gốc / Tiếng Việt** toggle for direct bilingual editing.
-- Vietnamese translation fields now appear in the same tabs and positions as the original English data.
-- Normal Admin editing no longer requires touching raw JSON.
-- English source fields are not changed while editing Tiếng Việt mode.
-- Empty Vietnamese fields still fall back to English source content.
+- Added Blog / Notes module for professional writing.
+- Added public blog routes: `/blog`, `/blog/[slug]`, `/en/blog`, `/vi/blog`, `/en/blog/[slug]`, `/vi/blog/[slug]`.
+- Added landing page Blog preview section.
+- Added Admin **Blog / Notes** tab.
+- Blog posts support Draft/Published status, featured flag, tags, summary, cover media and content paragraphs.
+- Public pages show only Published posts.
+- Added Blog support to Admin English/Tiếng Việt toggle.
+- Added blog SEO metadata, sitemap entries and JSON-LD BlogPosting data.
+- Blog data reuses the existing Supabase `portfolio_profiles.data` JSON column.
 - Version synchronized across `package.json`, `src/data/version.ts`, README and deployment docs.
 
-## Previous V1.3.0 highlights
-
-- Added public bilingual routes for English and Vietnamese.
-- Added `/en`, `/vi`, `/en/resume`, `/vi/resume`, `/en/contact`, `/vi/contact`.
-- Added localized project case-study routes: `/en/projects/[slug]` and `/vi/projects/[slug]`.
-- Added language switcher in the main navigation.
-- Added localized UI labels for navigation, sections, project filters, contact form, resume and case-study pages.
-- Added Vietnamese portfolio content overrides with fallback to the main English profile.
-- Added Admin **Language** tab for editing translation JSON.
-- Fixed Admin textarea line-break issue: line-list fields now allow Enter/new lines while editing and clean blank rows on blur.
-- Updated SEO metadata, sitemap and JSON-LD for localized routes.
 ## Previous stable versions
 
+- V1.3.1 – Admin Translation Toggle UX
 - V1.3.0 – Multi-language Portfolio
-
 - V1.2.1 – Google Drive Media URL Support
 - V1.2.0 – Media & Project Assets
 - V1.1.0 – Analytics & Visitor Insights

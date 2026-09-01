@@ -53,6 +53,16 @@ function normalizeProject(project: unknown, fallbackProject: PortfolioProfile["p
   } as unknown as PortfolioProfile["projects"][number];
 }
 
+function normalizeBlogPost(post: unknown, fallbackPost: PortfolioProfile["blog"][number]) {
+  const raw = objectValue(post);
+  return {
+    ...fallbackPost,
+    ...raw,
+    tags: arrayValue(raw.tags, fallbackPost.tags),
+    content: arrayValue(raw.content, fallbackPost.content),
+  } as unknown as PortfolioProfile["blog"][number];
+}
+
 export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
   const source = sourceProfile as unknown as MutableRecord;
   const raw = objectValue(input);
@@ -68,6 +78,8 @@ export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
   const inputProjects = Array.isArray(raw.projects) ? raw.projects : sourceProjects;
   const rawTranslations = objectValue(raw.translations);
   const sourceTranslations = objectValue(source.translations);
+  const sourceBlog = sourceProfile.blog;
+  const inputBlog = Array.isArray(raw.blog) ? raw.blog : sourceBlog;
 
   return {
     ...sourceProfile,
@@ -86,6 +98,7 @@ export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
     education: arrayValue(raw.education, sourceProfile.education),
     certifications: arrayValue(raw.certifications, sourceProfile.certifications),
     workingProcess: arrayValue(raw.workingProcess, sourceProfile.workingProcess),
+    blog: inputBlog.map((post, index) => normalizeBlogPost(post, sourceBlog[index] ?? sourceBlog[0])),
     contact: {
       ...sourceContact,
       ...rawContact,

@@ -1,4 +1,4 @@
-# Deployment Guide – HuyVo Portfolio V1.3.1
+# Deployment Guide – HuyVo Portfolio V1.4.0
 
 ## 1. Deploy to Vercel
 
@@ -38,7 +38,7 @@ This creates/keeps:
 - `portfolio_profiles`
 - `portfolio_events`
 
-V1.3.1 multilingual content uses the existing `portfolio_profiles.data` JSON column.
+V1.4.0 Blog / Notes uses the existing `portfolio_profiles.data` JSON column. No new table is required.
 
 ## 4. Public routes
 
@@ -49,6 +49,8 @@ English:
 /en/resume
 /en/contact
 /en/projects/[slug]
+/en/blog
+/en/blog/[slug]
 ```
 
 Vietnamese:
@@ -58,6 +60,8 @@ Vietnamese:
 /vi/resume
 /vi/contact
 /vi/projects/[slug]
+/vi/blog
+/vi/blog/[slug]
 ```
 
 Legacy English routes still work:
@@ -67,6 +71,8 @@ Legacy English routes still work:
 /resume
 /contact
 /projects/[slug]
+/blog
+/blog/[slug]
 ```
 
 ## 5. Admin workflow
@@ -76,20 +82,18 @@ Legacy English routes still work:
 ↓
 Login with ADMIN_PASSWORD
 ↓
-Edit English source content, or switch the Admin toggle to Tiếng Việt to edit Vietnamese fields in-place
+Open Blog / Notes
+↓
+Edit English source content or switch to Tiếng Việt for translations
 ↓
 Save live
 ```
 
-For multilingual content:
-
-```text
-/admin → Language → edit translations JSON → Apply translations JSON → Save live
-```
+Only blog posts with `Published` status are visible on the public website.
 
 ## 6. Media URLs
 
-Google Drive image links are supported. Make sure each Drive file is shared as:
+Google Drive image links are supported for avatar, project media and blog cover images. Make sure each Drive file is shared as:
 
 ```text
 Anyone with the link → Viewer
