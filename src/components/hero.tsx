@@ -1,10 +1,11 @@
 import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 import { appVersion } from "@/data/version";
+import { mediaPreviewUrl, mediaViewUrl } from "@/lib/media-url";
 
 export function Hero({ profileData = fallbackProfile }: { profileData?: PortfolioProfile }) {
   const profile = profileData;
-  const avatarUrl = profile.media?.avatarUrl?.trim();
-  const resumeUrl = profile.media?.resumeUrl?.trim();
+  const avatarUrl = mediaPreviewUrl(profile.media?.avatarUrl, 900);
+  const resumeUrl = mediaViewUrl(profile.media?.resumeUrl);
 
   return (
     <section className="hero section" id="top">
@@ -37,7 +38,7 @@ export function Hero({ profileData = fallbackProfile }: { profileData?: Portfoli
             </div>
             {avatarUrl ? (
               <div className="profile-photo-wrap">
-                <img src={avatarUrl} alt={profile.media?.avatarAlt || `Portrait photo of ${profile.name}`} />
+                <img src={avatarUrl} alt={profile.media?.avatarAlt || `Portrait photo of ${profile.name}`} referrerPolicy="no-referrer" />
               </div>
             ) : (
               <div className="monogram">{profile.shortName}</div>

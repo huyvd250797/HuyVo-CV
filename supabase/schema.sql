@@ -1,4 +1,4 @@
--- HuyVo Portfolio V1.2.0 — Media & Project Assets
+-- HuyVo Portfolio V1.2.1 — Google Drive Media URL Support
 -- Run this in Supabase SQL Editor before using Save live, Media assets and Analytics in /admin.
 
 create table if not exists public.portfolio_profiles (

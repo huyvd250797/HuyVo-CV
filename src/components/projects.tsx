@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { profile as fallbackProfile, type PortfolioProfile, type ProjectCategory } from "@/data/profile";
+import { mediaPreviewUrl } from "@/lib/media-url";
 
 type Filter = "All" | ProjectCategory;
 const filters: Filter[] = ["All", "Professional", "Product", "Tool"];
@@ -44,7 +45,7 @@ export function Projects({ profileData = fallbackProfile }: { profileData?: Port
 
         <div className="project-grid">
           {visible.map((project, index) => {
-            const thumbnailUrl = project.media?.thumbnailUrl?.trim();
+            const thumbnailUrl = mediaPreviewUrl(project.media?.thumbnailUrl, 1000);
             const assetCount = project.media?.assets?.filter((asset) => asset.url?.trim()).length ?? 0;
 
             return (
@@ -56,7 +57,7 @@ export function Projects({ profileData = fallbackProfile }: { profileData?: Port
 
                 <div className={thumbnailUrl ? "project-thumb has-image" : "project-thumb"} aria-hidden={!thumbnailUrl}>
                   {thumbnailUrl ? (
-                    <img src={thumbnailUrl} alt={project.media?.thumbnailAlt || `${project.title} project preview`} />
+                    <img src={thumbnailUrl} alt={project.media?.thumbnailAlt || `${project.title} project preview`} loading="lazy" referrerPolicy="no-referrer" />
                   ) : (
                     <span>{project.media?.icon || project.title.slice(0, 2).toUpperCase()}</span>
                   )}

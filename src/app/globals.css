@@ -1632,7 +1632,7 @@ html[data-active-section="contact"] .nav-cta {
   }
 }
 
-/* V1.2.0 — Media & Project Assets */
+/* V1.2.1 — Media & Google Drive URL Support */
 .profile-photo-wrap {
   width: min(360px, 84%);
   aspect-ratio: 1;
@@ -1886,6 +1886,25 @@ html[data-active-section="contact"] .nav-cta {
   font-size: 34px;
   font-weight: 950;
   letter-spacing: -.08em;
+}
+
+
+.admin-drive-note {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.admin-drive-note code,
+.admin-media-preview code {
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.admin-media-preview strong {
+  color: var(--text);
 }
 
 .admin-media-preview p,

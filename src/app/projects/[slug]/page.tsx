@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/json-ld";
 import { absoluteUrl } from "@/data/seo";
 import { breadcrumbJsonLd, projectJsonLd } from "@/data/structured-data";
 import { readPortfolioProfile } from "@/lib/portfolio-cms";
+import { mediaPreviewUrl, mediaViewUrl } from "@/lib/media-url";
 
 export const dynamicParams = true;
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const { profile } = await readPortfolioProfile();
   const project = profile.projects.find((item) => item.slug === slug);
-  const previewImage = project?.media?.thumbnailUrl?.trim() || "/opengraph-image";
+  const previewImage = mediaPreviewUrl(project?.media?.thumbnailUrl) || "/opengraph-image";
 
   return project
     ? {
@@ -52,7 +53,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
   const projectData = project as NonNullable<typeof project>;
   const study = projectData.caseStudy;
   const projectAssets = projectData.media?.assets?.filter((asset) => asset.url?.trim()) ?? [];
-  const thumbnailUrl = projectData.media?.thumbnailUrl?.trim();
+  const thumbnailUrl = mediaPreviewUrl(projectData.media?.thumbnailUrl);
   const hasMedia = Boolean(thumbnailUrl || projectAssets.length);
   const breadcrumb = breadcrumbJsonLd([
     { name: "Home", url: absoluteUrl("/") },
@@ -83,7 +84,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
           </div>
           {thumbnailUrl && (
             <figure className="case-preview-card">
-              <img src={thumbnailUrl} alt={projectData.media?.thumbnailAlt || `${projectData.title} preview`} />
+              <img src={thumbnailUrl} alt={projectData.media?.thumbnailAlt || `${projectData.title} preview`} referrerPolicy="no-referrer" />
               <figcaption>{projectData.media?.thumbnailAlt || "Project preview"}</figcaption>
             </figure>
           )}
@@ -100,10 +101,10 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
             </div>
             <div className="case-media-grid">
               {projectAssets.map((asset) => (
-                <a key={`${asset.title}-${asset.url}`} className="case-media-card" href={asset.url} target="_blank" rel="noreferrer" data-track-event="cta_click" data-track-label={`Project media: ${projectData.title} - ${asset.title}`}>
+                <a key={`${asset.title}-${asset.url}`} className="case-media-card" href={mediaViewUrl(asset.url)} target="_blank" rel="noreferrer" data-track-event="cta_click" data-track-label={`Project media: ${projectData.title} - ${asset.title}`}>
                   <div className="case-media-image">
                     {asset.type === "Image" || asset.type === "Screenshot" || asset.type === "Diagram" ? (
-                      <img src={asset.url} alt={asset.alt || asset.title} />
+                      <img src={mediaPreviewUrl(asset.url)} alt={asset.alt || asset.title} loading="lazy" referrerPolicy="no-referrer" />
                     ) : (
                       <span>{asset.type}</span>
                     )}
@@ -117,7 +118,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
               ))}
               {projectAssets.length === 0 && thumbnailUrl && (
                 <article className="case-media-card static-card">
-                  <div className="case-media-image"><img src={thumbnailUrl} alt={projectData.media?.thumbnailAlt || `${projectData.title} preview`} /></div>
+                  <div className="case-media-image"><img src={thumbnailUrl} alt={projectData.media?.thumbnailAlt || `${projectData.title} preview`} referrerPolicy="no-referrer" /></div>
                   <div><span>Preview</span><h3>Project thumbnail</h3><p>{projectData.media?.thumbnailAlt || "Primary project visual."}</p></div>
                 </article>
               )}
