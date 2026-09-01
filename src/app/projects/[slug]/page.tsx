@@ -60,7 +60,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
     <main id="top" className="case-study-page">
       <JsonLd data={[projectJsonLd(projectData, profile), breadcrumb]} />
       <div className="case-nav container">
-        <Link href="/#projects" className="case-back">← Back to projects</Link>
+        <Link href="/#projects" className="case-back" data-track-event="cta_click" data-track-label="Case study back to projects">← Back to projects</Link>
         <span>{profile.shortName}<i>.</i></span>
       </div>
 
@@ -135,7 +135,7 @@ export default async function ProjectCaseStudy({ params }: { params: Promise<{ s
           <div className="case-lessons">
             {study.lessons.map((lesson, index) => <div key={lesson}><span>{String(index + 1).padStart(2, "0")}</span><p>{lesson}</p></div>)}
           </div>
-          <div className="case-next"><Link href="/#projects">Explore other projects ↗</Link></div>
+          <div className="case-next"><Link href="/#projects" data-track-event="cta_click" data-track-label="Case study explore other projects">Explore other projects ↗</Link></div>
         </div>
       </section>
       <Footer profileData={profile} />

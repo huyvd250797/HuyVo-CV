@@ -3,8 +3,10 @@
 import { FormEvent, useEffect, useMemo, useState, type ReactNode } from "react";
 import { profile, type ProjectCategory } from "@/data/profile";
 import { appVersion } from "@/data/version";
+import type { AnalyticsSummary } from "@/lib/portfolio-analytics";
+import { ThemeSwitcher } from "./theme-switcher";
 
-type AdminTab = "profile" | "experience" | "projects" | "skills" | "credentials" | "export";
+type AdminTab = "profile" | "experience" | "projects" | "skills" | "credentials" | "analytics" | "export";
 type CmsSource = "supabase" | "source";
 
 type HighlightDraft = { label: string; value: string };
@@ -74,8 +76,8 @@ type AdminProfileDraft = {
   social: { linkedin: string; github: string };
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v100";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v100";
+const storageKey = "huyvo-portfolio-admin-draft-v110";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v110";
 const fallbackPassword = "huyvo-admin";
 
 const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
@@ -84,6 +86,7 @@ const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
   { id: "projects", label: "Projects", description: "Portfolio cards and case study content." },
   { id: "skills", label: "Skills", description: "Skill groups used across portfolio and resume." },
   { id: "credentials", label: "Credentials", description: "Education, certifications and contact channels." },
+  { id: "analytics", label: "Analytics", description: "Visitor insights, page views and CTA clicks." },
   { id: "export", label: "Export", description: "Backup profile.ts and JSON when you still want a code copy." },
 ];
 
@@ -302,6 +305,9 @@ export function AdminDashboard() {
   const [livePassword, setLivePassword] = useState("");
   const [loadingLive, setLoadingLive] = useState(false);
   const [savingLive, setSavingLive] = useState(false);
+  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
+  const [analyticsMessage, setAnalyticsMessage] = useState("Analytics has not been loaded yet.");
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   const generatedSource = useMemo(() => buildProfileSource(draft), [draft]);
   const activeTabInfo = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
@@ -325,6 +331,10 @@ export function AdminDashboard() {
   useEffect(() => {
     if (unlocked) {
       void loadLiveProfile();
+      const passwordToUse = livePassword || password;
+      if (passwordToUse) {
+        void loadAnalytics(passwordToUse);
+      }
     }
   }, [unlocked]);
 
@@ -347,6 +357,7 @@ export function AdminDashboard() {
       setLivePassword(password.trim());
       window.sessionStorage.setItem(sessionKey, "true");
       setMessage("Admin unlocked");
+      void loadAnalytics(password.trim());
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Wrong admin password.");
     }
@@ -422,6 +433,35 @@ export function AdminDashboard() {
       setMessage(error instanceof Error ? error.message : "Save to Supabase failed");
     } finally {
       setSavingLive(false);
+    }
+  }
+
+  async function loadAnalytics(passwordOverride?: string) {
+    const passwordToUse = passwordOverride || livePassword || password;
+
+    if (!passwordToUse) {
+      setAnalyticsMessage("Enter ADMIN_PASSWORD to load analytics.");
+      return;
+    }
+
+    setLoadingAnalytics(true);
+    try {
+      const response = await fetch("/api/admin/analytics", {
+        cache: "no-store",
+        headers: { "x-admin-password": passwordToUse },
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Could not load analytics.");
+      }
+
+      setAnalytics(result as AnalyticsSummary);
+      setAnalyticsMessage(result.message || "Analytics loaded from Supabase.");
+    } catch (error) {
+      setAnalyticsMessage(error instanceof Error ? error.message : "Could not load analytics.");
+    } finally {
+      setLoadingAnalytics(false);
     }
   }
 
@@ -507,8 +547,11 @@ export function AdminDashboard() {
     return (
       <main className="admin-page admin-login-page">
         <div className="admin-login-card">
-          <a className="admin-back" href="/">← Back to portfolio</a>
-          <div className="admin-badge">{appVersion.label} · Real CMS</div>
+          <div className="admin-login-head">
+            <a className="admin-back" href="/">← Back to portfolio</a>
+            <ThemeSwitcher />
+          </div>
+          <div className="admin-badge">{appVersion.label} · Analytics CMS</div>
           <h1>Portfolio CMS / Admin</h1>
           <p>
             This version connects the editor to Supabase through a protected Next.js API route.
@@ -543,6 +586,7 @@ export function AdminDashboard() {
           <p>{appVersion.label} · {appVersion.name}</p>
         </div>
         <div className="admin-actions">
+          <ThemeSwitcher />
           <label className="admin-live-password">
             <span>Save password</span>
             <input
@@ -587,7 +631,7 @@ export function AdminDashboard() {
           <strong>{cmsSource === "supabase" ? "Live CMS connected" : "Finish Supabase setup"}</strong>
           <p>
             Run <code>supabase/schema.sql</code>, save one live profile, replace placeholder email/social links,
-            then redeploy after environment changes.
+            enable analytics if needed, then redeploy after environment changes.
           </p>
         </div>
         <ul>
@@ -595,6 +639,7 @@ export function AdminDashboard() {
           <li className={canWriteLive ? "done" : ""}>Service role write ready</li>
           <li className={cmsSource === "supabase" ? "done" : ""}>Live profile saved</li>
           <li className={draft.email !== "hello@example.com" ? "done" : ""}>Real email updated</li>
+          <li className={analytics?.enabled ? "done" : ""}>Analytics tracking enabled</li>
         </ul>
       </div>
 
@@ -806,8 +851,63 @@ export function AdminDashboard() {
             </AdminSection>
           )}
 
+          {activeTab === "analytics" && (
+            <AdminSection title="Analytics & visitor insights" description="Track public page views, project views, contact clicks and resume actions from Supabase events.">
+              <div className="admin-analytics-toolbar">
+                <p>{analyticsMessage}</p>
+                <button type="button" onClick={() => loadAnalytics()} disabled={loadingAnalytics}>
+                  {loadingAnalytics ? "Refreshing..." : "Refresh analytics"}
+                </button>
+              </div>
+
+              <div className="admin-analytics-grid">
+                <article><span>Total events</span><strong>{analytics?.totalEvents ?? 0}</strong><small>{analytics?.range ?? "Waiting for data"}</small></article>
+                <article><span>Today</span><strong>{analytics?.todayEvents ?? 0}</strong><small>UTC-based day count</small></article>
+                <article><span>Page views</span><strong>{analytics?.pageViews ?? 0}</strong><small>Home, resume, contact and public pages</small></article>
+                <article><span>CTA clicks</span><strong>{analytics?.ctaClicks ?? 0}</strong><small>Tracked buttons and links</small></article>
+                <article><span>Project views</span><strong>{analytics?.projectViews ?? 0}</strong><small>Case-study detail pages</small></article>
+                <article><span>Resume actions</span><strong>{analytics?.resumeDownloads ?? 0}</strong><small>Print / Save PDF clicks</small></article>
+              </div>
+
+              <div className="admin-analytics-columns">
+                <div className="admin-nested-card">
+                  <h3>Top pages</h3>
+                  <div className="admin-mini-list">
+                    {(analytics?.topPages.length ? analytics.topPages : [{ path: "No page views yet", count: 0 }]).map((item) => (
+                      <div key={item.path}><span>{item.path}</span><strong>{item.count}</strong></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="admin-nested-card">
+                  <h3>Top CTA clicks</h3>
+                  <div className="admin-mini-list">
+                    {(analytics?.topCtas.length ? analytics.topCtas : [{ label: "No CTA clicks yet", count: 0 }]).map((item) => (
+                      <div key={item.label}><span>{item.label}</span><strong>{item.count}</strong></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-nested-card">
+                <h3>Recent events</h3>
+                <div className="admin-event-table">
+                  <div className="head"><span>Event</span><span>Path</span><span>Label</span><span>Time</span></div>
+                  {(analytics?.recentEvents.length ? analytics.recentEvents : []).map((event) => (
+                    <div key={`${event.eventType}-${event.path}-${event.createdAt}`}>
+                      <span>{event.eventType}</span>
+                      <span>{event.path}</span>
+                      <span>{event.label}</span>
+                      <span>{new Date(event.createdAt).toLocaleString()}</span>
+                    </div>
+                  ))}
+                  {!analytics?.recentEvents.length && <p>No analytics events yet. Visit the public portfolio after deploy, then refresh this tab.</p>}
+                </div>
+              </div>
+            </AdminSection>
+          )}
+
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.0.0 writes live data to Supabase and keeps export as a production backup.">
+            <AdminSection title="Export backup" description="V1.1.0 writes live data to Supabase, tracks visitor insights and keeps export as a production backup.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>

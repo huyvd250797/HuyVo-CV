@@ -37,7 +37,7 @@ export default async function ResumePage() {
             <h2>{profile.role}</h2>
           </div>
           <div className="resume-contact">
-            <a href={`mailto:${profile.email}`}>{profile.email}</a>
+            <a href={`mailto:${profile.email}`} data-track-event="contact_click" data-track-label="Resume email">{profile.email}</a>
             <span>{profile.location}</span>
             <span>{profile.availability}</span>
           </div>

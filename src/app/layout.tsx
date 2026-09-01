@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
+import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { ScrollUx } from "@/components/scroll-ux";
 import { profile } from "@/data/profile";
 import { absoluteUrl, siteConfig } from "@/data/seo";
@@ -72,7 +73,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body><ScrollUx />{children}</body>
+      <body><ScrollUx /><Suspense fallback={null}><AnalyticsTracker /></Suspense>{children}</body>
     </html>
   );
 }
