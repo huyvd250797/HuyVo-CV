@@ -1,13 +1,13 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState, type ReactNode } from "react";
-import { profile, type BlogStatus, type MediaAssetType, type ProjectCategory } from "@/data/profile";
+import { profile, type BlogStatus, type MediaAssetType, type ProjectCategory, type ResumeSectionKey, type ResumeTemplate } from "@/data/profile";
 import { appVersion } from "@/data/version";
 import type { AnalyticsSummary } from "@/lib/portfolio-analytics";
 import { mediaPreviewUrl, mediaUrlInfo } from "@/lib/media-url";
 import { ThemeSwitcher } from "./theme-switcher";
 
-type AdminTab = "profile" | "media" | "language" | "experience" | "projects" | "skills" | "credentials" | "blog" | "analytics" | "export";
+type AdminTab = "profile" | "media" | "language" | "experience" | "projects" | "skills" | "credentials" | "resume" | "blog" | "analytics" | "export";
 type CmsSource = "supabase" | "source";
 type ValidationIssue = { level: "error" | "warning"; message: string };
 
@@ -73,6 +73,19 @@ type BrandMetricDraft = { label: string; value: string; detail: string };
 type BrandPillarDraft = { title: string; text: string };
 type PersonalBrandingDraft = { statement: string; signature: string; metrics: BrandMetricDraft[]; pillars: BrandPillarDraft[]; keywords: string[] };
 
+type ResumeBuilderDraft = {
+  defaultTemplate: ResumeTemplate;
+  targetRole: string;
+  headline: string;
+  summaryOverride: string;
+  projectLimit: number;
+  skillColumns: number;
+  showAvailability: boolean;
+  showVersion: boolean;
+  footerNote: string;
+  sections: Record<ResumeSectionKey, boolean>;
+};
+
 type AdminProfileDraft = {
   name: string;
   shortName: string;
@@ -84,6 +97,7 @@ type AdminProfileDraft = {
   availability: string;
   personalBranding: PersonalBrandingDraft;
   media: ProfileMediaDraft;
+  resumeBuilder: ResumeBuilderDraft;
   specialties: string[];
   about: string[];
   careerSummary: {
@@ -110,15 +124,15 @@ type AdminProfileDraft = {
   translations?: Record<string, unknown>;
 };
 
-const storageKey = "huyvo-portfolio-admin-draft-v170";
-const sessionKey = "huyvo-portfolio-admin-unlocked-v170";
+const storageKey = "huyvo-portfolio-admin-draft-v180";
+const sessionKey = "huyvo-portfolio-admin-unlocked-v180";
 const fallbackPassword = "huyvo-admin";
 
 type ContentLocale = "en" | "vi";
 type TranslationPath = Array<string | number>;
 type MutableRecord = Record<string, any>;
 
-const localizedEditorTabs: AdminTab[] = ["profile", "media", "experience", "projects", "skills", "credentials", "blog"];
+const localizedEditorTabs: AdminTab[] = ["profile", "media", "experience", "projects", "skills", "credentials", "resume", "blog"];
 
 function isRecord(value: unknown): value is MutableRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -208,6 +222,7 @@ const tabs: Array<{ id: AdminTab; label: string; description: string }> = [
   { id: "projects", label: "Projects", description: "Portfolio cards and case study content." },
   { id: "skills", label: "Skills", description: "Skill groups used across portfolio and resume." },
   { id: "credentials", label: "Credentials", description: "Education, certifications and contact channels." },
+  { id: "resume", label: "Resume Builder", description: "Templates, section visibility and CV export defaults." },
   { id: "blog", label: "Blog / Notes", description: "Publish professional notes with EN/VI content." },
   { id: "analytics", label: "Analytics", description: "Visitor insights, page views and CTA clicks." },
   { id: "export", label: "Export", description: "Backup profile.ts and JSON when you still want a code copy." },
@@ -234,6 +249,47 @@ function stringValue(value: unknown, fallback = "") {
 
 function stringList(value: unknown, fallback: readonly string[] = []) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [...fallback];
+}
+
+const resumeTemplates: ResumeTemplate[] = ["ATS", "Modern", "Compact", "Executive"];
+const resumeSectionKeys: ResumeSectionKey[] = ["summary", "experience", "projects", "skills", "education", "certifications", "branding"];
+
+function defaultResumeSections(): Record<ResumeSectionKey, boolean> {
+  return {
+    summary: true,
+    experience: true,
+    projects: true,
+    skills: true,
+    education: true,
+    certifications: true,
+    branding: true,
+  };
+}
+
+function normalizeResumeTemplate(value: unknown): ResumeTemplate {
+  return resumeTemplates.includes(value as ResumeTemplate) ? value as ResumeTemplate : "ATS";
+}
+
+function normalizeResumeBuilder(value: unknown, fallback?: Partial<ResumeBuilderDraft>): ResumeBuilderDraft {
+  const raw = isRecord(value) ? value : {};
+  const rawSections = isRecord(raw.sections) ? raw.sections : {};
+  const sections = { ...defaultResumeSections(), ...(fallback?.sections || {}) };
+  resumeSectionKeys.forEach((key) => {
+    if (typeof rawSections[key] === "boolean") sections[key] = rawSections[key] as boolean;
+  });
+
+  return {
+    defaultTemplate: normalizeResumeTemplate(raw.defaultTemplate ?? fallback?.defaultTemplate),
+    targetRole: stringValue(raw.targetRole, fallback?.targetRole || "Project Manager / Functional Consultant"),
+    headline: stringValue(raw.headline, fallback?.headline || "Project-focused professional turning business needs into structured software delivery."),
+    summaryOverride: stringValue(raw.summaryOverride, fallback?.summaryOverride || ""),
+    projectLimit: Math.max(1, Math.min(8, Number(raw.projectLimit ?? fallback?.projectLimit ?? 3) || 3)),
+    skillColumns: Math.max(1, Math.min(3, Number(raw.skillColumns ?? fallback?.skillColumns ?? 2) || 2)),
+    showAvailability: typeof raw.showAvailability === "boolean" ? raw.showAvailability : fallback?.showAvailability ?? true,
+    showVersion: typeof raw.showVersion === "boolean" ? raw.showVersion : fallback?.showVersion ?? false,
+    footerNote: stringValue(raw.footerNote, fallback?.footerNote || "Resume generated from the same live portfolio CMS data."),
+    sections,
+  };
 }
 
 function overviewList(value: unknown, fallback: readonly CaseStudyOverviewDraft[] = []) {
@@ -392,6 +448,7 @@ function createDraftFromProfile(): AdminProfileDraft {
       keywords: [...profile.personalBranding.keywords],
     },
     media: { ...profile.media },
+    resumeBuilder: normalizeResumeBuilder((profile as unknown as { resumeBuilder?: unknown }).resumeBuilder),
     specialties: [...profile.specialties],
     about: [...profile.about],
     careerSummary: {
@@ -449,11 +506,13 @@ function normalizeAdminDraft(input: Partial<AdminProfileDraft>): AdminProfileDra
   const rawPersonalBranding = isRecord(inputRecord.personalBranding) ? inputRecord.personalBranding as Partial<PersonalBrandingDraft> : {};
   const rawCareerSummary = isRecord(inputRecord.careerSummary) ? inputRecord.careerSummary as Partial<AdminProfileDraft["careerSummary"]> : {};
   const rawContact = isRecord(inputRecord.contact) ? inputRecord.contact as Partial<AdminProfileDraft["contact"]> : {};
+  const rawResumeBuilder = isRecord(inputRecord.resumeBuilder) ? inputRecord.resumeBuilder : {};
 
   return {
     ...base,
     ...input,
     media: { ...base.media, ...(isRecord(inputRecord.media) ? inputRecord.media : {}) },
+    resumeBuilder: normalizeResumeBuilder(rawResumeBuilder, base.resumeBuilder),
     personalBranding: {
       ...base.personalBranding,
       ...rawPersonalBranding,
@@ -583,7 +642,7 @@ function buildProfileSource(draft: AdminProfileDraft) {
       '"certifications": [] as Array<{\n    year: string;\n    name: string;\n    issuer: string;\n    credentialUrl?: string;\n  }>',
     );
   }
-  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\nexport type BlogStatus = "Draft" | "Published";\nexport type BrandMetric = { label: string; value: string; detail: string };\nexport type BrandPillar = { title: string; text: string };\nexport type PersonalBranding = { statement: string; signature: string; metrics: BrandMetric[]; pillars: BrandPillar[]; keywords: string[] };\nexport type CaseStudyOverview = { label: string; value: string; detail?: string };\nexport type CaseStudyTimeline = { phase: string; title: string; text: string };\nexport type ProjectCaseStudy = { context: string; problem: string; process: string[]; solution: string; result: string; lessons: string[]; overview?: CaseStudyOverview[]; responsibilities?: string[]; stakeholders?: string[]; timeline?: CaseStudyTimeline[]; challenges?: string[]; impact?: string[]; competencies?: string[] };\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport type BlogPost = {\n  title: string;\n  slug: string;\n  date: string;\n  status: BlogStatus;\n  featured?: boolean;\n  tags: string[];\n  summary: string;\n  content: string[];\n  coverImageUrl?: string;\n  coverImageAlt?: string;\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
+  return `export type ProjectCategory = "Professional" | "Product" | "Tool";\nexport type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";\nexport type BlogStatus = "Draft" | "Published";\nexport type ResumeTemplate = "Modern" | "ATS" | "Compact" | "Executive";\nexport type ResumeSectionKey = "summary" | "experience" | "projects" | "skills" | "education" | "certifications" | "branding";\nexport type ResumeBuilder = { defaultTemplate: ResumeTemplate; targetRole: string; headline: string; summaryOverride: string; projectLimit: number; skillColumns: number; showAvailability: boolean; showVersion: boolean; footerNote: string; sections: Record<ResumeSectionKey, boolean> };\nexport type BrandMetric = { label: string; value: string; detail: string };\nexport type BrandPillar = { title: string; text: string };\nexport type PersonalBranding = { statement: string; signature: string; metrics: BrandMetric[]; pillars: BrandPillar[]; keywords: string[] };\nexport type CaseStudyOverview = { label: string; value: string; detail?: string };\nexport type CaseStudyTimeline = { phase: string; title: string; text: string };\nexport type ProjectCaseStudy = { context: string; problem: string; process: string[]; solution: string; result: string; lessons: string[]; overview?: CaseStudyOverview[]; responsibilities?: string[]; stakeholders?: string[]; timeline?: CaseStudyTimeline[]; challenges?: string[]; impact?: string[]; competencies?: string[] };\n\nexport type MediaAsset = {\n  title: string;\n  type: MediaAssetType;\n  url: string;\n  caption?: string;\n  alt?: string;\n};\n\nexport type ProfileMedia = {\n  avatarUrl?: string;\n  avatarAlt?: string;\n  coverImageUrl?: string;\n  resumeUrl?: string;\n};\n\nexport type ProjectMedia = {\n  icon?: string;\n  thumbnailUrl?: string;\n  thumbnailAlt?: string;\n  assets: MediaAsset[];\n};\n\nexport type BlogPost = {\n  title: string;\n  slug: string;\n  date: string;\n  status: BlogStatus;\n  featured?: boolean;\n  tags: string[];\n  summary: string;\n  content: string[];\n  coverImageUrl?: string;\n  coverImageAlt?: string;\n};\n\nexport const profile = ${body} as const;\n\nexport type PortfolioProfile = typeof profile;\n`;
 }
 
 function TextField({
@@ -1140,6 +1199,20 @@ export function AdminDashboard() {
     setDraft((current) => ({ ...current, personalBranding: { ...current.personalBranding, ...patch } }));
   }
 
+  function updateResumeBuilder(patch: Partial<ResumeBuilderDraft>) {
+    setDraft((current) => ({ ...current, resumeBuilder: { ...current.resumeBuilder, ...patch } }));
+  }
+
+  function updateResumeSection(section: ResumeSectionKey, enabled: boolean) {
+    setDraft((current) => ({
+      ...current,
+      resumeBuilder: {
+        ...current.resumeBuilder,
+        sections: { ...current.resumeBuilder.sections, [section]: enabled },
+      },
+    }));
+  }
+
   function updateBrandMetric(index: number, patch: Partial<BrandMetricDraft>) {
     setDraft((current) => ({
       ...current,
@@ -1512,7 +1585,7 @@ export function AdminDashboard() {
             <a className="admin-back" href="/">← Back to portfolio</a>
             <ThemeSwitcher />
           </div>
-          <div className="admin-badge">{appVersion.label} · Case Study Pro</div>
+          <div className="admin-badge">{appVersion.label} · Resume Builder Pro</div>
           <h1>Portfolio CMS / Admin</h1>
           <p>
             This version connects profile, projects, blog notes, media assets and analytics to Supabase through protected Next.js API routes.
@@ -1607,6 +1680,7 @@ export function AdminDashboard() {
           <li className={draft.media.avatarUrl || draft.projects.some((project) => project.media.thumbnailUrl || project.media.assets.some((asset) => asset.url)) ? "done" : ""}>Google Drive/direct media supported</li>
           <li className={draft.translations?.vi ? "done" : ""}>Vietnamese translation overrides configured</li>
           <li className={draft.blog?.some((post) => post.status === "Published") ? "done" : ""}>Published blog notes configured</li>
+          <li className={draft.resumeBuilder?.defaultTemplate ? "done" : ""}>Resume Builder defaults configured</li>
         </ul>
       </div>
 
@@ -2414,6 +2488,90 @@ export function AdminDashboard() {
           )}
 
 
+          {activeTab === "resume" && (
+            <AdminSection
+              title={isVietnameseEditor ? "Resume Builder — Tiếng Việt" : "Resume Builder Pro"}
+              description={isVietnameseEditor ? "Nhập nội dung CV tiếng Việt riêng. Template, số project và bật/tắt section vẫn điều khiển ở English gốc." : "Control the default CV template, target positioning, visible sections and print/PDF defaults used by /resume."}
+            >
+              {!isVietnameseEditor ? (
+                <div className="admin-stack">
+                  <div className="admin-resume-preview-card">
+                    <div>
+                      <span>Current default</span>
+                      <strong>{draft.resumeBuilder.defaultTemplate}</strong>
+                      <p>{draft.resumeBuilder.targetRole}</p>
+                    </div>
+                    <a href="/resume" target="_blank" rel="noreferrer">Open resume preview ↗</a>
+                  </div>
+
+                  <div className="admin-grid two">
+                    <label className="admin-field">
+                      <span>Default template</span>
+                      <select value={draft.resumeBuilder.defaultTemplate} onChange={(event) => updateResumeBuilder({ defaultTemplate: event.target.value as ResumeTemplate })}>
+                        <option value="ATS">ATS Friendly</option>
+                        <option value="Modern">Modern</option>
+                        <option value="Compact">Compact</option>
+                        <option value="Executive">Executive</option>
+                      </select>
+                    </label>
+                    <TextField label="Target role" value={draft.resumeBuilder.targetRole} onChange={(value) => updateResumeBuilder({ targetRole: value })} />
+                    <TextAreaField label="Resume headline" value={draft.resumeBuilder.headline} rows={3} onChange={(value) => updateResumeBuilder({ headline: value })} />
+                    <TextAreaField label="Summary override" value={draft.resumeBuilder.summaryOverride} rows={5} onChange={(value) => updateResumeBuilder({ summaryOverride: value })} placeholder="Leave empty to reuse Career Summary." />
+                    <TextField label="Project limit" value={String(draft.resumeBuilder.projectLimit)} onChange={(value) => updateResumeBuilder({ projectLimit: Math.max(1, Math.min(8, Number(value) || 1)) })} />
+                    <TextField label="Skill columns" value={String(draft.resumeBuilder.skillColumns)} onChange={(value) => updateResumeBuilder({ skillColumns: Math.max(1, Math.min(3, Number(value) || 1)) })} />
+                    <TextAreaField label="Footer note" value={draft.resumeBuilder.footerNote} rows={3} onChange={(value) => updateResumeBuilder({ footerNote: value })} />
+                  </div>
+
+                  <div className="admin-nested-card">
+                    <h3>Resume sections</h3>
+                    <p className="admin-muted-text">Turn sections on/off for the default public resume. Visitors can still adjust their own preview before printing.</p>
+                    <div className="admin-section-toggle-grid">
+                      {resumeSectionKeys.map((section) => (
+                        <label className="admin-check-field" key={section}>
+                          <input type="checkbox" checked={draft.resumeBuilder.sections[section]} onChange={(event) => updateResumeSection(section, event.target.checked)} />
+                          <span>{section}</span>
+                        </label>
+                      ))}
+                      <label className="admin-check-field">
+                        <input type="checkbox" checked={draft.resumeBuilder.showAvailability} onChange={(event) => updateResumeBuilder({ showAvailability: event.target.checked })} />
+                        <span>Show availability</span>
+                      </label>
+                      <label className="admin-check-field">
+                        <input type="checkbox" checked={draft.resumeBuilder.showVersion} onChange={(event) => updateResumeBuilder({ showVersion: event.target.checked })} />
+                        <span>Show version in footer</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="admin-nested-card">
+                    <h3>Template guidance</h3>
+                    <div className="admin-mini-list">
+                      <div><span>ATS Friendly</span><strong>Best for recruiters and job applications</strong></div>
+                      <div><span>Modern</span><strong>Best for web portfolio PDF sharing</strong></div>
+                      <div><span>Compact</span><strong>Best when content must fit fewer pages</strong></div>
+                      <div><span>Executive</span><strong>Best for senior positioning and consulting</strong></div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="admin-stack">
+                  <div className="admin-translation-reference">
+                    <strong>English resume reference</strong>
+                    <span>{draft.resumeBuilder.targetRole} · {draft.resumeBuilder.defaultTemplate}</span>
+                    <small>Template, section toggles and numeric settings remain controlled from English source mode.</small>
+                  </div>
+                  <div className="admin-grid two">
+                    <TextField label="VI Target role" value={getViText(["resumeBuilder", "targetRole"])} placeholder={draft.resumeBuilder.targetRole} onChange={(value) => updateViTranslation(["resumeBuilder", "targetRole"], value)} />
+                    <TextAreaField label="VI Resume headline" value={getViText(["resumeBuilder", "headline"])} rows={3} placeholder={draft.resumeBuilder.headline} onChange={(value) => updateViTranslation(["resumeBuilder", "headline"], value)} />
+                    <TextAreaField label="VI Summary override" value={getViText(["resumeBuilder", "summaryOverride"])} rows={5} placeholder={draft.resumeBuilder.summaryOverride || draft.careerSummary.text} onChange={(value) => updateViTranslation(["resumeBuilder", "summaryOverride"], value)} />
+                    <TextAreaField label="VI Footer note" value={getViText(["resumeBuilder", "footerNote"])} rows={3} placeholder={draft.resumeBuilder.footerNote} onChange={(value) => updateViTranslation(["resumeBuilder", "footerNote"], value)} />
+                  </div>
+                </div>
+              )}
+            </AdminSection>
+          )}
+
+
           {activeTab === "blog" && (
             <AdminSection
               title={isVietnameseEditor ? "Blog / Notes — Tiếng Việt" : "Blog / Notes"}
@@ -2559,7 +2717,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.7.0 adds Career Case Study Pro blocks, sticky compact admin editing header and stronger case-study storytelling controls.">
+            <AdminSection title="Export backup" description="V1.8.0 adds Resume Builder Pro templates, section visibility controls and stronger PDF/export defaults.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>

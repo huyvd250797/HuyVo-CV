@@ -30,6 +30,37 @@ function stringArrayValue(value: unknown, fallback: readonly string[]): string[]
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [...fallback];
 }
 
+function normalizeResumeBuilder(rawValue: unknown, fallbackValue: unknown) {
+  const raw = objectValue(rawValue);
+  const fallback = objectValue(fallbackValue);
+  const templates = ["ATS", "Modern", "Compact", "Executive"];
+  const defaultSections = {
+    summary: true,
+    experience: true,
+    projects: true,
+    skills: true,
+    education: true,
+    certifications: true,
+    branding: true,
+  };
+  const fallbackSections = objectValue(fallback.sections);
+  const rawSections = objectValue(raw.sections);
+  const sections = { ...defaultSections, ...fallbackSections, ...rawSections };
+
+  return {
+    defaultTemplate: templates.includes(String(raw.defaultTemplate || fallback.defaultTemplate)) ? String(raw.defaultTemplate || fallback.defaultTemplate) : "ATS",
+    targetRole: typeof raw.targetRole === "string" ? raw.targetRole : typeof fallback.targetRole === "string" ? fallback.targetRole : "Project Manager / Functional Consultant",
+    headline: typeof raw.headline === "string" ? raw.headline : typeof fallback.headline === "string" ? fallback.headline : "Project-focused professional turning business needs into structured software delivery.",
+    summaryOverride: typeof raw.summaryOverride === "string" ? raw.summaryOverride : typeof fallback.summaryOverride === "string" ? fallback.summaryOverride : "",
+    projectLimit: Math.max(1, Math.min(8, Number(raw.projectLimit ?? fallback.projectLimit ?? 3) || 3)),
+    skillColumns: Math.max(1, Math.min(3, Number(raw.skillColumns ?? fallback.skillColumns ?? 2) || 2)),
+    showAvailability: typeof raw.showAvailability === "boolean" ? raw.showAvailability : typeof fallback.showAvailability === "boolean" ? fallback.showAvailability : true,
+    showVersion: typeof raw.showVersion === "boolean" ? raw.showVersion : typeof fallback.showVersion === "boolean" ? fallback.showVersion : false,
+    footerNote: typeof raw.footerNote === "string" ? raw.footerNote : typeof fallback.footerNote === "string" ? fallback.footerNote : "Resume generated from the same live portfolio CMS data.",
+    sections,
+  };
+}
+
 function defaultOverview(project: PortfolioProfile["projects"][number]) {
   return [
     { label: "Role", value: project.role, detail: "Primary ownership and professional contribution." },
@@ -101,6 +132,8 @@ export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
   const sourcePersonalBranding = objectValue(source.personalBranding);
   const rawMedia = objectValue(raw.media);
   const sourceMedia = objectValue(source.media);
+  const rawResumeBuilder = objectValue(raw.resumeBuilder);
+  const sourceResumeBuilder = objectValue(source.resumeBuilder);
   const rawSocial = objectValue(raw.social);
   const sourceSocial = objectValue(source.social);
   const sourceProjects = sourceProfile.projects;
@@ -114,6 +147,7 @@ export function normalizePortfolioProfile(input: unknown): PortfolioProfile {
     ...sourceProfile,
     ...raw,
     media: { ...sourceMedia, ...rawMedia },
+    resumeBuilder: normalizeResumeBuilder(rawResumeBuilder, sourceResumeBuilder),
     specialties: arrayValue(raw.specialties, sourceProfile.specialties),
     about: arrayValue(raw.about, sourceProfile.about),
     careerSummary: {
