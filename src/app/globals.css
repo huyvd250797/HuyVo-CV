@@ -3084,7 +3084,7 @@ html[data-active-section="contact"] .nav-cta {
   }
 }
 
-/* V1.8.0 Resume Builder Pro */
+/* V1.8.x Resume / CV Export */
 .resume-builder-shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -3326,4 +3326,184 @@ html[data-active-section="contact"] .nav-cta {
   .resume-builder-shell { display: block; width: 100%; }
   .resume-headline { color: #222; }
   .resume-brand-metrics span { background: transparent; }
+}
+
+/* V1.8.1 – Smart Navbar Visibility */
+.site-header {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform .32s ease, opacity .32s ease, background .24s ease, box-shadow .24s ease, border-color .24s ease;
+  will-change: transform, opacity;
+}
+
+.site-header.is-hidden {
+  transform: translateY(-105%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.site-header.is-visible.is-floating {
+  background: color-mix(in srgb, var(--header-bg) 92%, var(--surface) 8%);
+  box-shadow: 0 18px 48px color-mix(in srgb, #000 14%, transparent);
+}
+
+.site-header:focus-within,
+.site-header:hover,
+.site-header:has(.nav.open) {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* V1.8.1 – Polished CV Export Form */
+.resume-toolbar-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.resume-export-title span,
+.resume-export-note span {
+  display: block;
+  color: #315fe9;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.resume-export-title strong {
+  display: block;
+  margin-top: 6px;
+  color: #15171c;
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: .98;
+  letter-spacing: -.055em;
+  text-transform: none;
+}
+
+.resume-export-title p,
+.resume-export-note p {
+  margin: 8px 0 0;
+  color: #6a707b;
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 650;
+}
+
+.resume-export-note {
+  border: 1px solid rgba(49, 95, 233, .18);
+  border-radius: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(49, 95, 233, .11), rgba(255,255,255,.82));
+}
+
+.resume-export-note strong {
+  display: block;
+  margin-top: 7px;
+  color: #11151f;
+  font-size: 19px;
+  line-height: 1.05;
+  letter-spacing: -.04em;
+}
+
+.resume-template-modern {
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid #dde2ed;
+}
+
+.resume-template-modern .resume-header {
+  margin: -64px -68px 28px;
+  padding: 58px 68px 38px;
+  border-bottom: 0;
+  background: linear-gradient(135deg, #111827, #17213f 62%, #315fe9);
+  color: #fff;
+}
+
+.resume-template-modern .resume-kicker,
+.resume-template-modern .resume-header h2,
+.resume-template-modern .resume-headline,
+.resume-template-modern .resume-contact,
+.resume-template-modern .resume-contact a {
+  color: rgba(255,255,255,.82);
+}
+
+.resume-template-modern .resume-header h1 {
+  color: #fff;
+}
+
+.resume-template-modern .resume-section {
+  border-bottom-color: #e8ebf2;
+}
+
+.resume-template-modern .resume-section > h3 {
+  color: #315fe9;
+}
+
+.resume-template-modern .resume-specialties span,
+.resume-template-modern .resume-tags span {
+  background: #f6f8ff;
+  border-color: #dfe6ff;
+  color: #315fe9;
+}
+
+@media (max-width: 720px) {
+  .resume-toolbar-left {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .resume-export-title strong {
+    font-size: 27px;
+  }
+}
+
+@media print {
+  @page { size: A4; margin: 11mm; }
+
+  html,
+  body {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .site-header,
+  .back-to-top,
+  .scroll-progress-bar {
+    display: none !important;
+  }
+
+  .resume-page,
+  .resume-sheet,
+  .resume-section,
+  .resume-entry,
+  .resume-project {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .resume-template-modern {
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  .resume-template-modern .resume-header {
+    margin: 0 0 7mm !important;
+    padding: 8mm 9mm 7mm !important;
+    background: #17213f !important;
+  }
+
+  .resume-template-modern .resume-section {
+    padding: 5mm 0 !important;
+  }
+
+  .resume-template-modern .resume-specialties span,
+  .resume-template-modern .resume-tags span {
+    background: transparent !important;
+  }
 }

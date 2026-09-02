@@ -251,7 +251,7 @@ function stringList(value: unknown, fallback: readonly string[] = []) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [...fallback];
 }
 
-const resumeTemplates: ResumeTemplate[] = ["ATS", "Modern", "Compact", "Executive"];
+const resumeTemplates: ResumeTemplate[] = ["Modern", "ATS", "Compact", "Executive"];
 const resumeSectionKeys: ResumeSectionKey[] = ["summary", "experience", "projects", "skills", "education", "certifications", "branding"];
 
 function defaultResumeSections(): Record<ResumeSectionKey, boolean> {
@@ -267,7 +267,7 @@ function defaultResumeSections(): Record<ResumeSectionKey, boolean> {
 }
 
 function normalizeResumeTemplate(value: unknown): ResumeTemplate {
-  return resumeTemplates.includes(value as ResumeTemplate) ? value as ResumeTemplate : "ATS";
+  return resumeTemplates.includes(value as ResumeTemplate) ? value as ResumeTemplate : "Modern";
 }
 
 function normalizeResumeBuilder(value: unknown, fallback?: Partial<ResumeBuilderDraft>): ResumeBuilderDraft {
@@ -1585,7 +1585,7 @@ export function AdminDashboard() {
             <a className="admin-back" href="/">← Back to portfolio</a>
             <ThemeSwitcher />
           </div>
-          <div className="admin-badge">{appVersion.label} · Resume Builder Pro</div>
+          <div className="admin-badge">{appVersion.label} · CV Export Polish</div>
           <h1>Portfolio CMS / Admin</h1>
           <p>
             This version connects profile, projects, blog notes, media assets and analytics to Supabase through protected Next.js API routes.
@@ -2490,7 +2490,7 @@ export function AdminDashboard() {
 
           {activeTab === "resume" && (
             <AdminSection
-              title={isVietnameseEditor ? "Resume Builder — Tiếng Việt" : "Resume Builder Pro"}
+              title={isVietnameseEditor ? "CV Export — Tiếng Việt" : "CV Export Settings"}
               description={isVietnameseEditor ? "Nhập nội dung CV tiếng Việt riêng. Template, số project và bật/tắt section vẫn điều khiển ở English gốc." : "Control the default CV template, target positioning, visible sections and print/PDF defaults used by /resume."}
             >
               {!isVietnameseEditor ? (
@@ -2508,8 +2508,8 @@ export function AdminDashboard() {
                     <label className="admin-field">
                       <span>Default template</span>
                       <select value={draft.resumeBuilder.defaultTemplate} onChange={(event) => updateResumeBuilder({ defaultTemplate: event.target.value as ResumeTemplate })}>
+                        <option value="Modern">Professional / Modern</option>
                         <option value="ATS">ATS Friendly</option>
-                        <option value="Modern">Modern</option>
                         <option value="Compact">Compact</option>
                         <option value="Executive">Executive</option>
                       </select>
@@ -2717,7 +2717,7 @@ export function AdminDashboard() {
           )}
 
           {activeTab === "export" && (
-            <AdminSection title="Export backup" description="V1.8.0 adds Resume Builder Pro templates, section visibility controls and stronger PDF/export defaults.">
+            <AdminSection title="Export backup" description="V1.8.1 keeps CV export practical with polished A4 output, section controls and smart public navbar behavior.">
               <div className="admin-export-actions">
                 <button type="button" className="primary" onClick={saveLiveProfile}>Save live to Supabase</button>
                 <button type="button" onClick={copyProfileSource}>Copy profile.ts</button>

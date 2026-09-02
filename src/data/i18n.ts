@@ -140,7 +140,7 @@ export const uiCopy = {
       education: "Education",
       certifications: "Certifications",
       downloadFile: "Download CV file",
-      print: "Print / Save PDF",
+      print: "Export CV / Save PDF",
     },
     caseStudy: {
       back: "← Back to projects",
@@ -315,7 +315,7 @@ export const uiCopy = {
       education: "Học vấn",
       certifications: "Chứng chỉ",
       downloadFile: "Tải file CV",
-      print: "In / Lưu PDF",
+      print: "Xuất CV / Lưu PDF",
     },
     caseStudy: {
       back: "← Quay lại danh sách dự án",

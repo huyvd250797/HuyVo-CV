@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { profile as fallbackProfile, type PortfolioProfile } from "@/data/profile";
 import { getLocale, localizedPath, switchLocalePath, type Locale } from "@/data/i18n";
 import { getUiCopy } from "@/data/i18n";
@@ -13,13 +13,58 @@ export function Header({ profileData = fallbackProfile, locale = "en" }: { profi
   const copy = getUiCopy(activeLocale);
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [isHeaderVisible, setHeaderVisible] = useState(true);
+  const [isPastHeader, setPastHeader] = useState(false);
+  const lastScrollY = useRef(0);
+  const idleTimer = useRef<number | null>(null);
   const close = () => setOpen(false);
+
+  useEffect(() => {
+    lastScrollY.current = window.scrollY;
+
+    const showAfterIdle = () => {
+      if (idleTimer.current) window.clearTimeout(idleTimer.current);
+      idleTimer.current = window.setTimeout(() => setHeaderVisible(true), 1000);
+    };
+
+    const handleScroll = () => {
+      const currentY = Math.max(0, window.scrollY);
+      const delta = currentY - lastScrollY.current;
+      const pastHeader = currentY > 110;
+
+      setPastHeader(pastHeader);
+
+      if (!pastHeader) {
+        setHeaderVisible(true);
+      } else if (delta > 4 && !open) {
+        setHeaderVisible(false);
+        showAfterIdle();
+      } else if (delta < -4) {
+        setHeaderVisible(true);
+        showAfterIdle();
+      } else {
+        showAfterIdle();
+      }
+
+      lastScrollY.current = currentY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (idleTimer.current) window.clearTimeout(idleTimer.current);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (open) setHeaderVisible(true);
+  }, [open]);
   const root = localizedPath(activeLocale);
   const homeHref = root === "/" ? "/#top" : `${root}/#top`;
   const sectionHref = (section: string) => root === "/" ? `/#${section}` : `${root}/#${section}`;
 
   return (
-    <header className="site-header">
+    <header className={`site-header ${isHeaderVisible ? "is-visible" : "is-hidden"} ${isPastHeader ? "is-floating" : ""}`}>
       <div className="scroll-progress-bar" aria-hidden="true" />
       <div className="container nav-wrap">
         <a className="brand" href={homeHref} onClick={close} aria-label={`${profile.name} home`}>

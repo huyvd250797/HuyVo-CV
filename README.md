@@ -1,38 +1,22 @@
-# HuyVo Portfolio V1.8.0 – Resume Builder Pro
+# HuyVo Portfolio V1.8.1 – CV Export Polish & Smart Navbar
 
-Professional portfolio/CV web app built with Next.js, TypeScript and CSS. V1.8.0 upgrades the resume area into a builder-style experience with multiple templates, section toggles, target-role positioning and Admin controls for CV export defaults.
+Professional portfolio/CV web app built with Next.js, TypeScript and CSS.
 
-## New in V1.8.0
+V1.8.1 is a focused UX release after Resume Builder Pro. It keeps the resume feature practical instead of overly complex: users can quickly choose a clean CV form, keep the sections they need and export/save a polished A4 PDF from the browser. It also improves the public navbar so visitors can always access navigation, language toggle and theme controls while scrolling.
 
-- Version updated to `1.8.0`
-- Added Resume Builder Pro configuration in `src/data/profile.ts`
-- Upgraded `/resume`, `/en/resume` and `/vi/resume`
-- Added resume templates:
-  - ATS Friendly
-  - Modern
-  - Compact
-  - Executive
-- Added visitor-side resume controls:
-  - template switcher
-  - target CV selector
-  - section visibility toggles
-  - featured project limit
-  - Print / Save PDF remains available
-- Added Admin tab: `Resume Builder`
-- Admin can configure:
-  - default resume template
-  - target role
-  - resume headline
-  - summary override
-  - project limit
-  - skill columns
-  - footer note
-  - show/hide sections
-  - show/hide availability
-  - show/hide version in resume footer
-- Added Vietnamese translation form for Resume Builder content
-- Resume data is normalized when loading older Supabase records
-- Improved text/textarea editing stability in Admin fields
+## New in V1.8.1
+
+- Version updated to `1.8.1`
+- `src/data/version.ts` updated to `V1.8.1 – CV Export Polish & Smart Navbar`
+- Default resume template changed to `Modern`
+- Resume page copy simplified around CV export
+- Print button label changed to `Export CV / Save PDF`
+- Added polished A4 print CSS for the Modern resume form
+- Added smart navbar visibility behavior:
+  - hide/fade while scrolling down
+  - show again after about 1 second of no scrolling
+  - show immediately when scrolling up
+  - stay available when menu is open or the header is focused/hovered
 - No new Supabase table is required
 
 ## Run locally
@@ -62,11 +46,18 @@ huyvo-admin
 
 ## Deploy to Vercel
 
-Upload this ZIP or push the source to GitHub and import it in Vercel.
+Upload this source to GitHub or import it directly into Vercel.
 
-Keep Vercel output directory empty/default. Do not set it to `out`.
+Build settings:
 
-Recommended environment variables:
+```text
+Framework Preset: Next.js
+Build Command: npm run build
+Output Directory: leave empty / default
+Install Command: npm install
+```
+
+Required environment variables for live Supabase CMS:
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
@@ -75,23 +66,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ADMIN_PASSWORD=your-admin-password
 NEXT_PUBLIC_ENABLE_ANALYTICS=true
-SUPABASE_ANALYTICS_TABLE=portfolio_events
-ANALYTICS_MAX_ROWS=5000
 ```
 
-## Supabase
-
-V1.8.0 does not require a new table. It keeps using:
-
-```text
-portfolio_profiles
-portfolio_events
-```
-
-If this is a fresh setup, run:
-
-```text
-supabase/schema.sql
-```
-
-Older live records are normalized automatically when loaded, so they receive default Resume Builder settings.
+If Supabase is not configured, public pages fall back to `src/data/profile.ts`.
