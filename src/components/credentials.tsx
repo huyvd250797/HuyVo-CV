@@ -11,7 +11,7 @@ export function Credentials({ profileData = fallbackProfile, locale = "en" }: { 
   return (
     <section className="section credentials" id="credentials">
       <div className="container">
-        <div className="section-label"><span>07</span> {copy.sections.credentials}</div>
+        <div className="section-label"><span>06</span> {copy.sections.credentials}</div>
         <div className="credentials-grid">
           {hasEducation && (
             <div>

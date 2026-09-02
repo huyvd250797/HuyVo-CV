@@ -59,6 +59,7 @@ export function Header({ profileData = fallbackProfile, locale = "en" }: { profi
   useEffect(() => {
     if (open) setHeaderVisible(true);
   }, [open]);
+
   const root = localizedPath(activeLocale);
   const homeHref = root === "/" ? "/#top" : `${root}/#top`;
   const sectionHref = (section: string) => root === "/" ? `/#${section}` : `${root}/#${section}`;
@@ -71,15 +72,12 @@ export function Header({ profileData = fallbackProfile, locale = "en" }: { profi
           <span>{profile.shortName}</span><i>.</i>
         </a>
         <nav className={open ? "nav open" : "nav"} aria-label="Primary navigation">
-          <a href={sectionHref("about")} data-section="about" onClick={close}>{copy.nav.about}</a>
-          <a href={sectionHref("brand")} data-section="brand" onClick={close}>{copy.nav.brand}</a>
-          <a href={sectionHref("experience")} data-section="experience" onClick={close}>{copy.nav.experience}</a>
           <a href={sectionHref("projects")} data-section="projects" onClick={close}>{copy.nav.projects}</a>
+          <a href={sectionHref("experience")} data-section="experience" onClick={close}>{copy.nav.experience}</a>
           <a href={sectionHref("skills")} data-section="skills" onClick={close}>{copy.nav.skills}</a>
-          <a href={sectionHref("approach")} data-section="approach" onClick={close}>{copy.nav.process}</a>
-          <a href={localizedPath(activeLocale, "/resume")} data-track-event="cta_click" data-track-label="Navbar Resume" onClick={close}>{copy.nav.resume}</a>
-          <a href={localizedPath(activeLocale, "/blog")} data-track-event="cta_click" data-track-label="Navbar Blog" onClick={close}>{copy.nav.blog}</a>
-          <a className="nav-cta" href={localizedPath(activeLocale, "/contact")} data-track-event="contact_click" data-track-label="Navbar Let's talk" onClick={close}>{copy.nav.contact}</a>
+          <a href={sectionHref("about")} data-section="about" onClick={close}>{copy.nav.about}</a>
+          <a href={localizedPath(activeLocale, "/blog")} data-track-event="cta_click" data-track-label="Navbar Insights" onClick={close}>{copy.nav.blog}</a>
+          <a className="nav-cta" href={localizedPath(activeLocale, "/resume")} data-track-event="cta_click" data-track-label="Navbar Resume" onClick={close}>{copy.nav.resume} ↗</a>
         </nav>
         <div className="nav-actions">
           <div className="language-switcher" aria-label="Language switcher">

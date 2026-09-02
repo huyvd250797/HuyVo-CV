@@ -1,22 +1,29 @@
-# HuyVo Portfolio V1.8.1 – CV Export Polish & Smart Navbar
+# HuyVo Portfolio V1.9.0 – Professional Architecture
 
 Professional portfolio/CV web app built with Next.js, TypeScript and CSS.
 
-V1.8.1 is a focused UX release after Resume Builder Pro. It keeps the resume feature practical instead of overly complex: users can quickly choose a clean CV form, keep the sections they need and export/save a polished A4 PDF from the browser. It also improves the public navbar so visitors can always access navigation, language toggle and theme controls while scrolling.
+V1.9.0 restructures the public portfolio around a recruiter-first reading flow. Instead of presenting many equally weighted sections, the homepage now leads with professional positioning, a consolidated snapshot, selected work, experience and expertise. Existing CMS, Resume, i18n, analytics, blog, contact and case-study foundations are preserved.
 
-## New in V1.8.1
+## New in V1.9.0
 
-- Version updated to `1.8.1`
-- `src/data/version.ts` updated to `V1.8.1 – CV Export Polish & Smart Navbar`
-- Default resume template changed to `Modern`
-- Resume page copy simplified around CV export
-- Print button label changed to `Export CV / Save PDF`
-- Added polished A4 print CSS for the Modern resume form
-- Added smart navbar visibility behavior:
-  - hide/fade while scrolling down
-  - show again after about 1 second of no scrolling
-  - show immediately when scrolling up
-  - stay available when menu is open or the header is focused/hovered
+- Version updated to `1.9.0`
+- Added `ProfessionalSnapshot` to merge About, Career Summary and Personal Branding into one focused section
+- Reordered homepage to prioritize recruiter decision flow:
+  - Hero
+  - Professional Snapshot
+  - Selected Work
+  - Professional Experience
+  - Expertise
+  - How I Work
+  - Credentials
+  - Insights
+  - Contact
+- Moved Selected Work above Experience
+- Reworked projects as mini case studies with problem, contribution and impact
+- Simplified navbar to Work, Experience, Expertise, Profile, Insights and Resume
+- Removed Production Readiness from the public homepage
+- Removed public version label from Hero and Footer
+- Added responsive layout polish for the new professional architecture
 - No new Supabase table is required
 
 ## Run locally

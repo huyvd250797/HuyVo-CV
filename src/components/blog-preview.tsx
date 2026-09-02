@@ -22,7 +22,7 @@ export function BlogPreview({ profileData = fallbackProfile, locale = "en" }: { 
       <div className="container">
         <div className="blog-preview-heading">
           <div>
-            <div className="section-label"><span>10</span> {copy.sections.blog}</div>
+            <div className="section-label"><span>07</span> {copy.sections.blog}</div>
             <h2>{copy.sections.blogTitle}</h2>
           </div>
           <div>

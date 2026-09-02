@@ -1,5 +1,5 @@
 export const appVersion = {
-  number: "1.8.1",
-  label: "V1.8.1",
-  name: "CV Export Polish & Smart Navbar",
+  number: "1.9.0",
+  label: "V1.9.0",
+  name: "Professional Architecture",
 } as const;

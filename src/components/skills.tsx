@@ -8,7 +8,7 @@ export function Skills({ profileData = fallbackProfile, locale = "en" }: { profi
   return (
     <section className="section skills" id="skills">
       <div className="container">
-        <div className="section-label"><span>06</span> {copy.sections.skills}</div>
+        <div className="section-label"><span>04</span> {copy.sections.skills}</div>
         <div className="skills-heading">
           <h2>{copy.sections.skillsTitle}</h2>
           <p>{copy.sections.skillsDescription}</p>
