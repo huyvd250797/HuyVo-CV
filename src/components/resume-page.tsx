@@ -12,8 +12,8 @@ type ResumeSections = Record<ResumeSectionKey, boolean>;
 type ResumeTarget = "pm-fc" | "ba" | "product" | "executive";
 
 const templateOptions: Array<{ value: ResumeTemplate; label: string; description: string }> = [
+  { value: "Modern", label: "Professional", description: "Beautiful A4 CV form for sharing or printing." },
   { value: "ATS", label: "ATS", description: "Clean, recruiter-friendly and easy to parse." },
-  { value: "Modern", label: "Modern", description: "Balanced visual layout for web/PDF." },
   { value: "Compact", label: "Compact", description: "Tighter spacing for shorter PDFs." },
   { value: "Executive", label: "Executive", description: "Strong positioning and leadership summary." },
 ];
@@ -46,7 +46,7 @@ const sectionOptions: Array<{ key: ResumeSectionKey; label: string }> = [
 ];
 
 function normalizeTemplate(value?: string): ResumeTemplate {
-  return value === "Modern" || value === "ATS" || value === "Compact" || value === "Executive" ? value : "ATS";
+  return value === "Modern" || value === "ATS" || value === "Compact" || value === "Executive" ? value : "Modern";
 }
 
 function chooseTargetFromRole(role?: string): ResumeTarget {
@@ -87,10 +87,16 @@ function ResumeBuilderPanel({
   onProjectLimitChange: (value: number) => void;
 }) {
   return (
-    <aside className="resume-builder-panel" aria-label="Resume builder controls">
+    <aside className="resume-builder-panel" aria-label="Resume export controls">
+      <div className="resume-export-note">
+        <span>{locale === "vi" ? "Xuất CV" : "CV Export"}</span>
+        <strong>{locale === "vi" ? "Form CV đẹp, sẵn sàng in PDF" : "Beautiful CV form, PDF-ready"}</strong>
+        <p>{locale === "vi" ? "Chọn mẫu, bật/tắt nội dung cần hiển thị rồi bấm Xuất CV / Lưu PDF." : "Choose a form, keep only the sections you need, then export or save as PDF."}</p>
+      </div>
+
       <div>
-        <span>Resume Builder Pro</span>
-        <strong>Template</strong>
+        <span>{locale === "vi" ? "Mẫu hiển thị" : "CV form"}</span>
+        <strong>{locale === "vi" ? "Kiểu CV" : "Template"}</strong>
         <div className="resume-template-options">
           {templateOptions.map((option) => (
             <button
@@ -107,14 +113,14 @@ function ResumeBuilderPanel({
       </div>
 
       <label>
-        <span>Target CV</span>
+        <span>{locale === "vi" ? "Mục tiêu CV" : "Target CV"}</span>
         <select value={target} onChange={(event) => onTargetChange(event.target.value as ResumeTarget)}>
           {targetOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>
 
       <label>
-        <span>Featured projects</span>
+        <span>{locale === "vi" ? "Số dự án hiển thị" : "Featured projects"}</span>
         <input
           type="number"
           min={1}
@@ -125,7 +131,7 @@ function ResumeBuilderPanel({
       </label>
 
       <div>
-        <span>Sections</span>
+        <span>{locale === "vi" ? "Nội dung in ra" : "Sections"}</span>
         <div className="resume-section-toggles">
           {sectionOptions.map((option) => (
             <label key={option.key}>
@@ -167,7 +173,14 @@ export function ResumePageContent({ profile, locale }: { profile: PortfolioProfi
   return (
     <main id="top" className="resume-page">
       <div className="resume-toolbar container">
-        <Link href={localizedPath(activeLocale)}>{copy.resume.back}</Link>
+        <div className="resume-toolbar-left">
+          <Link href={localizedPath(activeLocale)}>{copy.resume.back}</Link>
+          <div className="resume-export-title">
+            <span>{activeLocale === "vi" ? "CV EXPORT" : "CV EXPORT"}</span>
+            <strong>{activeLocale === "vi" ? "Form CV chuyên nghiệp, tối ưu A4" : "Professional A4 resume export"}</strong>
+            <p>{activeLocale === "vi" ? "Dùng bộ chọn bên trái để đổi mẫu nhanh, sau đó xuất PDF từ trình duyệt." : "Use the left controls for quick formatting, then save a polished PDF from the browser."}</p>
+          </div>
+        </div>
         <div className="resume-toolbar-actions">
           <span>{appVersion.label} · {appVersion.name}</span>
           {resumeUrl && <a className="resume-download-link" href={resumeUrl} target="_blank" rel="noreferrer" data-track-event="resume_download" data-track-label="Resume Download attached CV">{copy.resume.downloadFile}</a>}

@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const locale = getLocale(localeParam);
   const title = locale === "vi" ? `CV | ${sourceProfile.name}` : `Resume | ${sourceProfile.name}`;
   const description = locale === "vi"
-    ? `CV chuyên nghiệp có Resume Builder Pro của ${sourceProfile.name}, ${sourceProfile.role}.`
-    : `Resume Builder Pro professional CV for ${sourceProfile.name}, ${sourceProfile.role}.`;
+    ? `CV chuyên nghiệp tối ưu xuất PDF của ${sourceProfile.name}, ${sourceProfile.role}.`
+    : `Professional A4 CV export for ${sourceProfile.name}, ${sourceProfile.role}.`;
   return {
     title,
     description,

@@ -1,27 +1,21 @@
-# Deployment Guide – HuyVo Portfolio V1.8.0
+# Deployment Guide – V1.8.1
 
-## 1. Install and test locally
+## Version
 
-```bash
-npm install
-npm run dev
-```
+`V1.8.1 – CV Export Polish & Smart Navbar`
 
-Then open:
+## Vercel settings
 
 ```text
-http://localhost:3000
-http://localhost:3000/resume
-http://localhost:3000/admin
+Framework Preset: Next.js
+Build Command: npm run build
+Install Command: npm install
+Output Directory: leave empty / default
 ```
 
-## 2. Deploy on Vercel
+Do not set the output directory to `out`.
 
-Use default Vercel settings for a Next.js project.
-
-Do not configure Output Directory as `out`.
-
-## 3. Environment variables
+## Environment variables
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
@@ -34,32 +28,38 @@ SUPABASE_ANALYTICS_TABLE=portfolio_events
 ANALYTICS_MAX_ROWS=5000
 ```
 
-## 4. Supabase SQL
+## Supabase
 
-V1.8.0 does not add a new table. Continue using the existing schema.
+V1.8.1 does not require a new table. Keep the existing tables:
 
-For a fresh Supabase project, run:
+```text
+portfolio_profiles
+portfolio_events
+```
+
+If you are setting up a fresh Supabase project, run:
 
 ```text
 supabase/schema.sql
 ```
 
-## 5. Resume Builder Pro flow
+## CV export
+
+Open:
 
 ```text
-/admin
-→ Resume Builder
-→ Choose default template
-→ Configure target role, headline, summary and sections
-→ Save live
-→ Open /resume or /vi/resume
-→ Choose template/sections if needed
-→ Print / Save PDF
+/resume
+/en/resume
+/vi/resume
 ```
 
-## 6. Notes
+Choose the CV form and click `Export CV / Save PDF`. The browser print dialog can save the CV as PDF.
 
-- Visitors can adjust the resume preview before printing without changing CMS data.
-- Admin defaults are saved to Supabase in `portfolio_profiles.data.resumeBuilder`.
-- Vietnamese fields are saved in `portfolio_profiles.data.translations.vi.resumeBuilder`.
-- Existing V1.7.0 data is normalized automatically.
+Recommended browser print options:
+
+```text
+Destination: Save as PDF
+Paper size: A4
+Margins: Default or None
+Background graphics: Enabled
+```

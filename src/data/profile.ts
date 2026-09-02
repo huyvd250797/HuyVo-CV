@@ -111,7 +111,7 @@ export const profile = {
     resumeUrl: "",
   } as ProfileMedia,
   resumeBuilder: {
-    defaultTemplate: "ATS" as ResumeTemplate,
+    defaultTemplate: "Modern" as ResumeTemplate,
     targetRole: "Project Manager / Functional Consultant",
     headline: "Project-focused professional turning business needs into structured, testable and deployable software solutions.",
     summaryOverride: "",
