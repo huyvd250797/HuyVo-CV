@@ -404,6 +404,12 @@ export type PortfolioTranslation = Partial<{
   media: Partial<{
     avatarAlt: string;
   }>;
+  resumeBuilder: Partial<{
+    targetRole: string;
+    headline: string;
+    summaryOverride: string;
+    footerNote: string;
+  }>;
   personalBranding: Partial<{
     statement: string;
     signature: string;
@@ -497,6 +503,7 @@ export function localizeProfile(profile: PortfolioProfile, localeInput?: string 
     ...(profile as AnyRecord),
     ...translation,
     media: { ...(profile.media as AnyRecord), ...(translation.media || {}) },
+    resumeBuilder: { ...((profile as AnyRecord).resumeBuilder || {}), ...(translation.resumeBuilder || {}) },
     personalBranding: {
       ...(baseBrand as AnyRecord),
       ...(translation.personalBranding || {}),

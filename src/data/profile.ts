@@ -1,6 +1,20 @@
 export type ProjectCategory = "Professional" | "Product" | "Tool";
 export type MediaAssetType = "Image" | "Screenshot" | "Diagram" | "Document" | "Video" | "Link";
 export type BlogStatus = "Draft" | "Published";
+export type ResumeTemplate = "Modern" | "ATS" | "Compact" | "Executive";
+export type ResumeSectionKey = "summary" | "experience" | "projects" | "skills" | "education" | "certifications" | "branding";
+export type ResumeBuilder = {
+  defaultTemplate: ResumeTemplate;
+  targetRole: string;
+  headline: string;
+  summaryOverride: string;
+  projectLimit: number;
+  skillColumns: number;
+  showAvailability: boolean;
+  showVersion: boolean;
+  footerNote: string;
+  sections: Record<ResumeSectionKey, boolean>;
+};
 
 export type CaseStudyOverview = { label: string; value: string; detail?: string };
 export type CaseStudyTimeline = { phase: string; title: string; text: string };
@@ -96,6 +110,26 @@ export const profile = {
     coverImageUrl: "",
     resumeUrl: "",
   } as ProfileMedia,
+  resumeBuilder: {
+    defaultTemplate: "ATS" as ResumeTemplate,
+    targetRole: "Project Manager / Functional Consultant",
+    headline: "Project-focused professional turning business needs into structured, testable and deployable software solutions.",
+    summaryOverride: "",
+    projectLimit: 3,
+    skillColumns: 2,
+    showAvailability: true,
+    showVersion: false,
+    footerNote: "Resume generated from the same live portfolio CMS data.",
+    sections: {
+      summary: true,
+      experience: true,
+      projects: true,
+      skills: true,
+      education: true,
+      certifications: true,
+      branding: true,
+    },
+  } as ResumeBuilder,
   specialties: [
     "Project Management",
     "Functional Consulting",

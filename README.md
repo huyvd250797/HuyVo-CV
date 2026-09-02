@@ -1,43 +1,41 @@
-# HuyVo Portfolio V1.7.0 – Career Case Study Pro
+# HuyVo Portfolio V1.8.0 – Resume Builder Pro
 
-Professional portfolio/CV web app built with Next.js, TypeScript and CSS. V1.7.0 upgrades project detail pages into stronger career case studies and improves the Admin editing experience with a sticky compact editing header.
+Professional portfolio/CV web app built with Next.js, TypeScript and CSS. V1.8.0 upgrades the resume area into a builder-style experience with multiple templates, section toggles, target-role positioning and Admin controls for CV export defaults.
 
-## New in V1.7.0
+## New in V1.8.0
 
-- Version updated to `1.7.0`
-- Project case-study pages upgraded to Career Case Study Pro layout
-- Added case-study blocks for:
-  - Overview metrics
-  - Stakeholders
-  - Responsibilities
-  - Delivery timeline
-  - Challenges
-  - Solution
-  - Impact / outcomes
-  - Competencies demonstrated
-  - Lessons learned
-- Added case-study CTA group: View Resume, Contact Me and Explore Other Projects
-- Added Admin fields to edit the new case-study content
-- Added Vietnamese translation inputs for the new case-study content
-- Added sticky compact Admin editing header
-- Admin header now stays visible while scrolling and keeps:
-  - current section name
-  - saved/unsaved state
-  - Save draft
-  - Save live
-  - English gốc / Tiếng Việt toggle
-- Improved Admin text entry for long textarea content and translation fields
-- Updated CMS normalization so older Supabase records receive V1.7.0 case-study defaults automatically
+- Version updated to `1.8.0`
+- Added Resume Builder Pro configuration in `src/data/profile.ts`
+- Upgraded `/resume`, `/en/resume` and `/vi/resume`
+- Added resume templates:
+  - ATS Friendly
+  - Modern
+  - Compact
+  - Executive
+- Added visitor-side resume controls:
+  - template switcher
+  - target CV selector
+  - section visibility toggles
+  - featured project limit
+  - Print / Save PDF remains available
+- Added Admin tab: `Resume Builder`
+- Admin can configure:
+  - default resume template
+  - target role
+  - resume headline
+  - summary override
+  - project limit
+  - skill columns
+  - footer note
+  - show/hide sections
+  - show/hide availability
+  - show/hide version in resume footer
+- Added Vietnamese translation form for Resume Builder content
+- Resume data is normalized when loading older Supabase records
+- Improved text/textarea editing stability in Admin fields
+- No new Supabase table is required
 
-## Stack
-
-- Next.js
-- TypeScript
-- CSS custom properties
-- Supabase CMS fallback support
-- Vercel-ready structure
-
-## Local setup
+## Run locally
 
 ```bash
 npm install
@@ -50,48 +48,25 @@ Open:
 http://localhost:3000
 ```
 
-## Build
-
-```bash
-npm run build
-```
-
-## Admin
-
-Open:
+Admin:
 
 ```text
-/admin
+http://localhost:3000/admin
 ```
 
-Default local fallback password:
+Default local password:
 
 ```text
 huyvo-admin
 ```
 
-For Vercel production, set:
+## Deploy to Vercel
 
-```env
-ADMIN_PASSWORD=your-secure-password
-```
+Upload this ZIP or push the source to GitHub and import it in Vercel.
 
-## Supabase
+Keep Vercel output directory empty/default. Do not set it to `out`.
 
-V1.7.0 does not require a new Supabase table. It keeps using:
-
-```text
-portfolio_profiles
-portfolio_events
-```
-
-If you have not created the tables yet, run:
-
-```text
-supabase/schema.sql
-```
-
-## Required Vercel environment variables
+Recommended environment variables:
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
@@ -104,17 +79,19 @@ SUPABASE_ANALYTICS_TABLE=portfolio_events
 ANALYTICS_MAX_ROWS=5000
 ```
 
-## Deploy to Vercel
+## Supabase
 
-1. Upload the ZIP to a GitHub repository or import the folder into Vercel.
-2. Keep Vercel Output Directory empty/default.
-3. Add the environment variables above.
-4. Deploy.
-5. Open `/admin`, load live data and save once.
+V1.8.0 does not require a new table. It keeps using:
 
-## Notes
+```text
+portfolio_profiles
+portfolio_events
+```
 
-- Public pages read Supabase live data when configured.
-- If Supabase is missing or not configured, pages fall back to `src/data/profile.ts`.
-- Google Drive media URLs are supported through direct thumbnail conversion.
-- Admin draft data is also stored in browser `localStorage` as a safety draft.
+If this is a fresh setup, run:
+
+```text
+supabase/schema.sql
+```
+
+Older live records are normalized automatically when loaded, so they receive default Resume Builder settings.
