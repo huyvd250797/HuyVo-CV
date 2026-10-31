@@ -1,19 +1,18 @@
-# Maison CV v1.2.0 — Flexible Editing & Autosave
+# Maison CV v1.3.0 — History & Recovery
 
 CV online theo thiết kế Maison Espresso, dành cho một chủ sở hữu. Có trình chỉnh sửa trên website, lưu nháp vào Supabase, xuất bản riêng và xem trên nhiều thiết bị. Vercel chạy website; Supabase lưu nội dung, tài khoản và ảnh.
 
 **Dùng website production hoàn toàn online, không cần mở localhost hay giữ PC chạy.** Trước lần dùng đầu cần cấu hình Supabase và Vercel theo phần dưới. ZIP không chứa database đang chạy, tài khoản thật hoặc secret của Boss.
 
 
-## Nâng cấp nhanh từ v1.1.0 (Boss đã cấu hình Supabase/Vercel)
+## Nâng cấp nhanh từ v1.2.0
 
-1. Giữ nguyên database, tài khoản chủ sở hữu và hai biến môi trường trên Vercel.
-2. Mở Supabase SQL Editor, chạy **`supabase/migrations/202610310002_flexible_editor.sql`** một lần. Không reset bảng, không chạy setup-owner lại và không chạy migration 001 sau 002.
-3. Push source v1.2.0 vào repository đang dùng, giữ đúng Root Directory, rồi deploy Vercel như trước.
-4. Mở lại `/admin` hoặc tải lại các tab cũ. CV và ảnh đã lưu vẫn được lấy từ Supabase.
-5. Thử chỉnh một mục, đợi khoảng 1,2 giây sau khi ngừng nhập và kiểm tra trạng thái **Đã lưu nháp**. Khách vẫn thấy bản đã xuất bản cũ cho đến khi Boss bấm Xuất bản.
+1. Giữ database, owner, ảnh và hai biến môi trường Vercel hiện tại. Không reset hoặc chạy setup-owner lại.
+2. Mở Supabase SQL Editor, chạy toàn bộ **`supabase/migrations/202610310003_history_recovery.sql`**. Migration giữ lại nháp và bản công khai hiện có làm mốc ban đầu; chạy lại không nhân đôi các mốc này.
+3. Đưa source v1.3.0 vào đúng Root Directory của repository, deploy Vercel rồi tải lại các tab `/admin` cũ.
+4. Mở **Lịch sử ↶**, tạo mốc thủ công, thử so sánh và khôi phục vào nháp. CV công khai chỉ thay đổi sau khi Boss chủ động xuất bản.
 
-Project mới chưa cấu hình: chạy **001 → 002 → setup-owner.sql**, sau đó làm theo hướng dẫn thiết lập bên dưới. Không cần thêm biến môi trường mới. Xem `UPGRADE-v1.2.0.md` để kiểm tra chi tiết.
+Project mới: chạy **001 → 002 → 003 → setup-owner.sql**. Đang ở v1.1: chạy **002 → 003**. Không chạy migration cũ sau migration mới. Không cần thêm biến môi trường. Xem **`UPGRADE-v1.3.0.md`** để nâng cấp và nghiệm thu.
 
 ## 1. Chức năng của phiên bản này
 
@@ -33,7 +32,13 @@ Project mới chưa cấu hình: chạy **001 → 002 → setup-owner.sql**, sau
 - Giữ bản chưa lưu trên thiết bị theo từng project và tài khoản; khi mở lại, cho phép chọn khôi phục. Bản cũ hơn cloud sẽ bị chặn tự lưu để tránh ghi đè.
 - Dùng font Noto Serif có bộ ký tự tiếng Việt, tự phục vụ từ `/fonts`; chuẩn hóa NFC khi nhập/lưu/render để sửa dấu tiếng Việt bị tách. Không tải font từ dịch vụ bên ngoài lúc dùng app.
 
-Autosave chỉ lưu **nháp**, không xuất bản. Chức năng hoàn tác hiện tại chỉ trong phiên; lịch sử cloud và nhập JSON tự động thuộc v1.3.0. Thiết bị khác cần mở/tải lại trang để đọc bản mới; chưa có cộng tác realtime.
+- Lịch sử riêng tư trên cloud: tự giữ mốc khi xuất bản, tạo mốc thủ công có tên/ghi chú; tải thêm các mốc cũ theo trang.
+- Xem CV của mốc và so sánh theo nhóm thông tin với nháp hiện tại hoặc một mốc đã tải khác, bao gồm thứ tự và phần ẩn/hiện.
+- Khôi phục vào nháp có xác nhận; tự giữ nháp trước thay đổi và tăng version mới. Không quay lùi version hoặc tự xuất bản.
+- Xuất nháp đã lưu/mốc lưu thành JSON; nhập JSON có kiểm tra cấu trúc, xem khác biệt, xử lý ảnh và xác nhận trước khi áp dụng. File lỗi không ghi đè dữ liệu.
+- Bảo vệ ảnh được lịch sử tham chiếu khỏi thao tác xóa thông thường; lịch sử chỉ chủ sở hữu đọc được.
+
+Autosave chỉ lưu **nháp**, không xuất bản. Lịch sử cloud là các mốc quan trọng, không ghi lại từng lần gõ/tự lưu. Hoàn tác 50 mốc vẫn chỉ trong phiên. Thiết bị khác cần mở/tải lại trang để đọc bản mới; chưa có cộng tác realtime.
 
 ## 2. Công nghệ và yêu cầu
 
@@ -58,11 +63,11 @@ Tài liệu: [Supabase + Next.js](https://supabase.com/docs/guides/getting-start
 
 1. Vào Supabase Dashboard, tạo project dùng cho CV.
 2. Mở **SQL Editor → New query**.
-3. Với project mới: mở `supabase/migrations/202610310001_cv_cloud.sql` trong source, sao chép toàn bộ và chạy, sau đó chạy `supabase/migrations/202610310002_flexible_editor.sql`. Nếu đã dùng v1.1.0, chỉ chạy 002.
+3. Với project mới: mở `supabase/migrations/202610310001_cv_cloud.sql` trong source, sao chép toàn bộ và chạy, sau đó chạy `supabase/migrations/202610310002_flexible_editor.sql`, cuối cùng `supabase/migrations/202610310003_history_recovery.sql`. Đã v1.2 chỉ chạy 003; đã v1.1 chạy 002 rồi 003.
 4. Kết quả: tạo các bảng, hàm lưu/xuất bản, RLS và private bucket `cv-assets`. Có thể chạy lại migration này; nó không seed CV hoặc chuyển quyền chủ sở hữu.
 5. Không đổi bucket thành public. Migration cho phép khách đọc đúng ảnh đang được snapshot công khai tham chiếu, còn ảnh nháp giữ riêng tư.
 
-Migration 002 chỉ nâng cấp các hàm của Maison CV, không xóa/reset nội dung và không đổi owner. Migration không đọc/sửa các bảng có sẵn của app khác. Nên dùng project riêng nếu Boss muốn quản lý CV độc lập.
+Migration 002 nâng cấp editor; 003 thêm bảng lịch sử, hàm tạo mốc/khôi phục, nâng quyền giữ ảnh và lưu mốc khi xuất bản. Không xóa/reset nội dung và không đổi owner. Migration không đọc/sửa các bảng có sẵn của app khác. Nên dùng project riêng nếu Boss muốn quản lý CV độc lập.
 
 ### 3.2 Tạo và chỉ định tài khoản Boss
 
@@ -90,14 +95,14 @@ Hai biến này được phép có trong client bundle. Không có biến mật 
 
 ### 4.1 Đưa source lên GitHub
 
-Giải nén ZIP, mở thư mục `Maison-CV-v1.2.0` có `package.json`.
+Giải nén ZIP, mở thư mục `Maison-CV-v1.3.0` có `package.json`.
 
 Với repository mới, mở Terminal/PowerShell ở chính thư mục đó:
 
 ```sh
 git init
 git add .
-git commit -m "Maison CV v1.2.0 - Flexible Editing and Autosave"
+git commit -m "Maison CV v1.3.0 - History and Recovery"
 git branch -M main
 git remote add origin https://github.com/YOUR_OWNER/YOUR_REPOSITORY.git
 git push -u origin main
@@ -105,13 +110,13 @@ git push -u origin main
 
 Thay URL bằng repository thật của Boss. Không chạy `git init`/`remote add` lần nữa trong repo đã tồn tại. `.gitignore` loại `.env`, `.next`, `node_modules`, log và cấu hình Vercel cục bộ.
 
-Với repository đã có source trước đó: clone/fetch repo hiện tại, tích hợp source v1.2.0 vào đúng thư mục, giữ `.git` và `.env.local` cá nhân. Kiểm tra `git status`, commit rồi push. Nếu báo `fetch first`, chạy fetch/pull và xử lý khác biệt, không force push để ghi đè lịch sử.
+Với repository đã có source trước đó: clone/fetch repo hiện tại, tích hợp source v1.3.0 vào đúng thư mục, giữ `.git` và `.env.local` cá nhân. Kiểm tra `git status`, commit rồi push. Nếu báo `fetch first`, chạy fetch/pull và xử lý khác biệt, không force push để ghi đè lịch sử.
 
 ```sh
 git pull --rebase origin main
 git status
 git add .
-git commit -m "Upgrade Maison CV to v1.2.0"
+git commit -m "Upgrade Maison CV to v1.3.0"
 git push origin main
 ```
 
@@ -122,7 +127,7 @@ Nếu phát sinh conflict, giải quyết nội dung trước khi tiếp tục. 
 1. Vercel → **Add New → Project → Import Git Repository**.
 2. Chọn repository/branch đã push.
 3. Framework: **Next.js**.
-4. **Root Directory:** thư mục chứa `package.json`. Nếu đã push nội dung thư mục source vào root repo thì để mặc định. Nếu repo chứa nguyên thư mục `Maison-CV-v1.2.0`, chọn thư mục đó.
+4. **Root Directory:** thư mục chứa `package.json`. Nếu đã push nội dung thư mục source vào root repo thì để mặc định. Nếu repo chứa nguyên thư mục `Maison-CV-v1.3.0`, chọn thư mục đó.
 5. Node.js: **24.x**. `engines.node` trong package.json cũng đã đặt 24.x.
 6. Install Command: `npm ci`.
 7. Build Command: `npm run build`.
@@ -163,7 +168,7 @@ Nếu thay các biến `NEXT_PUBLIC_*` sau khi build, **Redeploy** để client 
 
 Các lần tự lưu và lưu thủ công chỉ sửa bản nháp. Khi gõ tiếng Việt bằng bộ gõ tổ hợp, app đợi kết thúc tổ hợp ký tự rồi mới tự lưu. Muốn khách thấy thay đổi phải xuất bản. Build/deploy hoặc đăng nhập lại không seed lại và không ghi đè CV cloud.
 
-**Khi có xung đột:** giữ bản đang soạn thành JSON nếu cần đối chiếu, sau đó chủ động tải bản mới nhất. Bản JSON này chưa có chức năng nhập tự động ở v1.2.0. Không tự động ghi đè bản mới từ thiết bị khác.
+**Khi có xung đột:** giữ bản đang soạn thành JSON nếu cần đối chiếu, sau đó chủ động tải bản mới nhất. Sau khi tải lại bản online mới nhất, mở Lịch sử → Nhập JSON để đối chiếu và chủ động nhập bản đã giữ nếu phù hợp. Không tự động ghi đè bản mới từ thiết bị khác.
 
 **Bố cục và ẩn/hiện:** chọn Bố cục CV. Kéo tay nắm ⋮⋮ hoặc dùng ↑/↓; giữ các nhóm khối đầu/cột trái/cột phải của Maison. Bỏ chọn một phần để ẩn; thông tin đầu trang và nút Mở Portfolio luôn giữ. Các mục lặp trong từng phần cũng có tay nắm và nút sắp xếp. Mục ẩn được giữ đầy đủ trong nháp; khi xuất bản lại, nội dung mục đó bị loại khỏi snapshot công khai, không chỉ ẩn bằng CSS. Trước khi xuất bản lại, khách vẫn thấy bản cũ.
 
@@ -171,7 +176,23 @@ Các lần tự lưu và lưu thủ công chỉ sửa bản nháp. Khi gõ tiế
 
 **Hoàn tác/làm lại:** hai nút ↶/↷ trên thanh công cụ, tối đa 50 mốc trong phiên. Nội dung sau hoàn tác vẫn được tự lưu nháp; không tự khôi phục bản công khai. Tải lại trang bắt đầu một phiên hoàn tác mới.
 
-**Đổi/bỏ ảnh:** ảnh mới là file riêng. Bỏ ảnh chỉ gỡ khỏi nháp, không xóa file đang dùng bởi bản công khai. Ảnh nháp mới chưa công khai cho đến khi xuất bản. Bản này chưa có công cụ dọn file không còn tham chiếu.
+**Đổi/bỏ ảnh:** ảnh mới là file riêng. Bỏ ảnh chỉ gỡ khỏi nháp, không xóa file đang được nháp, bản công khai hoặc mốc lịch sử tham chiếu. Ảnh nháp mới chưa công khai cho đến khi xuất bản. Bản này chưa có công cụ dọn file không còn tham chiếu.
+
+## Lịch sử, khôi phục và JSON
+
+**Tạo và xem mốc:** lưu nháp xong, mở **Lịch sử ↶** trên thanh công cụ. Nhập tên/ghi chú rồi chọn **Tạo mốc từ nháp đã lưu**. Mốc giữ toàn bộ CV, cả phần ẩn; tạo mốc thủ công không tăng version nháp. Khi xuất bản, app tự lưu toàn bộ nháp thành mốc riêng tư, tối đa một mốc xuất bản cho mỗi version. Danh sách tải 20 mốc/lượt; dùng Tải thêm mốc để mở các mốc cũ.
+
+**So sánh:** chọn mốc, xem tab Khác biệt hoặc Xem CV. Chọn So sánh với để đối chiếu với nháp hiện tại hoặc mốc khác đã tải trong danh sách. Khác biệt được nhóm theo thông tin đầu trang, liên hệ, mục tiêu, danh sách nội dung và bố cục; đây là so sánh nội dung, không phải đánh dấu từng ký tự.
+
+**Khôi phục:** trước tiên xử lý bản khôi phục cục bộ/xung đột và lưu các thay đổi đang soạn. Chọn Khôi phục mốc vào nháp → đọc xác nhận → Xác nhận thay bản nháp. Trong cùng transaction, hệ thống giữ nháp cũ thành mốc Trước khôi phục, lưu nội dung đã chọn thành version mới và ghi mốc Đã khôi phục. Nếu thiết bị khác đã lưu trước, thao tác bị chặn, không thay nháp. Muốn quay lại, khôi phục mốc Trước khôi phục. CV công khai và nút Portfolio vẫn giữ bản đã xuất bản; Boss xem lại rồi chủ động xuất bản khi sẵn sàng.
+
+**Xuất JSON:** xuất nháp đã lưu hoặc mốc đang xem. File chứa toàn bộ nội dung, bố cục, cả phần ẩn và đường dẫn ảnh; không chứa mật khẩu, token Auth, khóa kết nối hoặc file ảnh. JSON là bản sao nội dung, không phải bản backup toàn bộ project Supabase.
+
+**Nhập JSON:** chọn Lịch sử → Nhập JSON → Chọn file, tối đa 256 KB. Hỗ trợ envelope Maison `formatVersion: 1` và JSON hồ sơ cũ hợp lệ; chuẩn hóa về schema CV 2. File lỗi, liên kết không an toàn hoặc schema tương lai bị từ chối. Xem cảnh báo và khác biệt trước khi xác nhận. App giữ mốc Trước nhập và Đã nhập trong cùng transaction. Không tự xuất bản. Ảnh có đường dẫn thuộc owner/project nguồn chỉ dùng lại khi tồn tại và được truy cập trong project hiện tại; ảnh khác owner hoặc không còn sẽ bỏ đường dẫn và hiện cảnh báo để Boss chọn lại. Nếu ảnh/nội dung thay đổi sau lúc xem trước, cần chọn file lại để xác nhận bản mới.
+
+**Sau nâng cấp:** chỉ có thể giữ nháp và bản công khai còn tồn tại lúc chạy 003; không tái tạo các lần lưu trước đó. Mốc công khai trước nâng cấp chỉ có nội dung đã công khai, không thể phục dựng phần từng bị ẩn. Mốc nháp trước nâng cấp giữ riêng nội dung nháp đầy đủ. Lịch sử không có chức năng sửa/xóa mốc hoặc tự dọn dung lượng trong phiên bản này. Ảnh được mốc tham chiếu giữ riêng tư; khách vẫn chỉ được xem ảnh của bản công khai hiện hành.
+
+Khi đang mở Lịch sử, editor nền và autosave tạm dừng; nút Lưu nháp hiện tại vẫn dùng được nếu chưa có xung đột. Khóa bản khôi phục cục bộ v1.2 được giữ nguyên để nhận diện bản chưa lưu cũ.
 
 ## 6. In / lưu PDF
 
@@ -225,7 +246,7 @@ npm run build
 
 - `npm test`: test renderer/validation/preview; chạy migration thật trên Postgres nhúng PGlite với Auth/Storage schema tối thiểu; test React UI với Auth/API được mock. Test không truy cập tài khoản Supabase thật.
 - `npm run test:cloud`: riêng phần migration, RLS, chống ghi đè và snapshot/ảnh công khai trên PGlite. Tên này không có nghĩa đã kiểm tra cloud của Boss.
-- `npm run test:ui`: luồng editor, autosave debounce, gõ trong lúc lưu, mất mạng/kết nối lại, khôi phục riêng theo owner, xung đột, IME, hoàn tác, thứ tự và ẩn/hiện, preview mobile.
+- `npm run test:ui`: luồng React editor/autosave/lịch sử, xác nhận khôi phục/import và API route import/paging/409 với API/Auth/Storage được mock.
 - `npm run check`: kiểm tra cấu trúc JSON nền. Các dòng PENDING nhắc nội dung chưa điền, không phải lỗi lưu cloud.
 - `npm run check:release`: đọc Supabase được cấu hình, kiểm tra bản công khai và quyền khách đối với nháp; cần đã thiết lập và xuất bản CV. Không dùng JSON nguồn để kết luận CV online đã hoàn thiện.
 
@@ -251,11 +272,15 @@ SITE_URL=https://YOUR_CV.vercel.app node scripts/smoke.mjs
 | `cv_owner` | Một User UID chủ sở hữu, do SQL Editor chỉ định |
 | `cv_documents` | Một CV nháp, version và thời gian lưu; không có quyền khách |
 | `cv_publications` | Một snapshot công khai, tách khỏi nháp |
+| `cv_revisions` | Lịch sử riêng tư, owner chỉ đọc; tạo mốc/khôi phục qua RPC có kiểm tra version |
+| `cv_migration_log` | Đánh dấu migration đã giữ baseline, không cấp quyền khách hoặc trình duyệt |
 | `cv_assets` | Metadata file; chủ sở hữu được đọc/ghi metadata của mình |
 | `cv-assets` Storage bucket | Private; owner xem file của mình; khách chỉ đọc đúng ảnh được bản công khai hiện hành tham chiếu |
 | `save_cv_draft` | Lưu có kiểm tra expected version; khởi tạo chỉ khi chưa có document |
-| `publish_cv` | Khóa/kiểm tra version rồi xuất bản snapshot, loại nội dung bị ẩn trong cùng transaction |
-| `cv_schema_version` | Trả phiên bản 2 cho đúng chủ sở hữu; API dùng để kiểm tra quyền và migration 002 |
+| `publish_cv` | Khóa/kiểm tra version rồi xuất bản snapshot, giữ mốc riêng tư đầy đủ rồi loại nội dung ẩn khỏi public snapshot trong cùng transaction |
+| `create_cv_checkpoint` | Khóa nháp, kiểm tra version, tạo mốc thủ công bất biến |
+| `apply_cv_recovery` | Giữ trước/sau khôi phục hoặc nhập JSON và lưu nháp mới atomically; không sửa publication |
+| `cv_schema_version` | Trả capability 3 cho owner; API yêu cầu migration 003. Schema nội dung CV vẫn là 2 |
 
 API owner xác thực token và gọi `cv_schema_version` (hàm này kiểm tra `is_cv_owner`). Quyền SELECT/INSERT/UPDATE/EXECUTE của database và Storage cũng được giới hạn, không dựa vào việc ẩn nút ở UI. Các hàm đặc quyền đặt search_path rỗng và tự kiểm tra owner. App không sử dụng service-role key ở runtime. Nội dung được kiểm tra và escape trước khi render; không nhận raw HTML để xuất bản.
 
@@ -264,8 +289,8 @@ Những ảnh đã từng công khai có thể đã được người xem tải 
 ## 10. Nâng cấp, sao lưu và quay lại
 
 - Không reset database để cập nhật source. Giữ hai biến môi trường, owner và dữ liệu Supabase hiện có.
-- Trước migration tương lai, sao lưu nội dung của `cv_documents`, `cv_publications`, metadata và file Storage qua công cụ export/backup phù hợp của project. Lịch sử cloud chưa có; bản này chỉ có hoàn tác trong phiên và bản khôi phục cục bộ chưa lưu.
-- Có thể rollback deployment Vercel về bản đã kiểm tra. Editor v1.1.0 chưa hiểu layout/ẩn mục của v1.2.0, nên tránh dùng editor cũ để lưu sau khi đã nâng cấp. Source v1.0.0 chỉ đọc JSON; rollback về v1.0.0 không hiển thị CV cloud của v1.1.0, nhưng không cần xóa dữ liệu Supabase.
+- Trước migration tương lai, sao lưu nội dung của `cv_documents`, `cv_publications`, metadata và file Storage qua công cụ export/backup phù hợp của project. Mốc lịch sử giữ nội dung trong cùng database, không thay thế backup độc lập của database và file Storage. JSON xuất ra không bao gồm file ảnh.
+- Sau migration 003, API editor v1.2 yêu cầu capability 2 nên sẽ chặn chỉnh sửa. Không hạ migration bằng cách xóa bảng hoặc đổi `cv_schema_version`. Nếu cần sửa deployment, dùng bản vá v1.3 tương thích; bản CV công khai vẫn nằm ở snapshot riêng. Xem hướng dẫn phục hồi trong UPGRADE-v1.3.0.md.
 - Migration lần này chỉ thêm các đối tượng của Maison CV. Các bản sau cần migration tăng dần và hướng dẫn riêng, không thay SQL bằng thao tác xóa bảng.
 - Khi đổi tên miền, cập nhật Auth callback, site URL trong editor và xuất bản lại.
 
@@ -279,7 +304,7 @@ Font normal/italic được đóng gói ở `public/fonts/`, kèm giấy phép O
 | --- | --- |
 | `/admin` hiển thị hướng dẫn kết nối | Thêm đúng hai biến môi trường, kiểm tra URL/key và redeploy |
 | Đăng nhập đúng nhưng báo chưa có quyền owner | So sánh User UID trong Authentication với `cv_owner.user_id`, chạy setup-owner cho đúng user |
-| Báo chưa hoàn tất schema/quyền database | Chạy migration 001 rồi 002 cho project mới; project đang v1.1 chỉ chạy 002. Kiểm tra error SQL; không tự tắt RLS |
+| Báo chưa hoàn tất schema/quyền database | Project mới chạy 001 → 002 → 003; đang v1.2 chỉ chạy 003; đang v1.1 chạy 002 → 003. Kiểm tra error SQL; không tự tắt RLS |
 | `/` vẫn là trang đang hoàn thiện | Lưu nháp chưa đủ; hoàn thiện dữ liệu và bấm Xuất bản |
 | Không xuất bản được vì nội dung mẫu | Thay nội dung `[ ]`, điền tên mục đang trống hoặc xóa mục chưa dùng |
 | Lưu báo thiết bị khác đã cập nhật | Giữ bản đang soạn để đối chiếu, tải bản mới nhất, chỉnh lại rồi lưu |
@@ -295,6 +320,7 @@ Font normal/italic được đóng gói ở `public/fonts/`, kèm giấy phép O
 ## 12. Cấu trúc và phát triển tiếp
 
 - `src/app/`: CV công khai, admin, print, Portfolio chờ, callback và API.
+- `src/components/HistoryPanel.tsx`: lịch sử, so sánh, xem CV, nhập/xuất JSON và xác nhận khôi phục.
 - `src/components/Editor.tsx`: editor và luồng Auth phía trình duyệt; `SortHandle.tsx`: sắp xếp bằng chuột/cảm ứng và nút lên/xuống.
 - `src/lib/`: renderer Maison, layout, validation, hook autosave/khôi phục, client Supabase, API guard và đọc snapshot công khai.
 - `src/data/profile.json`: dữ liệu nền một lần; không phải nguồn dữ liệu live sau khi lưu online.
@@ -302,4 +328,4 @@ Font normal/italic được đóng gói ở `public/fonts/`, kèm giấy phép O
 - `tests/`: kiểm tra nội dung, quyền dữ liệu và luồng UI.
 - `preview/`: bản HTML/CSS offline để xem thiết kế, không có đăng nhập/lưu cloud. Tạo lại bằng `node scripts/export-preview.mjs`; không upload thư mục này thay cho toàn bộ app Next.js.
 
-Phiên bản tiếp theo: **v1.3.0 — History & Recovery**: lịch sử xuất bản, mốc lưu, so sánh/khôi phục và xuất/nhập JSON. Gửi ZIP mới nhất và yêu cầu xây dựng phiên bản tiếp theo để giữ đúng source và roadmap.
+Phiên bản tiếp theo: **v1.4.0 — PDF & Professional Sharing**: PDF tự động, kiểm soát A4/ngắt trang, QR và metadata/ảnh chia sẻ; cần kiểm chứng engine PDF trên Vercel trước khi chọn giải pháp. Gửi ZIP mới nhất và yêu cầu xây dựng phiên bản tiếp theo để giữ đúng source và roadmap.

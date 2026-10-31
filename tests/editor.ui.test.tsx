@@ -140,3 +140,24 @@ test('Collection ordering updates preview and is saved with the draft',async()=>
  await screen.findByText('Đã lưu nháp online. Khách vẫn thấy bản đã xuất bản.');
  expect(remote.content.skills[0].name).toBe('Kỹ năng B');
 });
+test('Recovery from the archive updates the editor without triggering publication or another autosave',async()=>{
+ const prior=vi.mocked(fetch).getMockImplementation()!;
+ const id='33333333-3333-4333-8333-333333333333';
+ const restored={...fixture,name:'Hồ sơ khôi phục'};
+ const revision={id,kind:'manual',label:'Mốc phục hồi',note:'',document_version:1,created_at:'2026-10-31T10:00:00Z',size_bytes:2300,content:restored};
+ vi.mocked(fetch).mockImplementation(async(input,options)=>{
+  const path=String(input);
+  if(path==='/api/admin/history')return {ok:true,status:200,json:async()=>({items:[revision],nextCursor:null})} as Response;
+  if(path==='/api/admin/history/'+id)return {ok:true,status:200,json:async()=>({revision})} as Response;
+  if(path.endsWith('/restore')){remote={content:restored,version:2,updated_at:'2026-10-31T12:00:00Z'};return {ok:true,status:200,json:async()=>({document:remote})} as Response;}
+  return prior(input,options);
+ });
+ render(<Editor/>);await screen.findByLabelText('Họ và tên');fireEvent.click(screen.getByRole('button',{name:'Lịch sử ↶'}));
+ fireEvent.click(await screen.findByRole('button',{name:/Mốc thủ công.*Mốc phục hồi/}));
+ fireEvent.click(await screen.findByRole('button',{name:'Khôi phục mốc vào nháp ↗'}));
+ fireEvent.click(await screen.findByRole('button',{name:'Xác nhận thay bản nháp'}));
+ await waitFor(()=>expect((screen.getByLabelText('Họ và tên') as HTMLInputElement).value).toBe('Hồ sơ khôi phục'));
+ expect(document.querySelector('.history-panel')).toBeNull();
+ expect(screen.getByText('Đã khôi phục vào bản nháp và giữ mốc trước khôi phục. CV công khai chưa thay đổi.')).toBeTruthy();
+ expect(vi.mocked(fetch).mock.calls.some(([url,init])=>String(url).includes('/publish')||init?.method==='PUT')).toBe(false);
+});

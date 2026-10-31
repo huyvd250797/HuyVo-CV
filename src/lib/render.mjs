@@ -78,7 +78,7 @@ function projects(profile) {
   return profile.projects.length ? `<div class="projects">${profile.projects.map((item, index) => { const demo = safeWebUrl(item.demoUrl), code = safeWebUrl(item.sourceUrl); return `<article class="personal-project">${projectArt(index)}<div class="project-copy"><p class="project-type">${e([item.role, item.year].filter(Boolean).join(' / '))}</p><h3>${e(item.name)}</h3><p>${e(item.description)}</p><div class="tags" style="margin-top:15px">${item.technologies.map(technology => `<span class="tag">${e(technology)}</span>`).join('')}</div><div class="project-bottom">${demo ? external(demo, 'Xem demo ↗', 'button') : ''}${code ? external(code, 'Mã nguồn ↗', 'button') : ''}</div></div></article>`; }).join('')}</div>` : empty(profile, 'Sản phẩm cá nhân đang chờ bạn cung cấp. Đây là khu vực riêng với các dự án triển khai tại đơn vị.', 'Chưa có sản phẩm cá nhân được công khai.');
 }
 function footer(profile) {
-  return `<footer><span>${e(profile.name)} · ${e(profile.role)}</span><span>CV Online Maison Espresso · v1.2.0</span></footer>`;
+  return `<footer><span>${e(profile.name)} · ${e(profile.role)}</span><span>CV Online Maison Espresso · v1.3.0</span></footer>`;
 }
 function contactActions(profile) {
   const email = safeEmail(profile.email), phone = safePhone(profile.phone);

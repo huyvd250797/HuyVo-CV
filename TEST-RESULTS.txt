@@ -1,57 +1,146 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.2.0 test
+> maison-cv@1.3.0 test
 > npm run test:unit && npm run test:ui
 
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.2.0 test:unit
+> maison-cv@1.3.0 test:unit
 > node --test tests/*.test.mjs
 
 ▶ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images
-  ✔ No first-login ownership or automatic public seed (18.825214ms)
-  ✔ Owner can save first draft; duplicate seed and stale version are rejected (13.19667ms)
-  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (9.593829ms)
-  ✔ Draft images are private and storage writes require explicit owner (9.758335ms)
-  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (15.729169ms)
-  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (9.762061ms)
-✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (2494.112446ms)
-✔ v1.1 records get the default layout; incomplete or duplicated order does not lose sections (4.137158ms)
-✔ Renderer reorders within columns and hides full sections while keeping the Portfolio entry (3.850619ms)
-✔ Hidden content is preserved in draft and removed from the public payload (0.588902ms)
-✔ Publish validates visible content and allows a deliberately hidden contact section (2.223509ms)
-✔ Vietnamese Unicode is composed consistently in saved content and rendering (0.937771ms)
-✔ Bundled serif fonts cover Vietnamese/Latin and do not depend on a remote font service (32.577119ms)
-✔ Preview routes serve real files with the correct content type, without opening a socket (12.45154ms)
-✔ Preview Portfolio aliases redirect to the correct static document (0.706691ms)
-✔ Preview does not serve source files or traversal outside public assets (2.001301ms)
-✔ Draft is honest about missing content and includes all six verified units (4.336042ms)
-✔ The final content section is the Portfolio entry, followed by footer (0.711762ms)
-✔ Published contact links use real, validated destinations (0.883867ms)
-✔ All content stays text; malicious URL schemes and attribute injection are rejected (1.457234ms)
-✔ Portrait and project links render only when configured (2.223392ms)
-✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.425663ms)
-✔ Content checks reject malformed data and identify unfinished release content (1.482994ms)
-✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (9.061397ms)
-✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (0.902855ms)
-✔ Image validation checks signatures instead of trusting extension or MIME type (0.221392ms)
-✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (3.629473ms)
-ℹ tests 27
+  ✔ No first-login ownership or automatic public seed (21.427927ms)
+  ✔ Owner can save first draft; duplicate seed and stale version are rejected (13.067559ms)
+  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (16.335706ms)
+  ✔ Draft images are private and storage writes require explicit owner (13.206505ms)
+  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (20.052002ms)
+  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (11.289575ms)
+  ✔ v1.3 captures the existing draft/public baseline exactly once (26.59756ms)
+  ✔ History and recovery RPCs are private and revision content is immutable to the browser (9.798805ms)
+  ✔ Manual checkpoints keep the complete draft without changing its version (12.218765ms)
+  ✔ Publication archives the full draft once per version while the public snapshot remains redacted (13.505612ms)
+  ✔ Restore creates a pre-change checkpoint and a new draft, without publishing or accepting a stale retry (24.491725ms)
+  ✔ Import preserves the previous saved draft atomically and leaves the publication untouched (5.758771ms)
+  ✔ Portraits referenced by private history cannot be deleted or read by anonymous visitors (10.299509ms)
+  ✔ Migration reruns preserve baselines and do not invent pre-upgrade states for a new project (38.320272ms)
+✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (3147.326389ms)
+✔ JSON backup round trips CV content, layout and schema without exporting credentials (4.150815ms)
+✔ Legacy JSON including decomposed Vietnamese is converted without changing source data (0.905671ms)
+✔ Malformed, unrelated and future-version backups are rejected before import (0.75017ms)
+✔ Import limits are measured in bytes and reject unsafe links and malformed rows (2.137019ms)
+✔ Comparisons identify contact, ordering and visibility changes, without mutating either profile (2.179161ms)
+✔ Semantically identical hidden sets and normalized Vietnamese do not create spurious differences (0.832431ms)
+✔ v1.1 records get the default layout; incomplete or duplicated order does not lose sections (2.669334ms)
+✔ Renderer reorders within columns and hides full sections while keeping the Portfolio entry (6.985379ms)
+✔ Hidden content is preserved in draft and removed from the public payload (1.261861ms)
+✔ Publish validates visible content and allows a deliberately hidden contact section (2.900548ms)
+✔ Vietnamese Unicode is composed consistently in saved content and rendering (1.131432ms)
+✔ Bundled serif fonts cover Vietnamese/Latin and do not depend on a remote font service (24.283251ms)
+✔ Preview routes serve real files with the correct content type, without opening a socket (8.831345ms)
+✔ Preview Portfolio aliases redirect to the correct static document (0.401886ms)
+✔ Preview does not serve source files or traversal outside public assets (2.85085ms)
+✔ Draft is honest about missing content and includes all six verified units (4.600884ms)
+✔ The final content section is the Portfolio entry, followed by footer (0.989411ms)
+✔ Published contact links use real, validated destinations (1.081451ms)
+✔ All content stays text; malicious URL schemes and attribute injection are rejected (1.501218ms)
+✔ Portrait and project links render only when configured (3.043446ms)
+✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.465558ms)
+✔ Content checks reject malformed data and identify unfinished release content (1.393129ms)
+✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (5.487774ms)
+✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (2.152688ms)
+✔ Image validation checks signatures instead of trusting extension or MIME type (0.667771ms)
+✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (4.363975ms)
+ℹ tests 41
 ℹ suites 0
-ℹ pass 27
+ℹ pass 41
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 2704.032943
+ℹ duration_ms 3380.246077
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.2.0 test:ui
+> maison-cv@1.3.0 test:ui
 > vitest run
 
 
- RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.2.0
+ RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.3.0
 
 
- Test Files  2 passed (2)
-      Tests  18 passed (18)
-   Start at  19:32:33
-   Duration  3.13s (tests 57%, environment 33%, import 5%, transform 4%)
+ Test Files  4 passed (4)
+      Tests  34 passed (34)
+   Start at  20:20:52
+   Duration  3.84s (tests 56%, environment 34%, import 7%, transform 3%)
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> maison-cv@1.3.0 typecheck
+> tsc --noEmit
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> maison-cv@1.3.0 check
+> node scripts/check-content.mjs
+
+PENDING: At least one real contact method is needed
+PENDING: profile.name contains a placeholder
+PENDING: profile.objective contains a placeholder
+PENDING: profile.education[0].school contains a placeholder
+PENDING: profile.education[0].degree contains a placeholder
+PENDING: profile.education[0].period contains a placeholder
+PENDING: profile.skills[0].name contains a placeholder
+PENDING: profile.skills[0].description contains a placeholder
+PENDING: profile.skills[1].name contains a placeholder
+PENDING: profile.skills[1].description contains a placeholder
+PENDING: profile.experience[0].role contains a placeholder
+PENDING: profile.experience[0].company contains a placeholder
+PENDING: profile.experience[0].period contains a placeholder
+PENDING: profile.experience[0].summary contains a placeholder
+PENDING: profile.experience[0].highlights[0] contains a placeholder
+PENDING: profile.experience[0].highlights[1] contains a placeholder
+PENDING: Portrait has not been provided
+Content structure: PASS (draft; 17 content items pending).
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> maison-cv@1.3.0 build
+> next build --webpack
+
+▲ Next.js 16.4.3 (webpack)
+✓ Running next.config.ts took 39ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.6s
+  Running TypeScript ...
+  Finished TypeScript in 5.0s ...
+  Collecting page data using 8 workers ...
+  Generating static pages using 8 workers (0/9) ...
+  Generating static pages using 8 workers (2/9) 
+  Generating static pages using 8 workers (4/9) 
+  Generating static pages using 8 workers (6/9) 
+✓ Generating static pages using 8 workers (9/9) in 635ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ○ /admin
+├ ƒ /api/admin/cv
+├ ƒ /api/admin/history
+├ ƒ /api/admin/history/[id]
+├ ƒ /api/admin/history/[id]/restore
+├ ƒ /api/admin/import
+├ ƒ /api/admin/publish
+├ ƒ /api/admin/upload
+├ ƒ /api/media/[...path]
+├ ○ /auth/callback
+├ ○ /icon.svg
+├ ƒ /portfolio
+├ ƒ /print
+├ ƒ /robots.txt
+└ ƒ /sitemap.xml
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
 

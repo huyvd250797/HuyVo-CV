@@ -1,32 +1,35 @@
-# Kiểm chứng Maison CV v1.2.0
+# Kiểm chứng Maison CV v1.3.0 — History & Recovery
 
-Ngày: 31/10/2026. Nền nâng cấp: source v1.1.0 đã bàn giao trong cuộc trò chuyện. Runtime kiểm tra Node.js 24.22.1, Next.js 16.4.3 / Webpack; dependency nền được giữ nguyên, bổ sung Fontsource Noto Serif 5.3.0 để lấy asset font.
+Ngày: 31/10/2026. Nền nâng cấp: ZIP v1.2.0 Boss cung cấp (`Maison-CV_v1.2.0(1).zip`), SHA-256 `27032e5064c11df9bf132825563f89525853d629451b2043a3d6c212e320ccef`. Runtime Node.js 24.22.1, Next.js 16.4.3 / Webpack. Dependency giữ nguyên; package và lockfile nâng cùng 1.3.0.
 
-## Đã xác minh
+## Kết quả
 
 | Hạng mục | Kết quả |
 | --- | --- |
-| Cài dependency và package-lock.json | PASS; version app và lockfile cùng 1.2.0, dependency khớp; không có env thật trong ZIP |
-| `npm test` | PASS: 27 kiểm tra Node/renderer/validation/Postgres, gồm subtest; 18 kiểm tra React/editor/autosave. Tổng 45 |
+| Cài dependency | PASS `npm ci`; lockfile đồng bộ; không cần thêm dependency hoặc biến môi trường |
+| `npm test` | PASS 41 kiểm tra Node gồm subtest + 34 kiểm tra Vitest = 75; 0 fail |
 | `npm run typecheck` | PASS |
-| `npm run check` | PASS cấu trúc dữ liệu nền; 17 mục PENDING là placeholder của source cũ, không phải dữ liệu Supabase của Boss |
-| `npm run build` | PASS build production bằng Webpack |
-| Migration | Chạy 001, chạy 002 và lặp lại 002 trên Postgres nhúng PGlite; giữ RLS/owner, CAS, ảnh private, snapshot tách riêng; metadata layout được giữ; nội dung bị ẩn chỉ gỡ ở public snapshot, không gỡ khỏi nháp |
-| Autosave | Debounce; không gọi publish; vẫn giữ chữ gõ khi request trước đang chạy; lượt kế tiếp dùng version mới; tạm dừng trong IME; offline/online và cache theo owner |
-| Xung đột/khôi phục | Không tự ghi đè; giữ bản cục bộ; bản khôi phục có base version cũ tiếp tục bị chặn cả sau khi mở lại, không tự đổi base version để vượt kiểm tra |
-| Editor | Inline, form, thêm/xóa/sắp xếp mục bằng nút, ẩn/hiện, đổi thứ tự cột, hoàn tác/làm lại, preview mobile, đăng nhập lỗi/đăng xuất phạm vi local |
-| Font | Kiểm tra file WOFF2, Unicode ranges Vietnamese/Latin/Latin mở rộng, giấy phép kèm; chuẩn hóa NFC; font được phục vụ từ public/fonts, không dùng Google Fonts runtime |
-| Browser QA | Xem bản render component với dữ liệu kiểm thử trên desktop và khung mobile 390px; kiểm tra các cụm “Hồ sơ của bạn”, “Chăm chút từng chi tiết”, “Chưa xuất bản” đã liền dấu. Không lưu các trang/screenshot QA vào ZIP |
-| Offline preview | Tạo lại từ renderer/CSS hiện hành; đường dẫn font tương đối và MIME font/woff2 đã kiểm tra |
+| `npm run check` | PASS cấu trúc JSON nền; 17 PENDING là placeholder vốn có, không phải dữ liệu Supabase đang dùng |
+| `npm run build` | PASS production build Webpack, TypeScript và tạo các route lịch sử/import |
+| Migration 003 | Chạy sau 001/002 trên PGlite; baseline nháp/public một lần; chạy lại không nhân đôi hoặc dựng baseline sau lần nâng cấp đầu; capability 3 |
+| Lịch sử / quyền | Owner đọc, khách và user khác không đọc; trình duyệt không được INSERT/UPDATE/DELETE revision trực tiếp; RPC chặn user không phải owner |
+| Checkpoint/publish | Mốc thủ công giữ đầy đủ nháp và không đổi version; publish giữ nội dung ẩn trong revision riêng tư, public vẫn bị loại phần ẩn; dedup mốc publish cùng version |
+| Khôi phục/import | Giữ trước/sau trong transaction; version nháp tăng, public không đổi; conflict/đầu vào lỗi không thêm mốc hoặc ghi đè |
+| Storage | Ảnh được revision tham chiếu không xóa được bằng quyền owner thông thường; file không tham chiếu vẫn xóa được; anonymous chỉ đọc ảnh public hiện hành |
+| JSON / so sánh | Roundtrip nội dung/layout, không xuất credential; từ chối file lỗi/tương lai/quá byte/link không an toàn; NFC và hidden set không tạo khác biệt giả; thứ tự có thay đổi được phát hiện |
+| API | Test route thật với owner/Storage được mock: preview trước apply, fingerprint, ảnh khác owner/ảnh biến mất, pagination metadata-only/cursor, label và restore 409/404 |
+| UI | Tạo mốc, xem/so sánh, chặn khi dirty, xác nhận restore/import, lỗi JSON không gọi API, conflict giữ nội dung; Editor nhận version mới sau restore mà không tự PUT/publish |
+| Browser QA | Xem DOM render từ component test bằng Chrome ở desktop và iframe mobile 390×844; kiểm tra cuộn đến phần so sánh/nút khôi phục, dấu tiếng Việt và không tràn ngang. Trang QA tạm đã bỏ khỏi source bàn giao |
+| Font / preview | Giữ 6 WOFF2 Noto Serif và giấy phép OFL; tạo lại preview offline từ renderer/CSS v1.3, footer đúng version |
 
-Log ở `TEST-RESULTS.txt`; quá trình build cũng chạy TypeScript. Browser QA dùng DOM từ component test, không phải xác nhận kết nối Supabase thật.
+Log lệnh ở `TEST-RESULTS.txt`. Bộ 75 kiểm tra tính cả kiểm tra nền v1.2 để giữ hành vi autosave, khôi phục cục bộ, layout, private/public và renderer. Dữ liệu kiểm thử không ghi vào tài khoản của Boss.
 
-## Giới hạn xác minh và trạng thái triển khai
+## Phạm vi chưa xác minh
 
-- Lần này chưa có URL/key/owner của Supabase thật hoặc repository/Vercel đích để thực hiện nghiệm thu cloud, push hay deploy bản v1.2.0.
-- Auth/API trong React test được mock; PGlite dùng schema Auth/Storage tối thiểu, không thay thế service Supabase thật.
-- Chưa kiểm tra kéo bằng cảm ứng trên thiết bị vật lý, Windows/iPhone/Safari thật, SMTP khôi phục hoặc PDF với CV cá nhân đầy đủ. Các nút lên/xuống là cách sắp xếp thay thế dùng được bằng bàn phím.
-- Chưa chạy `check:release` trên project thật. Sau khi chạy migration 002 và deploy, cần kiểm tra autosave, hai thiết bị cùng sửa, quyền đọc nháp, xuất bản, upload và in theo `UPGRADE-v1.2.0.md`.
-- Giữ nguyên dữ liệu/owner/ảnh và hai biến Vercel hiện tại; không reset DB. Mục đã ẩn chỉ biến mất khỏi bản công khai sau khi xuất bản lại.
+- Chưa có project Supabase thật, repository GitHub hoặc Vercel đích trong yêu cầu lần này; chưa chạy migration trên database thật, chưa push hoặc deploy production.
+- PGlite dùng Auth/Storage schema tối thiểu. Test API/React mock Auth và Storage, không thay thế nghiệm thu Supabase thật. Browser QA xác minh bố cục render bằng dữ liệu kiểm thử, không xác nhận hoạt động cloud.
+- Chưa kiểm tra SMTP khôi phục, iPhone/Safari và cảm ứng trên thiết bị vật lý, PDF với hồ sơ thật hoặc tải file JSON qua các trình duyệt thật.
+- Chưa chạy `check:release` và smoke test trên deployment thật. Làm bảng nghiệm thu trong `UPGRADE-v1.3.0.md` sau migration/deploy.
+- Lịch sử chỉ có mốc được giữ kể từ nâng cấp, cùng baseline còn tồn tại lúc nâng cấp; không thể phục dựng các lần lưu cũ đã bị ghi đè. Chưa có UI dọn/xóa lịch sử.
 
-Bản này có hoàn tác tạm trong phiên và khôi phục cục bộ, chưa có lịch sử phiên bản trên cloud của v1.3.0.
+Giữ nguyên owner/database/ảnh/env. Source không chứa secret thật; `.env.example` chỉ có placeholder. PDF tự động và Portfolio đầy đủ vẫn thuộc các phiên bản kế tiếp trong ROADMAP.md.

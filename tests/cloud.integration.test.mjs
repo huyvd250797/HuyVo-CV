@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 const migration=await readFile(new URL('../supabase/migrations/202610310001_cv_cloud.sql',import.meta.url),'utf8');
 const upgrade=await readFile(new URL('../supabase/migrations/202610310002_flexible_editor.sql',import.meta.url),'utf8');
+const historyMigration=await readFile(new URL('../supabase/migrations/202610310003_history_recovery.sql',import.meta.url),'utf8');
 const owner='11111111-1111-4111-8111-111111111111', stranger='22222222-2222-4222-8222-222222222222';
 
 test('Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images',async t=>{
@@ -96,6 +97,74 @@ test('Postgres migration: explicit owner, RLS, atomic saves, published snapshots
   assert.deepEqual(p.layout.order.aside,['certificates','skills','education']);
   await assert.rejects(db.query('select public.cv_schema_version()'),/permission denied/);
   await as('authenticated',stranger);assert.equal(await scalar('select public.cv_schema_version() as value'),0);
+ });
+ let checkpointId,publishedId;
+ await t.test('v1.3 captures the existing draft/public baseline exactly once',async()=>{
+  await as('postgres');await db.exec(historyMigration);await db.exec(historyMigration);
+  const baseline=(await db.query('select * from public.cv_revisions order by kind')).rows;
+  assert.equal(baseline.length,2);assert.equal(baseline.find(x=>x.kind==='baseline_draft').content.email,'test@example.com');
+  assert.equal(baseline.find(x=>x.kind==='baseline_public').content.email,'');
+  await as('authenticated',owner);assert.equal(await scalar('select public.cv_schema_version() as value'),3);
+ });
+ await t.test('History and recovery RPCs are private and revision content is immutable to the browser',async()=>{
+  await as('anon');await assert.rejects(db.query('select * from public.cv_revisions'),/permission denied/);
+  await assert.rejects(db.query("select public.create_cv_checkpoint(4,'x','')"),/permission denied/);
+  await as('authenticated',stranger);assert.equal((await db.query('select * from public.cv_revisions')).rows.length,0);
+  await assert.rejects(db.query("select public.create_cv_checkpoint(4,'x','')"),/OWNER_REQUIRED/);
+  await assert.rejects(db.query("select public.apply_cv_recovery(4,'import','{}',null)"),/OWNER_REQUIRED/);
+  await as('authenticated',owner);await assert.rejects(db.query("update public.cv_revisions set label='evil'"),/permission denied/);
+  await assert.rejects(db.query('delete from public.cv_revisions'),/permission denied/);
+ });
+ await t.test('Manual checkpoints keep the complete draft without changing its version',async()=>{
+  const result=await scalar("select public.create_cv_checkpoint(4,'Ứng tuyển PM','Ghi chú thật') as value");checkpointId=result.id;
+  const row=(await db.query('select * from public.cv_revisions where id=$1',[checkpointId])).rows[0];
+  assert.equal(row.content.email,'test@example.com');assert.equal(row.note,'Ghi chú thật');
+  assert.equal(Number((await db.query('select version from public.cv_documents')).rows[0].version),4);
+  await assert.rejects(db.query("select public.create_cv_checkpoint(3,'stale','')"),/CV_CONFLICT/);
+  await assert.rejects(db.query("select public.create_cv_checkpoint(4,$1,'')",['x'.repeat(121)]),/INVALID_REVISION_LABEL/);
+ });
+ await t.test('Publication archives the full draft once per version while the public snapshot remains redacted',async()=>{
+  await db.query('select public.save_cv_draft($1::jsonb,4)',[JSON.stringify({...content,name:'Phiên bản 5',portrait:`/api/media/${otherPath}`,objective:'HIDDEN IN PUBLIC',layout:{hidden:['objective']}})]);
+  const published=await scalar('select public.publish_cv(5) as value');publishedId=published.revision_id;
+  const again=await scalar('select public.publish_cv(5) as value');assert.equal(again.revision_id,publishedId);
+  assert.equal((await db.query("select * from public.cv_revisions where kind='published' and document_version=5")).rows.length,1);
+  assert.equal((await db.query('select content from public.cv_revisions where id=$1',[publishedId])).rows[0].content.objective,'HIDDEN IN PUBLIC');
+  await as('anon');assert.equal((await db.query('select content from public.cv_publications')).rows[0].content.objective,'');
+  await as('authenticated',owner);
+ });
+ await t.test('Restore creates a pre-change checkpoint and a new draft, without publishing or accepting a stale retry',async()=>{
+  const result=await scalar("select public.apply_cv_recovery(5,'restore',null,$1::uuid) as value",[checkpointId]);
+  assert.equal(result.document.version,6);assert.equal(result.document.content.name,'Tên kiểm thử');
+  assert.equal((await db.query('select content from public.cv_revisions where id=$1',[result.before_revision_id])).rows[0].content.name,'Phiên bản 5');
+  assert.equal(Number((await db.query('select document_version from public.cv_publications')).rows[0].document_version),5);
+  const count=(await db.query('select count(*) from public.cv_revisions')).rows[0].count;
+  await assert.rejects(db.query("select public.apply_cv_recovery(5,'restore',null,$1::uuid)",[checkpointId]),/CV_CONFLICT/);
+  await assert.rejects(db.query("select public.apply_cv_recovery(6,'restore',null,'99999999-9999-4999-8999-999999999999')"),/REVISION_NOT_FOUND/);
+  await assert.rejects(db.query("select public.apply_cv_recovery(6,'bad','{}',null)"),/INVALID_RECOVERY_SOURCE/);
+  await assert.rejects(db.query("select public.apply_cv_recovery(6,'import','[]',null)"),/INVALID_CV/);
+  assert.equal((await db.query('select count(*) from public.cv_revisions')).rows[0].count,count);
+ });
+ await t.test('Import preserves the previous saved draft atomically and leaves the publication untouched',async()=>{
+  const result=await scalar("select public.apply_cv_recovery(6,'import',$1::jsonb,null) as value",[JSON.stringify({...content,name:'Nhập JSON',portrait:`/api/media/${otherPath}`})]);
+  assert.equal(result.document.version,7);assert.equal(result.document.content.name,'Nhập JSON');
+  assert.equal((await db.query('select content from public.cv_revisions where id=$1',[result.before_revision_id])).rows[0].content.name,'Tên kiểm thử');
+  assert.equal((await db.query('select content from public.cv_publications')).rows[0].content.name,'Phiên bản 5');
+ });
+ await t.test('Portraits referenced by private history cannot be deleted or read by anonymous visitors',async()=>{
+  const deleted=await db.query("delete from storage.objects where bucket_id='cv-assets' returning name");assert.equal(deleted.rows.length,0);
+  const loose=`${owner}/55555555-5555-4555-8555-555555555555.png`;
+  await db.query("insert into storage.objects(bucket_id,name) values('cv-assets',$1)",[loose]);
+  assert.equal((await db.query('delete from storage.objects where name=$1 returning name',[loose])).rows.length,1);
+  await as('anon');assert.deepEqual((await db.query('select name from storage.objects')).rows.map(x=>x.name),[otherPath]);
+  await assert.rejects(db.query('select content from public.cv_revisions'),/permission denied/);
+ });
+ await t.test('Migration reruns preserve baselines and do not invent pre-upgrade states for a new project',async()=>{
+  await as('postgres');await db.exec(historyMigration);
+  assert.equal((await db.query("select * from public.cv_revisions where kind like 'baseline_%'")).rows.length,2);
+  await db.exec('truncate public.cv_revisions,public.cv_documents,public.cv_publications,public.cv_migration_log');
+  await db.exec(historyMigration);await as('authenticated',owner);await db.query('select public.save_cv_draft($1::jsonb,0)',[JSON.stringify(content)]);
+  await as('postgres');await db.exec(historyMigration);
+  assert.equal((await db.query('select * from public.cv_revisions')).rows.length,0);
  });
  await db.close();
 });

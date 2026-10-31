@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.3.0 — History & Recovery · 31/10/2026
+
+- Lịch sử cloud riêng tư theo thời gian; mốc khi xuất bản, mốc thủ công có tên và ghi chú; phân trang 20 mốc.
+- So sánh theo nhóm thông tin, thứ tự và phần ẩn/hiện với nháp hoặc mốc khác; xem CV ở chế độ chỉ đọc cùng ảnh riêng tư.
+- Khôi phục vào nháp sau xác nhận; giữ mốc trước/sau trong cùng transaction, tăng version và giữ CAS; không tự xuất bản.
+- Xuất JSON nội dung/layout; nhập file tối đa 256 KB có kiểm tra schema, xem trước, xác nhận và giữ mốc trước/sau. Không đóng gói ảnh/token/secret trong JSON.
+- Xác minh ảnh nhập, cảnh báo ảnh thiếu/khác owner; fingerprint nội dung xem trước chặn áp dụng nếu dữ liệu hoặc ảnh đã thay đổi.
+- RLS chỉ owner đọc lịch sử; RPC kiểm tra quyền/version; chặn sửa/xóa mốc từ trình duyệt. Bảo vệ ảnh đang được lịch sử tham chiếu.
+- Migration 003 giữ nháp/public hiện có làm baseline một lần, không tái tạo lịch sử chưa từng lưu; không reset DB/owner/ảnh/env.
+- Giữ font tiếng Việt và autosave v1.2; tạm dừng editor nền khi mở lịch sử, giữ khóa backup cục bộ cũ để tương thích.
+- App/package-lock/footer/backup cùng version 1.3.0; schema CV vẫn 2, capability database nâng thành 3.
+
+### Nâng cấp
+
+Đang v1.2 chỉ chạy `202610310003_history_recovery.sql`, deploy source mới và tải lại tab quản trị. Project mới chạy 001 → 002 → 003 → setup-owner. Xem `UPGRADE-v1.3.0.md`. Không thêm biến môi trường, không đổi bản công khai trước khi Boss xuất bản lại.
+
+
 ## v1.2.0 — Flexible Editing & Autosave · 31/10/2026
 
 - Tự lưu nháp sau khoảng 1,2 giây ngừng nhập; gom yêu cầu và giữ nội dung gõ thêm trong lúc request trước đang chạy.
