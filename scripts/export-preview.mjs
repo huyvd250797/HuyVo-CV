@@ -1,0 +1,12 @@
+import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import { renderDocument } from '../src/lib/render.mjs';
+const root = fileURLToPath(new URL('../', import.meta.url));
+const profile = JSON.parse(await readFile(path.join(root, 'src/data/profile.json'), 'utf8'));
+await mkdir(path.join(root, 'preview'), { recursive: true });
+const options = { homeHref: 'index.html', portfolioHref: 'portfolio.html', assetPrefix: '../public' };
+await writeFile(path.join(root, 'preview/index.html'), renderDocument(profile, 'cv', options));
+await writeFile(path.join(root, 'preview/portfolio.html'), renderDocument(profile, 'portfolio', options));
+await copyFile(path.join(root, 'src/app/globals.css'), path.join(root, 'preview/styles.css'));
+console.log('Offline review updated: preview/index.html and preview/portfolio.html');

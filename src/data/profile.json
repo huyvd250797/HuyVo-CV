@@ -1,0 +1,74 @@
+{
+  "publication": "draft",
+  "language": "vi",
+  "name": "[Họ và tên]",
+  "role": "IT Project Manager / Business Analyst",
+  "siteUrl": "",
+  "summary": "Tham gia triển khai hệ thống quản trị giáo dục đại học, kết nối nhu cầu nghiệp vụ với giải pháp công nghệ.",
+  "objective": "[Mục tiêu nghề nghiệp của bạn]",
+  "email": "",
+  "phone": "",
+  "website": "",
+  "address": "",
+  "portrait": "",
+  "portraitAlt": "Ảnh chân dung cá nhân",
+  "cvFile": "",
+  "education": [
+    {
+      "school": "[Tên trường đã tốt nghiệp]",
+      "degree": "[Chuyên ngành / Bằng cấp]",
+      "period": "[Năm nhập học – Năm tốt nghiệp]",
+      "detail": ""
+    }
+  ],
+  "skills": [
+    {
+      "name": "[Kỹ năng chuyên môn]",
+      "description": "[Mô tả năng lực và công cụ thực tế]"
+    },
+    {
+      "name": "[Kỹ năng cá nhân]",
+      "description": "[Mô tả năng lực phối hợp, giao tiếp hoặc giải quyết vấn đề]"
+    }
+  ],
+  "experience": [
+    {
+      "role": "[Vị trí công việc gần nhất]",
+      "company": "[Tên công ty / Tổ chức]",
+      "period": "[Thời gian làm việc]",
+      "summary": "[Vai trò và phạm vi phụ trách]",
+      "highlights": [
+        "[Trách nhiệm chính]",
+        "[Kết quả đã xác nhận]"
+      ]
+    }
+  ],
+  "implementations": [
+    {
+      "name": "GDU",
+      "description": "Tham gia triển khai hệ thống quản trị tại GDU."
+    },
+    {
+      "name": "DTHU",
+      "description": "Tham gia triển khai hệ thống quản trị tại DTHU."
+    },
+    {
+      "name": "HIU",
+      "description": "Tham gia triển khai hệ thống quản trị tại HIU."
+    },
+    {
+      "name": "EPU",
+      "description": "Tham gia triển khai hệ thống quản trị tại EPU."
+    },
+    {
+      "name": "DAU",
+      "description": "Tham gia triển khai hệ thống quản trị tại DAU."
+    },
+    {
+      "name": "INTRACOM",
+      "description": "Tham gia triển khai hệ thống quản trị tại INTRACOM."
+    }
+  ],
+  "projects": [],
+  "certificates": []
+}

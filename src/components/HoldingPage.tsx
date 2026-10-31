@@ -1,0 +1,3 @@
+export function HoldingPage({ error=false }: { error?:boolean }) {
+  return <main id="main" className="holding-page"><a className="wordmark" href="/">maison.<span>PERSONAL RÉSUMÉ</span></a><div className="holding-orbit" aria-hidden="true">m.</div><p className="micro">A NEW CHAPTER</p><h1>{error ? <>Hẹn gặp lại<br/>trong chốc lát.</> : <>Một câu chuyện<br/>đang được hoàn thiện.</>}</h1><p>{error ? 'Hồ sơ tạm thời chưa tải được. Vui lòng thử lại sau.' : 'CV sẽ xuất hiện tại đây khi chủ sở hữu sẵn sàng chia sẻ.'}</p><a className="button" href={error?'/':'/admin'}>{error?'Tải lại trang':'Dành cho chủ sở hữu'} ↗</a><small>MAISON ESPRESSO · PERSONAL RÉSUMÉ</small></main>;
+}

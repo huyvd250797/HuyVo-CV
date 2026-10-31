@@ -1,0 +1,51 @@
+
+> maison-cv@1.1.0 test
+> npm run test:unit && npm run test:ui
+
+
+> maison-cv@1.1.0 test:unit
+> node --test tests/*.test.mjs
+
+▶ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images
+  ✔ No first-login ownership or automatic public seed (20.033782ms)
+  ✔ Owner can save first draft; duplicate seed and stale version are rejected (14.829392ms)
+  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (9.347903ms)
+  ✔ Draft images are private and storage writes require explicit owner (14.560419ms)
+  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (13.347084ms)
+✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (2851.014913ms)
+✔ Preview routes serve real files with the correct content type, without opening a socket (14.24274ms)
+✔ Preview Portfolio aliases redirect to the correct static document (0.90768ms)
+✔ Preview does not serve source files or traversal outside public assets (5.379381ms)
+✔ Draft is honest about missing content and includes all six verified units (4.780643ms)
+✔ The final content section is the Portfolio entry, followed by footer (0.608917ms)
+✔ Published contact links use real, validated destinations (0.756043ms)
+✔ All content stays text; malicious URL schemes and attribute injection are rejected (0.75799ms)
+✔ Portrait and project links render only when configured (0.550671ms)
+✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.270818ms)
+✔ Content checks reject malformed data and identify unfinished release content (2.490266ms)
+✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (6.061206ms)
+✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (1.508971ms)
+✔ Image validation checks signatures instead of trusting extension or MIME type (0.460333ms)
+✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (2.852579ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3097.886866
+
+
+> maison-cv@1.1.0 test:ui
+> vitest run
+
+
+ RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.1.0
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  18:24:07
+   Duration  3.45s (environment 47%, tests 42%, import 6%, transform 4%)
+
