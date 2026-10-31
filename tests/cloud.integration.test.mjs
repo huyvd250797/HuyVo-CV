@@ -166,5 +166,25 @@ test('Postgres migration: explicit owner, RLS, atomic saves, published snapshots
   await as('postgres');await db.exec(historyMigration);
   assert.equal((await db.query('select * from public.cv_revisions')).rows.length,0);
  });
+ await t.test('Sharing capability migration is repeatable and keeps documents, publication, history and owner',async()=>{
+  await as('postgres');const before=await db.query('select content,version from public.cv_documents');
+  const migration4=await readFile(new URL('../supabase/migrations/202610310004_professional_sharing.sql',import.meta.url),'utf8');
+  await db.exec(migration4);await db.exec(migration4);
+  assert.deepEqual((await db.query('select content,version from public.cv_documents')).rows,before.rows);
+  await as('authenticated',owner);assert.equal(await scalar('select public.cv_schema_version() as value'),4);
+  const version=Number(before.rows[0].version);
+  const updated={...content,schemaVersion:3,implementations:[{code:'EPU',name:'Trường Đại học Điện lực',description:'Giữ mã mới'}]};
+  const saved=await scalar('select public.save_cv_draft($1::jsonb,$2::bigint) as value',[JSON.stringify(updated),version]);
+  assert.equal(saved.content.schemaVersion,3);assert.equal(saved.content.implementations[0].code,'EPU');
+  const mark=await scalar("select public.create_cv_checkpoint($1::bigint,'Mã đơn vị','') as value",[version+1]);
+  await scalar('select public.save_cv_draft($1::jsonb,$2::bigint) as value',[JSON.stringify({...updated,implementations:[]}),version+1]);
+  const restored=await scalar("select public.apply_cv_recovery($1::bigint,'restore',null,$2::uuid) as value",[version+2,mark.id]);
+  assert.equal(restored.document.content.schemaVersion,3);assert.equal(restored.document.content.implementations[0].code,'EPU');
+  await scalar('select public.publish_cv($1::bigint) as value',[version+3]);
+  const publication=(await db.query('select content from public.cv_publications')).rows[0].content;
+  assert.equal(publication.schemaVersion,3);assert.equal(publication.implementations[0].name,'Trường Đại học Điện lực');
+  await as('authenticated',stranger);assert.equal(await scalar('select public.cv_schema_version() as value'),0);
+  await as('anon');await assert.rejects(db.query('select public.cv_schema_version()'),/permission denied/);
+ });
  await db.close();
 });

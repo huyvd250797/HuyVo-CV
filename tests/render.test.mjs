@@ -8,7 +8,7 @@ const base = JSON.parse(await readFile(new URL('../src/data/profile.json', impor
 test('Draft is honest about missing content and includes all six verified units', () => {
   const html = renderCv(base);
   assert.match(html, /Hồ sơ đang hoàn thiện/);
-  for (const unit of ['GDU','DTHU','HIU','EPU','DAU','INTRACOM']) assert.match(html, new RegExp(`<summary>${unit}</summary>`));
+  for (const unit of ['GDU','DTHU','HIU','EPU','DAU','INTRACOM']) assert.match(html, new RegExp(`<summary>[\\s\\S]*?>${unit}</(?:strong|span)>[\\s\\S]*?</summary>`));
   assert.doesNotMatch(html, /href="\/cv.pdf"/);
   assert.match(html, /href="\/portfolio"/);
   for (const id of ['education','skills','certificates','experience','projects','personal','objective']) assert.match(html, new RegExp(`id="${id}"`));

@@ -1,35 +1,39 @@
-# Kiểm chứng Maison CV v1.3.0 — History & Recovery
+# Kiểm chứng Maison CV v1.4.0
 
-Ngày: 31/10/2026. Nền nâng cấp: ZIP v1.2.0 Boss cung cấp (`Maison-CV_v1.2.0(1).zip`), SHA-256 `27032e5064c11df9bf132825563f89525853d629451b2043a3d6c212e320ccef`. Runtime Node.js 24.22.1, Next.js 16.4.3 / Webpack. Dependency giữ nguyên; package và lockfile nâng cùng 1.3.0.
+Ngày 31/10/2026 (Asia/Bangkok). Nâng cấp trực tiếp ZIP v1.3.0 Boss cung cấp: SHA-256 `b388a5f42e9cfb0e32e25ceccd31327e4cc2059978791c35e6c07fa0ef32fb07`. Node.js 24.22.1, Next.js 16.4.3 / Webpack, React 19.3.1. Không đổi stack hoặc dữ liệu cá nhân từ nguồn khác.
 
 ## Kết quả
 
 | Hạng mục | Kết quả |
 | --- | --- |
-| Cài dependency | PASS `npm ci`; lockfile đồng bộ; không cần thêm dependency hoặc biến môi trường |
-| `npm test` | PASS 41 kiểm tra Node gồm subtest + 34 kiểm tra Vitest = 75; 0 fail |
+| Dependency / lockfile | PASS; package/lock 1.4.0; PDF 4.3.1, layout 4.4.3/render 4.3.1 overrides; pdf-lib 1.17.1, QR 1.5.4, sharp 0.35.5 |
+| `npm test` | PASS 47 kiểm tra Node gồm subtest + 48 Vitest = 95, không fail |
+| `npm run test:cloud` sau khi hoàn thiện 004 | PASS; kiểm tra thêm save/restore/publish giữ code, schema 3 và capability 4 |
 | `npm run typecheck` | PASS |
-| `npm run check` | PASS cấu trúc JSON nền; 17 PENDING là placeholder vốn có, không phải dữ liệu Supabase đang dùng |
-| `npm run build` | PASS production build Webpack, TypeScript và tạo các route lịch sử/import |
-| Migration 003 | Chạy sau 001/002 trên PGlite; baseline nháp/public một lần; chạy lại không nhân đôi hoặc dựng baseline sau lần nâng cấp đầu; capability 3 |
-| Lịch sử / quyền | Owner đọc, khách và user khác không đọc; trình duyệt không được INSERT/UPDATE/DELETE revision trực tiếp; RPC chặn user không phải owner |
-| Checkpoint/publish | Mốc thủ công giữ đầy đủ nháp và không đổi version; publish giữ nội dung ẩn trong revision riêng tư, public vẫn bị loại phần ẩn; dedup mốc publish cùng version |
-| Khôi phục/import | Giữ trước/sau trong transaction; version nháp tăng, public không đổi; conflict/đầu vào lỗi không thêm mốc hoặc ghi đè |
-| Storage | Ảnh được revision tham chiếu không xóa được bằng quyền owner thông thường; file không tham chiếu vẫn xóa được; anonymous chỉ đọc ảnh public hiện hành |
-| JSON / so sánh | Roundtrip nội dung/layout, không xuất credential; từ chối file lỗi/tương lai/quá byte/link không an toàn; NFC và hidden set không tạo khác biệt giả; thứ tự có thay đổi được phát hiện |
-| API | Test route thật với owner/Storage được mock: preview trước apply, fingerprint, ảnh khác owner/ảnh biến mất, pagination metadata-only/cursor, label và restore 409/404 |
-| UI | Tạo mốc, xem/so sánh, chặn khi dirty, xác nhận restore/import, lỗi JSON không gọi API, conflict giữ nội dung; Editor nhận version mới sau restore mà không tự PUT/publish |
-| Browser QA | Xem DOM render từ component test bằng Chrome ở desktop và iframe mobile 390×844; kiểm tra cuộn đến phần so sánh/nút khôi phục, dấu tiếng Việt và không tràn ngang. Trang QA tạm đã bỏ khỏi source bàn giao |
-| Font / preview | Giữ 6 WOFF2 Noto Serif và giấy phép OFL; tạo lại preview offline từ renderer/CSS v1.3, footer đúng version |
+| `npm run build` | PASS production Webpack/TypeScript, BUILD_ID và tracing các endpoint được tạo |
+| Server bundle fonts | PASS: NFT của PDF/OG có đủ ba TTF; external packages được khai báo cho Node.js |
+| `npm run check` | PASS cấu trúc nền; 17 PENDING là placeholder cũ, không phải nội dung cloud |
+| Migration 004 | Chạy 001→002→003→004 trên PGlite; rerun 004; nháp hiện có giữ nguyên trước lần ghi mới; owner vẫn có capability 4, người khác 0/khách không được execute. Lưu/restore/publish mới dùng schema 3 và giữ Mã đơn vị |
+| Mã đơn vị | Test trường mã/tên độc lập, lưu cloud mock, render hai dòng, legacy mã rỗng, NFC, giới hạn 80 ký tự, escape HTML; JSON và diff/history giữ code |
+| PDF API | Attachment/tên file/version/no-store, đọc publication, đổi nội dung ở cùng version đổi cache key, unpublished không render, lỗi/tệp quá lớn trả thông báo phù hợp |
+| PDF engine thật | Render fixture 2 trang và fixture dài 8 trang; tự ngắt A4; file khoảng 48/64 KB. PDF font nhúng, trích xuất đúng tiếng Việt, đủ 10 mốc cuối các công việc, không có chuỗi ở phần ẩn |
+| PDF visual QA | Render PNG tất cả 2/8 trang; xem từng trang ngắn và contact sheet dài. Tiêu đề không đứng riêng cuối trang, footer đánh số đúng; pdfplumber kiểm tra toàn bộ word bounding boxes nằm trong trang, không có chữ tràn |
+| Social image thật | ImageResponse tạo PNG 1200×630 có tên/chức danh/giới thiệu tiếng Việt; xem ảnh render; chưa publish trả 404 |
+| QR | Tạo PNG thật 480×480, metadata kích thước đúng, helper URL loại path/query/hash và credentials; chưa có URL không tạo QR. Chưa quét bằng điện thoại thật |
+| Chia sẻ UI | Copy/Web Share đúng URL public, thiếu URL dùng origin copy dự phòng; PDF lỗi không báo thành công, nút thử lại; QR có alt/download, trạng thái aria-live |
+| Browser QA | Chrome xem component DOM từ test: chia sẻ ở iframe 390×844; editor desktop mở thẻ EPU và trường mã/tên. Kiểm tra responsive một cột cho vùng triển khai hẹp, hai dòng mã/tên rõ ràng. Trang/screenshot QA không đưa vào ZIP |
+| Hành vi nền | Các kiểm tra autosave, local recovery, CAS, history/import/restore, private/public và Storage RLS của v1.3 tiếp tục đạt |
+| Preview offline | Tạo lại renderer/CSS/footer v1.4.0; không có Auth/PDF cloud trong preview offline |
 
-Log lệnh ở `TEST-RESULTS.txt`. Bộ 75 kiểm tra tính cả kiểm tra nền v1.2 để giữ hành vi autosave, khôi phục cục bộ, layout, private/public và renderer. Dữ liệu kiểm thử không ghi vào tài khoản của Boss.
+Log lệnh ở `TEST-RESULTS.txt`. Dependency PDF được khóa theo bộ đã kiểm tra vì phiên bản dàn trang mới đã bộc lộ lỗi footer/orphan heading trong QA; không bỏ overrides hoặc nâng đồng loạt mà chưa chạy lại kiểm tra PDF.
 
-## Phạm vi chưa xác minh
+## Giới hạn xác minh
 
-- Chưa có project Supabase thật, repository GitHub hoặc Vercel đích trong yêu cầu lần này; chưa chạy migration trên database thật, chưa push hoặc deploy production.
-- PGlite dùng Auth/Storage schema tối thiểu. Test API/React mock Auth và Storage, không thay thế nghiệm thu Supabase thật. Browser QA xác minh bố cục render bằng dữ liệu kiểm thử, không xác nhận hoạt động cloud.
-- Chưa kiểm tra SMTP khôi phục, iPhone/Safari và cảm ứng trên thiết bị vật lý, PDF với hồ sơ thật hoặc tải file JSON qua các trình duyệt thật.
-- Chưa chạy `check:release` và smoke test trên deployment thật. Làm bảng nghiệm thu trong `UPGRADE-v1.3.0.md` sau migration/deploy.
-- Lịch sử chỉ có mốc được giữ kể từ nâng cấp, cùng baseline còn tồn tại lúc nâng cấp; không thể phục dựng các lần lưu cũ đã bị ghi đè. Chưa có UI dọn/xóa lịch sử.
+- Chưa có URL/key/project owner Supabase thật, repository hoặc Vercel đích cho lần nâng cấp này. Chưa push GitHub, deploy, chạy migration hoặc đo cold start trên tài khoản thật của Boss.
+- React/API test dùng mock Auth/Storage/publication; PGlite dùng schema Auth/Storage tối thiểu. Test engine PDF/OG/QR là thực, nhưng dữ liệu là fixture kiểm thử.
+- Browser QA xác minh bố cục component; chưa nghiệm thu luồng tải file trên iPhone, Web Share thực, quét QR từ thiết bị thứ hai hoặc preview Zalo/Facebook thật. Cache preview ngoài app phụ thuộc nền tảng.
+- PDF là mẫu A4 sáng một cột, nội dung tương ứng public, không sao chép pixel giao diện web. Chưa có gắn thẻ PDF/UA đầy đủ, tùy chọn nhiều template PDF hoặc mật khẩu.
+- Ảnh responsive được xử lý sau Storage RLS; chưa có tài khoản cloud thật để thử tải ảnh qua Function đã deploy. Các policy cũ đã có test PGlite.
+- PDF tự động chỉ xuất bản công khai; In bản nháp vẫn dùng trình duyệt. Nội dung dài hơn fixture cần Boss kiểm tra với hồ sơ thật sau deploy theo UPGRADE-v1.4.0.md.
 
-Giữ nguyên owner/database/ảnh/env. Source không chứa secret thật; `.env.example` chỉ có placeholder. PDF tự động và Portfolio đầy đủ vẫn thuộc các phiên bản kế tiếp trong ROADMAP.md.
+Giữ hai biến Supabase hiện tại, không thêm secret vào source. Portfolio vẫn là trang chờ; phiên bản kế tiếp là v2.0.0 theo ROADMAP.md.

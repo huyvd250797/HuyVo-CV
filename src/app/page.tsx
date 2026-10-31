@@ -2,15 +2,16 @@ import type { Metadata } from 'next';
 import { loadPublicCv } from '@/lib/public-profile';
 import { renderCv } from '@/lib/render.mjs';
 import { PublicMarkup } from '@/components/PublicMarkup';
+import { ShareTools } from '@/components/ShareTools';
+import {canonicalCvUrl,publishedMetadata} from '@/lib/sharing.mjs';
 import { HoldingPage } from '@/components/HoldingPage';
 export const dynamic = 'force-dynamic';
 export async function generateMetadata(): Promise<Metadata> {
-  const { profile:p } = await loadPublicCv();
-  if (!p) return { title:'CV đang hoàn thiện',robots:{index:false,follow:false} };
-  return { title:`${p.name} — ${p.role}`,description:p.summary,robots:{index:true,follow:true},openGraph:{title:`${p.name} — ${p.role}`,description:p.summary,type:'website',locale:'vi_VN',images:['/og-image.png']} };
+ const {profile,version}=await loadPublicCv();
+ return profile?publishedMetadata(profile,version):{title:'CV đang hoàn thiện',robots:{index:false,follow:false}};
 }
 export default async function HomePage() {
-  const { profile, status } = await loadPublicCv();
+  const { profile, status,version=1 } = await loadPublicCv();
   if (!profile) return <HoldingPage error={status==='error'} />;
-  return <><PublicMarkup html={renderCv(profile,{ printHref:'/print' })} /><a className="owner-entry" href="/admin">Quản lý CV</a></>;
+  return <><PublicMarkup html={renderCv(profile,{ printHref:'/print',pdfHref:'/api/cv/pdf',responsivePortrait:true })} /><ShareTools name={profile.name} role={profile.role} url={canonicalCvUrl(profile.siteUrl)} version={version}/><a className="owner-entry" href="/admin">Quản lý CV</a></>;
 }

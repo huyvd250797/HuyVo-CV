@@ -161,3 +161,15 @@ test('Recovery from the archive updates the editor without triggering publicatio
  expect(screen.getByText('Đã khôi phục vào bản nháp và giữ mốc trước khôi phục. CV công khai chưa thay đổi.')).toBeTruthy();
  expect(vi.mocked(fetch).mock.calls.some(([url,init])=>String(url).includes('/publish')||init?.method==='PUT')).toBe(false);
 });
+
+test('Implementation code and full name edit independently, autosave and render in two lines',async()=>{
+ remote.content.implementations=[{name:'EPU',description:'Nội dung trước nâng cấp'}];
+ render(<Editor/>);await screen.findByLabelText('Họ và tên');
+ fireEvent.click(screen.getByRole('button',{name:/07.*Kinh nghiệm triển khai/}));
+ fireEvent.change(screen.getByLabelText('Mã đơn vị (ví dụ: EPU)'),{target:{value:'EPU'}});
+ fireEvent.change(screen.getByLabelText('Tên đơn vị đầy đủ'),{target:{value:'Trường Đại học Điện lực'}});
+ fireEvent.click(screen.getAllByRole('button',{name:'Lưu nháp'})[0]);await screen.findByText('Đã lưu nháp online. Khách vẫn thấy bản đã xuất bản.');
+ expect(remote.content.implementations[0]).toMatchObject({code:'EPU',name:'Trường Đại học Điện lực',description:'Nội dung trước nâng cấp'});
+ expect(document.querySelector('.unit-code')?.textContent).toBe('EPU');expect(document.querySelector('.unit-name')?.textContent).toBe('Trường Đại học Điện lực');
+ if(process.env.QA_CAPTURE_DIR){const css=await readFile('src/app/globals.css','utf8');await mkdir(process.env.QA_CAPTURE_DIR,{recursive:true});await writeFile(`${process.env.QA_CAPTURE_DIR}/unit-editor.html`,`<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body>${document.body.innerHTML}</body></html>`);}
+});

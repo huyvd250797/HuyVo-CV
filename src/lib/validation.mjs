@@ -3,7 +3,7 @@ const groups = {
   education: ['school','degree','period','detail'],
   skills: ['name','description'],
   experience: ['role','company','period','summary','highlights'],
-  implementations: ['name','description'],
+  implementations: ['code','name','description'],
   projects: ['name','description','role','year','technologies','demoUrl','sourceUrl'],
   certificates: ['name','issuer','year','url'],
 };
@@ -14,7 +14,7 @@ export function validWebUrl(value) {
 export function validateCv(input, publishing = false) {
   const errors = [];
   if (!input || typeof input !== 'object' || Array.isArray(input)) return { errors: ['Dữ liệu CV không hợp lệ.'], data: null };
-  const data = { publication: 'draft', language: 'vi', cvFile: '', schemaVersion: 2 };
+  const data = { publication: 'draft', language: 'vi', cvFile: '', schemaVersion: 3 };
   function string(value, label, max = 6000) {
     if (typeof value !== 'string') { errors.push(`${label}: cần là văn bản.`); return ''; }
     if (value.length > max) errors.push(`${label}: tối đa ${max} ký tự.`);
@@ -36,7 +36,7 @@ export function validateCv(input, publishing = false) {
         if (['highlights','technologies'].includes(key)) {
           if (!Array.isArray(item[key]) || item[key].length > 40) { errors.push(`${label}: tối đa 40 dòng.`); row[key] = []; }
           else row[key] = item[key].map(v => string(v,label,1500)).filter(Boolean);
-        } else row[key] = string(item[key] ?? '',label);
+        } else row[key] = string(item[key] ?? '',label,key==='code'?80:6000);
         if (['url','demoUrl','sourceUrl'].includes(key) && row[key] && !validWebUrl(row[key])) errors.push(`${label}: đường dẫn không hợp lệ.`);
       }
       return row;

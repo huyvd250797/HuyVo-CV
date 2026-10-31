@@ -46,29 +46,36 @@
   "implementations": [
     {
       "name": "GDU",
-      "description": "Tham gia triển khai hệ thống quản trị tại GDU."
+      "description": "Tham gia triển khai hệ thống quản trị tại GDU.",
+      "code": ""
     },
     {
       "name": "DTHU",
-      "description": "Tham gia triển khai hệ thống quản trị tại DTHU."
+      "description": "Tham gia triển khai hệ thống quản trị tại DTHU.",
+      "code": ""
     },
     {
       "name": "HIU",
-      "description": "Tham gia triển khai hệ thống quản trị tại HIU."
+      "description": "Tham gia triển khai hệ thống quản trị tại HIU.",
+      "code": ""
     },
     {
-      "name": "EPU",
-      "description": "Tham gia triển khai hệ thống quản trị tại EPU."
+      "name": "Trường Đại học Điện lực",
+      "description": "Tham gia triển khai hệ thống quản trị tại EPU.",
+      "code": "EPU"
     },
     {
       "name": "DAU",
-      "description": "Tham gia triển khai hệ thống quản trị tại DAU."
+      "description": "Tham gia triển khai hệ thống quản trị tại DAU.",
+      "code": ""
     },
     {
       "name": "INTRACOM",
-      "description": "Tham gia triển khai hệ thống quản trị tại INTRACOM."
+      "description": "Tham gia triển khai hệ thống quản trị tại INTRACOM.",
+      "code": ""
     }
   ],
   "projects": [],
-  "certificates": []
+  "certificates": [],
+  "schemaVersion": 3
 }

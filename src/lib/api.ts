@@ -10,7 +10,7 @@ export async function ownerContext(request: Request) {
   const { data: { user }, error } = await db.auth.getUser(token);
   if (error || !user) throw new ApiError(401,'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
   const owner = await db.rpc('cv_schema_version');
-  if (owner.error || (Number(owner.data)!==0 && Number(owner.data)!==3)) throw new ApiError(503,'Cần chạy migration v1.3.0 (003) trong Supabase trước khi chỉnh sửa.');
+  if (owner.error || (Number(owner.data)!==0 && Number(owner.data)!==4)) throw new ApiError(503,'Cần chạy migration v1.4.0 (004) trong Supabase trước khi chỉnh sửa.');
   if (Number(owner.data)===0) throw new ApiError(403,'Tài khoản này chưa được cấp quyền chủ sở hữu CV.');
   return { db, user };
 }

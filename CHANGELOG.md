@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.4.0 — PDF & Professional Sharing · 31/10/2026
+
+- Tải PDF A4 tự động từ snapshot public, không từ nháp. Font TTF nội bộ hỗ trợ tiếng Việt có thể chọn chữ; ngắt nhiều trang, footer/số trang, liên kết và QR cuối hồ sơ.
+- Mẫu A4 sáng một cột riêng cho ứng tuyển; cùng toàn bộ nội dung/thứ tự/ẩn mục của bản công khai. Không ép CV dài thành một trang hoặc chụp web thành ảnh.
+- Bộ chia sẻ: copy URL, Web Share có fallback, tải QR PNG; metadata OG/Twitter/canonical và ảnh PNG 1200×630 từ nội dung công khai.
+- Thêm Mã đơn vị (`implementations[].code`, tùy chọn, tối đa 80 ký tự); mã trên/tên đầy đủ dưới. Hỗ trợ editor/autosave, JSON, diff/history và PDF; dữ liệu cũ giữ tên cũ, mã mặc định rỗng. Không tự suy đoán tên của các đơn vị đang lưu.
+- Schema nội dung nâng 3; đọc được JSON schema 1/2 và các mốc cũ. Migration 004 nâng capability 4 và hàm lưu schema 3 để chặn editor cũ làm mất mã mới; không sửa nội dung hoặc lịch sử trong DB.
+- Tối ưu chân dung WebP responsive sau Storage RLS; resize ảnh PDF/OG, không tải URL ảnh tùy ý từ người dùng.
+- Các endpoint public không cache CDN/client. Cache PDF tiến trình theo hash/version tối đa 4 bản; giới hạn response và fallback in trình duyệt.
+- Khóa renderer/layout/render PDF đã kiểm tra và đóng gói font/license; Node.js runtime, không Chromium hay dịch vụ PDF ngoài. Không thêm env.
+
+Nâng cấp: chạy `202610310004_professional_sharing.sql` sau 003 rồi deploy source/tải lại tab cũ. Khai báo URL website CV, điền mã/tên đơn vị, lưu và xuất bản để áp dụng lên public/QR/PDF. Xem `UPGRADE-v1.4.0.md`.
+
+
 ## v1.3.0 — History & Recovery · 31/10/2026
 
 - Lịch sử cloud riêng tư theo thời gian; mốc khi xuất bản, mốc thủ công có tên và ghi chú; phân trang 20 mốc.
