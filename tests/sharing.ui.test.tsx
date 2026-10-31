@@ -19,6 +19,6 @@ test('Missing published URL hides QR and keeps browser URL as copy fallback',asy
  expect(screen.queryByRole('img')).toBeNull();fireEvent.click(screen.getByRole('button',{name:'Sao chép link'}));await screen.findByText('Đã sao chép liên kết CV công khai.');expect(writeText.mock.calls[0][0]).not.toContain('/admin');
 });
 test('Sharing component exposes readable QR, download and status controls',async()=>{
- render(<ShareTools {...props}/>);expect(screen.getByRole('img',{name:'Mã QR mở CV công khai'}).getAttribute('src')).toBe('/api/share/qr?v=18');expect(screen.getByRole('link',{name:/Tải QR/}).getAttribute('href')).toBe('/api/share/qr?download=1');
+ render(<ShareTools {...props}/>);expect(screen.getByRole('img',{name:'Mã QR mở CV công khai'}).getAttribute('src')).toBe('/api/share/qr?lang=vi&v=18');expect(screen.getByRole('link',{name:/Tải QR/}).getAttribute('href')).toBe('/api/share/qr?lang=vi&download=1');
  if(process.env.QA_CAPTURE_DIR){await mkdir(process.env.QA_CAPTURE_DIR,{recursive:true});const css=await readFile('src/app/globals.css','utf8');await writeFile(`${process.env.QA_CAPTURE_DIR}/sharing.html`,`<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body>${document.body.innerHTML}</body></html>`);}
 });

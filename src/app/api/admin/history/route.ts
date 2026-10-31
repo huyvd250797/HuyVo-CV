@@ -27,3 +27,5 @@ export async function POST(request:Request) {
   if(error)dbFailure(error);return json({revision:data});
  }catch(error){return failure(error);}
 }
+
+export async function DELETE(request:Request){try{const {db}=await ownerContext(request),body=await readJson(request);if((body.all===true&&body.id!==undefined)||(body.all!==undefined&&body.all!==false&&body.all!==true)||(body.all!==true&&!(typeof body.id==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.id))))throw new ApiError(422,'Chọn mốc cần xóa.');if(body.all===true&&body.confirm!=='DELETE')throw new ApiError(422,'Xác nhận xóa toàn bộ lịch sử.');const {data,error}=await db.rpc('delete_cv_history',{p_id:body.all?null:body.id,p_all:body.all===true});if(error)dbFailure(error);return json(data);}catch(e){return failure(e);}}

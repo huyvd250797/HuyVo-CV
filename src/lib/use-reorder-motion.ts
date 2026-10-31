@@ -1,0 +1,8 @@
+'use client';
+import {useRef,useEffect} from 'react';
+export function useReorderMotion(){
+ const before=useRef<Map<string,DOMRect>|null>(null),kind=useRef('blocks'),active=useRef<Animation[]>([]);
+ function capture(type='blocks'){kind.current=type;active.current.forEach(a=>a.cancel());active.current=[];before.current=new Map();const selector=type==='blocks'?'[data-motion-key^="block:"]':'[data-motion-key^="row:"],[data-motion-key^="panel:"]';document.querySelectorAll<HTMLElement>('.editor-app '+selector.split(',').join(', .editor-app ')).forEach(el=>before.current!.set(el.dataset.motionKey!,el.getBoundingClientRect()));}
+ function play(){const rects=before.current;before.current=null;if(!rects||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;const selector=kind.current==='blocks'?'[data-motion-key^="block:"]':'[data-motion-key^="row:"],[data-motion-key^="panel:"]';document.querySelectorAll<HTMLElement>('.editor-app '+selector.split(',').join(', .editor-app ')).forEach(el=>{const old=rects.get(el.dataset.motionKey!),now=el.getBoundingClientRect();if(!old||typeof el.animate!=='function')return;const x=old.left-now.left,y=old.top-now.top,d=Math.hypot(x,y);if(d<2)return;const bend=(25+Math.random()*45)*(Math.random()<.5?-1:1),mx=x*.5-y/d*bend,my=y*.5+x/d*bend;const frames=Array.from({length:17},(_,i)=>{const t=i/16,u=1-t;return {transform:`translate(${u*u*x+2*u*t*mx}px,${u*u*y+2*u*t*my}px)`,offset:t};});active.current.push(el.animate(frames,{duration:430+Math.random()*170,easing:'cubic-bezier(.2,.7,.2,1)'}));});}
+ useEffect(()=>()=>active.current.forEach(a=>a.cancel()),[]);return {capture,play};
+}

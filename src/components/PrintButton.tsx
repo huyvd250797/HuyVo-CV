@@ -1,2 +1,2 @@
 'use client';
-export function PrintButton() { return <button className="button primary" onClick={async()=>{await document.fonts.ready;window.print();}}>In / Lưu PDF ↓</button>; }
+export function PrintButton({language='vi'}:{language?:string}) { return <button className="button primary" onClick={async()=>{await document.fonts.ready;window.print();}}>{language==='en'?'Print / Save PDF ↓':'In / Lưu PDF ↓'}</button>; }

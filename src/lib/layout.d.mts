@@ -5,7 +5,7 @@ export const sectionIds:SectionId[];
 export const defaultTitles:Record<SectionId,string>;
 export function normalizeLayout(value?:unknown):Required<CvLayout> & {order:Record<'intro'|'aside'|'career'|'tail',SectionId[]>;grid:{order:SectionId[];spans:Record<SectionId,number>};titles:Partial<Record<SectionId,string>>};
 export function sectionOrder(value?:unknown):SectionId[];
-export function sectionTitle(value:unknown,id:SectionId):string;
+export function sectionTitle(value:unknown,id:SectionId,language?:string):string;
 export function moveSection(value:unknown,from:SectionId,to:SectionId):ReturnType<typeof normalizeLayout>;
 export function publicContent(profile:Profile):Profile;
 export function moveItem<T>(items:T[],from:number,to:number):T[];

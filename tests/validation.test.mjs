@@ -23,7 +23,7 @@ test('Image validation checks signatures instead of trusting extension or MIME t
 });
 test('Editor hooks are opt-in; public rendering remains escaped and links to current print route',()=>{
  const editor=renderCv({...seed,name:'<img onerror=alert(1)>'},{editing:true});
- assert.match(editor,/contenteditable="true"/);assert.match(editor,/data-cv-section="education"/);
+ assert.match(editor,/data-inline-path="name"/);assert.match(editor,/data-cv-section="education"/);
  assert.match(editor,/&lt;img onerror=alert\(1\)&gt;/);assert.doesNotMatch(editor,/<img onerror/);
  const publicHtml=renderCv(seed,{printHref:'/print'});
  assert.doesNotMatch(publicHtml,/contenteditable|data-cv-section|cv.pdf/);

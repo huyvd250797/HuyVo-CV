@@ -85,3 +85,13 @@ test('Archive render can be captured for visual QA without connecting to a real 
  await screen.findByText('2 nhóm thông tin có thay đổi.');
  if(process.env.QA_CAPTURE_DIR){await mkdir(process.env.QA_CAPTURE_DIR,{recursive:true});const css=await readFile(`${process.cwd()}/src/app/globals.css`,'utf8');await writeFile(`${process.env.QA_CAPTURE_DIR}/history.html`,`<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body>${document.body.innerHTML}</body></html>`);}
 });
+
+test('Deleting one revision and clearing all history require confirmation and never apply a draft',async()=>{
+ panel();await screen.findByRole('button',{name:/Mốc thủ công.*Ứng tuyển PM/});fireEvent.click(screen.getByRole('button',{name:/Mốc thủ công.*Ứng tuyển PM/}));
+ await screen.findByRole('button',{name:'Xóa mốc'});fireEvent.click(screen.getByRole('button',{name:'Xóa mốc'}));expect(call.mock.calls.some((x:any[])=>x[1]?.method==='DELETE')).toBe(false);
+ fireEvent.click(screen.getByRole('button',{name:'Xác nhận xóa'}));await screen.findByText('Đã xóa lịch sử đã chọn. CV nháp và bản công khai được giữ nguyên.');
+ expect(JSON.parse(call.mock.calls.find((x:any[])=>x[1]?.method==='DELETE')[1].body)).toEqual({id:revision.id});expect(applied).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole('button',{name:'Xóa tất cả'}));expect((screen.getByRole('button',{name:'Xác nhận xóa'}) as HTMLButtonElement).disabled).toBe(true);
+ fireEvent.change(screen.getByLabelText('Xác nhận xóa tất cả'),{target:{value:'DELETE'}});fireEvent.click(screen.getByRole('button',{name:'Xác nhận xóa'}));
+ await waitFor(()=>expect(call.mock.calls.filter((x:any[])=>x[1]?.method==='DELETE')).toHaveLength(2));expect(applied).not.toHaveBeenCalled();
+});

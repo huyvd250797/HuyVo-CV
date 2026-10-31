@@ -1,3 +1,4 @@
+import {englishTitles} from './i18n.mjs';
 export const layoutZones={intro:['objective','personal'],aside:['education','skills','certificates'],career:['experience','delivery']};
 export const sectionIds=[...Object.values(layoutZones).flat(),'projects'];
 export const maisonZones=['intro','aside','career','tail'];
@@ -19,7 +20,7 @@ export function normalizeLayout(value){
  return {mode:source.mode==='grid'?'grid':'maison',order,hidden:unique(Array.isArray(source.hidden)?source.hidden:[]),titles,grid:{order:gridOrder,spans}};
 }
 export function sectionOrder(value){const l=normalizeLayout(value);return l.mode==='grid'?l.grid.order:maisonZones.flatMap(zone=>l.order[zone]);}
-export function sectionTitle(value,id){return normalizeLayout(value).titles[id]||defaultTitles[id]||id;}
+export function sectionTitle(value,id,language='vi'){return normalizeLayout(value).titles[id]||(language==='en'?englishTitles[id]:defaultTitles[id])||id;}
 export function moveSection(value,from,to){
  const l=normalizeLayout(value);if(from===to||!sectionIds.includes(from)||!sectionIds.includes(to))return l;
  if(l.mode==='grid'){l.grid.order=moveItem(l.grid.order,l.grid.order.indexOf(from),l.grid.order.indexOf(to));return l;}

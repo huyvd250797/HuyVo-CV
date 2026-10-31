@@ -1,3 +1,4 @@
+import {formatPeriod} from './i18n.mjs';
 import React from 'react';
 import path from 'node:path';
 import {PDFDocument,StandardFonts,rgb} from 'pdf-lib';
@@ -7,8 +8,13 @@ import {normalizeLayout,publicContent,sectionOrder,sectionTitle} from './layout.
 import {canonicalCvUrl} from './sharing.mjs';
 import {safeWebUrl,safeEmail,safePhone} from './render.mjs';
 const fonts=path.join(process.cwd(),'public/fonts/pdf');
+function registerFonts(){
+Font.register({family:'Helvetica',fonts:[{src:'Helvetica'},{src:'Helvetica-Bold',fontWeight:700},{src:'Helvetica-Oblique',fontStyle:'italic'},{src:'Helvetica-BoldOblique',fontWeight:700,fontStyle:'italic'}]});
+Font.registerHyphenationCallback(word=>[word]);
 Font.register({family:'MaisonSans',fonts:[{src:path.join(fonts,'NotoSans-Regular.ttf')},{src:path.join(fonts,'NotoSans-Bold.ttf'),fontWeight:700}]});
 Font.register({family:'MaisonSerif',src:path.join(fonts,'NotoSerif-Regular.ttf')});
+}
+registerFonts();
 Font.registerHyphenationCallback(word=>[word]);
 const s=StyleSheet.create({
  page:{fontFamily:'MaisonSans',fontSize:9.5,lineHeight:1.65,color:'#39352e',paddingTop:38,paddingBottom:53,paddingHorizontal:43,backgroundColor:'#fffdf9'},
@@ -25,33 +31,40 @@ const s=StyleSheet.create({
 function Body({children}:{children?:React.ReactNode}){return <Text style={s.body} orphans={2} widows={2}>{children}</Text>;}
 function WebLink({href,children}:{href?:string|null;children:React.ReactNode}){return href?<Link src={href} style={s.link}>{children}</Link>:<Text>{children}</Text>;}
 const titles:Record<SectionId,string>={objective:'Mục tiêu nghề nghiệp',personal:'Thông tin liên hệ',education:'Học vấn',skills:'Kỹ năng cá nhân',certificates:'Chứng chỉ',experience:'Kinh nghiệm làm việc',delivery:'Kinh nghiệm triển khai',projects:'Sản phẩm nổi bật'};
-export function CvPdf({profile,version,portrait,qr}:{profile:Profile;version:number;portrait?:Buffer;qr?:Buffer}){
+export function CvPdf({profile,version,portrait,qr,logos={}}:{profile:Profile;version:number;portrait?:Buffer;qr?:Buffer;logos?:Record<string,Buffer>}){
  // Defence in depth: even a full private input cannot expose hidden fields in a public PDF.
- const p=publicContent(profile),layout=normalizeLayout(p.layout),hidden=new Set(layout.hidden),url=canonicalCvUrl(p.siteUrl);
- const order=sectionOrder(layout);
+ const p=publicContent(profile),layout=normalizeLayout(p.layout),hidden=new Set(layout.hidden),url=canonicalCvUrl(p.siteUrl,p.language);
+ const en=p.language==='en';const order=sectionOrder(layout);const enTitles:Record<SectionId,string>={objective:'Career objective',personal:'Contact information',education:'Education',skills:'Skills',certificates:'Certifications',experience:'Professional experience',delivery:'Implementation experience',projects:'Selected applications & projects'};
  const body=(id:SectionId):React.ReactNode=>{
   switch(id){
    case 'objective':return p.objective?<Body>{p.objective}</Body>:null;
-   case 'personal':return <View style={s.contact}>{[['Email',p.email,safeEmail(p.email)],['Điện thoại',p.phone,safePhone(p.phone)],['Website',p.website,safeWebUrl(p.website)],['Địa chỉ',p.address,null]].filter(([,value])=>value).map(([label,value,href])=><Text key={label} style={s.body}>{label}: <WebLink href={href}>{value}</WebLink></Text>)}</View>;
-   case 'education':return p.education.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={22}>{r.school}</Text><Text style={s.meta}>{[r.degree,r.period].filter(Boolean).join(' | ')}</Text>{r.detail&&<Body>{r.detail}</Body>}</View>);
+   case 'personal':return <View style={s.contact}>{[[en?'Email':'Email',p.email,safeEmail(p.email)],[en?'Phone':'Điện thoại',p.phone,safePhone(p.phone)],['Website',p.website,safeWebUrl(p.website)],[en?'Location':'Địa chỉ',p.address,null]].filter(([,value])=>value).map(([label,value,href])=><Text key={label} style={s.body}>{label}: <WebLink href={href}>{value}</WebLink></Text>)}</View>;
+   case 'education':return p.education.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={22}>{r.school}</Text><Text style={s.meta}>{[r.degree,formatPeriod(r.period,p.language)].filter(Boolean).join(' | ')}</Text>{r.detail&&<Body>{r.detail}</Body>}</View>);
    case 'skills':return p.skills.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={18}>{r.name}</Text>{r.description&&<Body>{r.description}</Body>}</View>);
-   case 'certificates':return p.certificates.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={18}>{r.name}</Text><Text style={s.meta}>{[r.issuer,r.year].filter(Boolean).join(' | ')}</Text>{safeWebUrl(r.url||'')&&<Text style={s.body}><WebLink href={safeWebUrl(r.url||'')}>Xác minh: {r.url}</WebLink></Text>}</View>);
-   case 'experience':return p.experience.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={28}>{r.role}</Text><Text style={s.meta}>{[r.company,r.period].filter(Boolean).join(' | ')}</Text>{r.summary&&<Body>{r.summary}</Body>}{r.highlights.map((line,n)=><Text style={s.bullet} key={n} orphans={2} widows={2}>- {line}</Text>)}</View>);
-   case 'delivery':return p.implementations.map((r,i)=><View key={i} style={s.entry}>{r.code&&<Text style={s.code} minPresenceAhead={25}>{r.code}</Text>}<Text style={s.entryTitle} minPresenceAhead={18}>{r.name}</Text>{r.period&&<Text style={s.meta}>{r.period}</Text>}{r.description&&<Body>{r.description}</Body>}</View>);
-   case 'projects':return p.projects.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={25}>{r.name}</Text><Text style={s.meta}>{[r.role,r.year].filter(Boolean).join(' | ')}</Text>{r.description&&<Body>{r.description}</Body>}{!!r.technologies.length&&<Body>Công nghệ: {r.technologies.join(', ')}</Body>}{[['Demo',r.demoUrl],['Mã nguồn',r.sourceUrl]].filter(([,href])=>safeWebUrl(href||'')).map(([label,href])=><Text style={s.body} key={label}><WebLink href={safeWebUrl(href||'')}>{label}: {href}</WebLink></Text>)}</View>);
+   case 'certificates':return p.certificates.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={18}>{r.name}</Text><Text style={s.meta}>{[r.issuer,formatPeriod(r.year,p.language)].filter(Boolean).join(' | ')}</Text>{safeWebUrl(r.url||'')&&<Text style={s.body}><WebLink href={safeWebUrl(r.url||'')}>{en?'Verify':'Xác minh'}: {r.url}</WebLink></Text>}</View>);
+   case 'experience':return p.experience.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={28}>{r.role}</Text><Text style={s.meta}>{[r.company,formatPeriod(r.period,p.language)].filter(Boolean).join(' | ')}</Text>{r.summary&&<Body>{r.summary}</Body>}{r.highlights.map((line,n)=><Text style={s.bullet} key={n} orphans={2} widows={2}>- {line}</Text>)}</View>);
+   case 'delivery':return p.implementations.map((r,i)=><View key={i} style={s.entry}><View style={{flexDirection:'row',gap:9,alignItems:'center',marginBottom:4}} wrap={false}>{logos[String(i)]&&<Image src={{data:logos[String(i)],format:'jpg'}} style={{width:28,height:28,objectFit:'contain'}}/>}<View style={{flex:1}}>{r.code&&<Text style={s.code}>{r.code}</Text>}<Text style={s.entryTitle}>{r.name}</Text></View></View>{r.period&&<Text style={s.meta}>{formatPeriod(r.period,p.language)}</Text>}{r.description&&<Body>{r.description}</Body>}</View>);
+   case 'projects':return p.projects.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={25}>{r.name}</Text><Text style={s.meta}>{[r.role,formatPeriod(r.year,p.language)].filter(Boolean).join(' | ')}</Text>{r.description&&<Body>{r.description}</Body>}{!!r.technologies.length&&<Body>{en?'Technologies':'Công nghệ'}: {r.technologies.join(', ')}</Body>}{[['Demo',r.demoUrl],[en?'Source code':'Mã nguồn',r.sourceUrl]].filter(([,href])=>safeWebUrl(href||'')).map(([label,href])=><Text style={s.body} key={label}><WebLink href={safeWebUrl(href||'')}>{label}: {href}</WebLink></Text>)}</View>);
   }
  };
  const nonempty=(id:SectionId)=>id==='personal'?!!(p.email||p.phone||p.address||p.website):id==='objective'?!!p.objective:(id==='delivery'?p.implementations:p[id as 'education']).length>0;
- return <Document title={`${p.name} - ${p.role}`} author={p.name} subject={`Hồ sơ công khai - phiên bản ${version}`} creator="Maison CV v1.5.0" language="vi-VN"><Page size="A4" style={s.page} wrap>
-  <Text style={s.top}>MAISON / HỒ SƠ NĂNG LỰC</Text>
+ return <Document title={`${p.name} - ${p.role}`} author={p.name} subject={`${en?'Published profile - version':'Hồ sơ công khai - phiên bản'} ${version}`} creator="Maison CV v1.6.0" language={en?'en-US':'vi-VN'}><Page size="A4" style={s.page} wrap>
+  <Text style={s.top}>{p.branding?.name||'MAISON'} / {en?'PROFESSIONAL PROFILE':'HỒ SƠ NĂNG LỰC'}</Text>
   <View style={s.hero}><View style={s.heroCopy}><Text style={s.name} minPresenceAhead={30}>{p.name}</Text><Text style={s.role}>{p.role}</Text>{p.summary&&<Text style={s.summary} orphans={2} widows={2}>{p.summary}</Text>}</View>{portrait&&<Image src={{data:portrait,format:'jpg'}} style={s.photo}/>}</View>
-  {order.filter(id=>!hidden.has(id)&&nonempty(id)).map(id=><React.Fragment key={id}><Text style={s.heading} minPresenceAhead={65}>{layout.titles[id]||titles[id]}</Text>{body(id)}</React.Fragment>)}
-  {url&&<View style={s.qrRow} wrap={false}>{qr&&<Image src={{data:qr,format:'png'}} style={s.qr}/>}<View style={s.qrText}><Text>Hồ sơ online & Portfolio</Text><Link src={url} style={s.link}>{url}</Link><Text>Bản công khai v{version}. Quét QR để xem nội dung hiện hành.</Text><Link src={new URL('/portfolio',url).href} style={s.link}>Mở Portfolio</Link></View></View>}
+  {order.filter(id=>!hidden.has(id)&&nonempty(id)).map(id=><React.Fragment key={id}><Text style={s.heading} minPresenceAhead={65}>{layout.titles[id]||(en?enTitles[id]:titles[id])}</Text>{body(id)}</React.Fragment>)}
+  {url&&<View style={s.qrRow} wrap={false}>{qr&&<Image src={{data:qr,format:'png'}} style={s.qr}/>}<View style={s.qrText}><Text>{en?'Online CV & Portfolio':'Hồ sơ online & Portfolio'}</Text><Link src={url} style={s.link}>{url}</Link><Text>{en?'Published version':'Bản công khai'} v{version}. {en?'Scan for the latest profile.':'Quét QR để xem nội dung hiện hành.'}</Text><Link src={new URL(en?'/portfolio?lang=en':'/portfolio',url).href} style={s.link}>{en?'Open Portfolio':'Mở Portfolio'}</Link></View></View>}
 
  </Page></Document>;
 }
-export async function renderCvPdf(profile:Profile,version:number,portrait?:Buffer,qr?:Buffer){
- const raw=await renderToBuffer(<CvPdf profile={profile} version={version} portrait={portrait} qr={qr}/>);
+let rendering:Promise<unknown>=Promise.resolve();
+export function renderCvPdf(profile:Profile,version:number,portrait?:Buffer,qr?:Buffer,logos?:Record<string,Buffer>):Promise<Buffer>{
+ // fontkit objects contain mutable glyph/subset state. Reusing them across documents
+ // can drop characters when switching VI/EN. Serialize and load fresh font objects.
+ const result=rendering.catch(()=>{}).then(()=>renderFresh(profile,version,portrait,qr,logos));rendering=result;return result;
+}
+async function renderFresh(profile:Profile,version:number,portrait?:Buffer,qr?:Buffer,logos?:Record<string,Buffer>){
+ Font.clear();registerFonts();
+ const raw=await renderToBuffer(<CvPdf profile={profile} version={version} portrait={portrait} qr={qr} logos={logos}/>);
  // Stamp after pagination: the footer stays inside A4 and cannot affect text flow.
  const pdf=await PDFDocument.load(raw),font=await pdf.embedFont(StandardFonts.Helvetica),pages=pdf.getPages();
  pages.forEach((page,index)=>{

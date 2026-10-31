@@ -10,7 +10,7 @@ export async function ownerContext(request: Request) {
   const { data: { user }, error } = await db.auth.getUser(token);
   if (error || !user) throw new ApiError(401,'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
   const owner = await db.rpc('cv_schema_version');
-  if (owner.error || (Number(owner.data)!==0 && Number(owner.data)!==5)) throw new ApiError(503,'Cần chạy migration v1.5.0 (005) trong Supabase trước khi chỉnh sửa.');
+  if (owner.error || (Number(owner.data)!==0 && Number(owner.data)!==6)) throw new ApiError(503,'Cần chạy migration v1.6.0 (006) trong Supabase trước khi chỉnh sửa.');
   if (Number(owner.data)===0) throw new ApiError(403,'Tài khoản này chưa được cấp quyền chủ sở hữu CV.');
   return { db, user };
 }
@@ -19,7 +19,7 @@ export function failure(error: unknown) {
   console.error('Maison API:', error instanceof Error ? error.message : 'Unknown error');
   return json({ error:'Không thể hoàn tất thao tác. Kiểm tra kết nối rồi thử lại.' },500);
 }
-export async function readJson(request: Request,limit=220000) {
+export async function readJson(request: Request,limit=600000) {
   const text = await request.text();
   if (new TextEncoder().encode(text).byteLength > limit) throw new ApiError(413,'Nội dung quá lớn.');
   try { const value=JSON.parse(text); if (!value || typeof value!=='object' || Array.isArray(value)) throw new Error(); return value; } catch { throw new ApiError(400,'Dữ liệu gửi lên không hợp lệ.'); }

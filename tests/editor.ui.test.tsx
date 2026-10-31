@@ -79,24 +79,23 @@ test('Collections can be added/deleted and preview is read only',async()=>{
  expect(document.querySelector('[contenteditable="true"]')).toBeNull();
  expect(screen.queryByLabelText('Họ và tên')).toBeNull();
 });
-test('Direct text editing commits the field on blur and updates the editing panel',async()=>{
+test('Double click opens text editor; outside updates the matching sidebar field',async()=>{
  render(<Editor/>);await screen.findByLabelText('Họ và tên');
- const field=document.querySelector('[data-cv-field="name"]') as HTMLElement;
- Object.defineProperty(field,'innerText',{value:'Tên nhập trực tiếp',configurable:true});
- fireEvent.blur(field);
+ fireEvent.doubleClick(document.querySelector('[data-inline-path="name"]')!);
+ const input=screen.getByRole('textbox',{name:/Sửa nội dung/});
+ fireEvent.change(input,{target:{value:'Tên nhập trực tiếp'}});
+ if(process.env.QA_CAPTURE_DIR){const css=await readFile('src/app/globals.css','utf8');await mkdir(process.env.QA_CAPTURE_DIR,{recursive:true});await writeFile(`${process.env.QA_CAPTURE_DIR}/inline.html`,`<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body>${document.body.innerHTML}</body></html>`);}
+ fireEvent.pointerDown(document.body);
+ expect(screen.queryByRole('dialog',{name:'Chỉnh sửa trực tiếp'})).toBeNull();
  expect((screen.getByLabelText('Họ và tên') as HTMLInputElement).value).toBe('Tên nhập trực tiếp');
  expect((screen.getAllByRole('button',{name:'Lưu nháp'})[0] as HTMLButtonElement).disabled).toBe(false);
 });
-test('Typing directly enables Save immediately and saves the active field before blur',async()=>{
+test('Inline save commits the active field and writes the cloud draft',async()=>{
  render(<Editor/>);await screen.findByLabelText('Họ và tên');
- const field=document.querySelector('[data-cv-field="name"]') as HTMLElement;
- Object.defineProperty(field,'innerText',{value:'Tên chưa rời con trỏ',configurable:true});
- fireEvent.input(field);
- const save=screen.getAllByRole('button',{name:'Lưu nháp'})[0] as HTMLButtonElement;
- expect(save.disabled).toBe(false);
- fireEvent.click(save);
- await screen.findByText('Đã lưu nháp online. Khách vẫn thấy bản đã xuất bản.');
- expect(remote.content.name).toBe('Tên chưa rời con trỏ');
+ fireEvent.doubleClick(document.querySelector('[data-inline-path="name"]')!);
+ fireEvent.change(screen.getByRole('textbox',{name:/Sửa nội dung/}),{target:{value:'Tên chưa rời con trỏ'}});
+ fireEvent.click(screen.getByRole('button',{name:'Lưu nội dung trực tiếp'}));
+ await waitFor(()=>expect(remote.content.name).toBe('Tên chưa rời con trỏ'));
 });
 test('Signed-out owner gets a login form and a readable invalid-credentials error',async()=>{
  mocks.client.auth.getSession=vi.fn(async()=>({data:{session:null}}));
@@ -218,6 +217,40 @@ test('Pointer dragging a selected canvas block moves its actual layout and cance
  render(<Editor/>);await screen.findByLabelText('Họ và tên');fireEvent.click(document.querySelector('.editor-preview #education h2')!);
  const target=document.querySelector('.editor-preview #delivery')!;Object.defineProperty(document,'elementFromPoint',{configurable:true,value:vi.fn(()=>target)});
  const handle=screen.getByRole('button',{name:'Kéo block Học vấn.'});fireEvent.pointerDown(handle,{button:0,clientX:10,clientY:100,pointerId:1});fireEvent.pointerMove(handle,{clientX:10,clientY:500,pointerId:1});fireEvent.pointerUp(handle,{clientX:10,clientY:500,pointerId:1});
- expect(Array.from(document.querySelectorAll('.resume-career>.cv-block')).map(n=>n.id)).toEqual(['experience','delivery','education']);
+ expect(Array.from(document.querySelectorAll('.resume-career>.cv-block')).map(n=>n.id)).toEqual(['experience','education']);
+ expect(Array.from(document.querySelectorAll('.resume-aside>.cv-block')).map(n=>n.id)).toContain('delivery');
  const other=screen.getByRole('button',{name:'Kéo block Học vấn.'});fireEvent.pointerDown(other,{button:0,clientX:1,clientY:1,pointerId:2});fireEvent.pointerCancel(other,{pointerId:2});expect(document.querySelector('.cv-drop-target')).toBeNull();delete (document as any).elementFromPoint;
+});
+
+test('Switching VI/EN preserves independent unsaved edits and Escape cancels inline changes',async()=>{
+ render(<Editor/>);await screen.findByLabelText('Họ và tên');
+ fireEvent.change(screen.getByLabelText('Giới thiệu ngắn'),{target:{value:'Nội dung tiếng Việt riêng'}});
+ fireEvent.change(screen.getByLabelText('Ngôn ngữ đang chỉnh sửa'),{target:{value:'en'}});
+ fireEvent.click(screen.getByRole('button',{name:/Contact information.*↗/}));
+ expect((screen.getByLabelText('Giới thiệu ngắn') as HTMLTextAreaElement).value).toBe('');
+ fireEvent.change(screen.getByLabelText('Giới thiệu ngắn'),{target:{value:'Independent English summary'}});
+ fireEvent.doubleClick(document.querySelector('[data-inline-path="name"]')!);
+ fireEvent.change(screen.getByRole('textbox',{name:/Sửa nội dung/}),{target:{value:'Discarded name'}});fireEvent.keyDown(document,{key:'Escape'});
+ expect((screen.getByLabelText('Họ và tên') as HTMLInputElement).value).toBe('Tên kiểm thử');
+ fireEvent.change(screen.getByLabelText('Ngôn ngữ đang chỉnh sửa'),{target:{value:'vi'}});
+ expect((screen.getByLabelText('Giới thiệu ngắn') as HTMLTextAreaElement).value).toBe('Nội dung tiếng Việt riêng');
+ fireEvent.click(screen.getAllByRole('button',{name:'Lưu nháp'})[0]);await waitFor(()=>expect(remote.version).toBe(2));
+ expect(remote.content.summary).toBe('Nội dung tiếng Việt riêng');expect(remote.content.translations.en.summary).toBe('Independent English summary');
+});
+test('Auto Save off cancels the scheduled write and manual Save still works',async()=>{
+ render(<Editor/>);await screen.findByLabelText('Họ và tên');
+ fireEvent.change(screen.getByLabelText('Họ và tên'),{target:{value:'Lưu thủ công'}});
+ fireEvent.click(screen.getByRole('button',{name:'⚙ Cài đặt'}));
+ fireEvent.click(screen.getByRole('checkbox',{name:/Auto Save/}));
+ if(process.env.QA_CAPTURE_DIR){const css=await readFile('src/app/globals.css','utf8');await mkdir(process.env.QA_CAPTURE_DIR,{recursive:true});await writeFile(`${process.env.QA_CAPTURE_DIR}/settings.html`,`<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style><body>${document.body.innerHTML}</body></html>`);}
+ await new Promise(resolve=>setTimeout(resolve,1450));expect(remote.version).toBe(1);
+ fireEvent.click(screen.getAllByRole('button',{name:'Lưu nháp'})[0]);await waitFor(()=>expect(remote.content.name).toBe('Lưu thủ công'));
+});
+test('Bottom plus appends a neighboring data editor and inline row text syncs the matching field',async()=>{
+ remote.content.education=[{id:'edu1',school:'Trường thứ nhất',degree:'IT',period:'2020',detail:''}];
+ render(<Editor/>);await screen.findByLabelText('Họ và tên');fireEvent.click(document.querySelector('.editor-preview #education h2')!);
+ fireEvent.click(screen.getByRole('button',{name:'Thêm ở cuối Học vấn.'}));expect(screen.getAllByLabelText('Trường / Cơ sở đào tạo')).toHaveLength(2);
+ const field=document.querySelector('[data-inline-path="education.0.school"]')!;fireEvent.doubleClick(field);
+ fireEvent.change(screen.getByRole('textbox',{name:/Sửa nội dung/}),{target:{value:'Đổi đúng trường thứ nhất'}});fireEvent.pointerDown(document.body);
+ expect((screen.getAllByLabelText('Trường / Cơ sở đào tạo')[0] as HTMLInputElement).value).toBe('Đổi đúng trường thứ nhất');expect((screen.getAllByLabelText('Trường / Cơ sở đào tạo')[1] as HTMLInputElement).value).toBe('');
 });

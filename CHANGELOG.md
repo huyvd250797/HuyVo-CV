@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.6.0 — Bilingual CV · 31/10/2026
+
+- Bộ nội dung VI/EN độc lập trong cùng nháp/version; sửa và khôi phục không ghi đè ngôn ngữ còn lại. EN có tiêu đề/UI và định dạng thời gian riêng; nhập bản dịch chuyên môn trước khi xuất bản.
+- Xuất bản VI, EN hoặc Tất cả; cập nhật đúng snapshot đã chọn. Public switch chỉ có khi cả hai bản đã xuất bản. PDF, print, QR, metadata và ảnh chia sẻ theo ngôn ngữ.
+- Cài đặt Auto Save bật/tắt với lưu thủ công, cloud preference version riêng; thay tên/logo thương hiệu và favicon (áp dụng cả editor). Branding công khai sau Lưu cài đặt.
+- Double click trường/tiêu đề/dòng để nhập trực tiếp; ngoài cập nhật nháp, ✓ lưu cloud, Escape hủy. Thêm ＋ dưới item cuối, focus đúng item mới.
+- Kéo block đổi chỗ, các block/dòng di chuyển có animation đường cong Bézier ngẫu nhiên; hỗ trợ Reduced Motion. Giữ nút lên/xuống và hai bố cục cũ.
+- Logo đơn vị tùy chọn, đồng kích thước, đặt trái mã/tên; ảnh private được bảo vệ theo hai publication, draft, history và branding.
+- Xóa mốc hoặc toàn bộ lịch sử qua RPC owner; xác nhận DELETE khi xóa hết; giữ nháp/public/preferences. JSON/diff/preview hỗ trợ cả hai bộ nội dung, backup 512 KB.
+- Sửa lỗi glyph PDF khi tạo nhiều bản VI/EN liên tiếp: mỗi lần render dùng font mới, hàng đợi tránh dùng chung font đang render; giữ font gốc và kiểm tra PDF thật nhiều trang.
+- Migration 006 additive, capability 6/schema 5; giữ snapshot cũ là VI, owner và dữ liệu hiện tại. Giữ hai env Supabase, không thêm dependency. Source chưa deploy lên tài khoản thật.
+
 ## v1.5.0 — Visual Layout Studio · 31/10/2026
 
 - Thêm tay nắm kéo block trực tiếp trên CV, di chuyển giữa vùng Maison hoặc thứ tự grid; hỗ trợ lên/xuống, pointer capture, tự cuộn và hủy kéo.

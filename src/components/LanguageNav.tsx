@@ -1,0 +1,2 @@
+import type {Locale} from '@/lib/types';
+export function LanguageNav({languages,current}:{languages:Locale[];current:string}){return languages.includes('en')&&languages.includes('vi')?<nav className="language-nav" aria-label="CV language"><a href="/" lang="vi" aria-current={current==='vi'?'page':undefined}>Tiếng Việt</a><a href="/en" lang="en" aria-current={current==='en'?'page':undefined}>English</a></nav>:null;}
