@@ -1,39 +1,27 @@
-# Kiểm chứng Maison CV v1.4.0
+# Kiểm chứng Maison CV v1.5.0 — Visual Layout Studio
 
-Ngày 31/10/2026 (Asia/Bangkok). Nâng cấp trực tiếp ZIP v1.3.0 Boss cung cấp: SHA-256 `b388a5f42e9cfb0e32e25ceccd31327e4cc2059978791c35e6c07fa0ef32fb07`. Node.js 24.22.1, Next.js 16.4.3 / Webpack, React 19.3.1. Không đổi stack hoặc dữ liệu cá nhân từ nguồn khác.
-
-## Kết quả
+31/10/2026, Asia/Bangkok. Nền là ZIP v1.4.0 Boss gửi, SHA-256 `ebc84c1d6890ceaf5e2b1a3852f8ac580b2155ab7b8e9273eb85b967bcbf79b4`. Node.js 24.22.1, Next.js 16.4.3 / Webpack, React 19.3.1. Dependency giữ nguyên, package/lock nâng cùng 1.5.0.
 
 | Hạng mục | Kết quả |
 | --- | --- |
-| Dependency / lockfile | PASS; package/lock 1.4.0; PDF 4.3.1, layout 4.4.3/render 4.3.1 overrides; pdf-lib 1.17.1, QR 1.5.4, sharp 0.35.5 |
-| `npm test` | PASS 47 kiểm tra Node gồm subtest + 48 Vitest = 95, không fail |
-| `npm run test:cloud` sau khi hoàn thiện 004 | PASS; kiểm tra thêm save/restore/publish giữ code, schema 3 và capability 4 |
+| `npm test` | PASS 54 kiểm tra Node gồm subtest + 55 Vitest = **109**, không fail |
 | `npm run typecheck` | PASS |
-| `npm run build` | PASS production Webpack/TypeScript, BUILD_ID và tracing các endpoint được tạo |
-| Server bundle fonts | PASS: NFT của PDF/OG có đủ ba TTF; external packages được khai báo cho Node.js |
-| `npm run check` | PASS cấu trúc nền; 17 PENDING là placeholder cũ, không phải nội dung cloud |
-| Migration 004 | Chạy 001→002→003→004 trên PGlite; rerun 004; nháp hiện có giữ nguyên trước lần ghi mới; owner vẫn có capability 4, người khác 0/khách không được execute. Lưu/restore/publish mới dùng schema 3 và giữ Mã đơn vị |
-| Mã đơn vị | Test trường mã/tên độc lập, lưu cloud mock, render hai dòng, legacy mã rỗng, NFC, giới hạn 80 ký tự, escape HTML; JSON và diff/history giữ code |
-| PDF API | Attachment/tên file/version/no-store, đọc publication, đổi nội dung ở cùng version đổi cache key, unpublished không render, lỗi/tệp quá lớn trả thông báo phù hợp |
-| PDF engine thật | Render fixture 2 trang và fixture dài 8 trang; tự ngắt A4; file khoảng 48/64 KB. PDF font nhúng, trích xuất đúng tiếng Việt, đủ 10 mốc cuối các công việc, không có chuỗi ở phần ẩn |
-| PDF visual QA | Render PNG tất cả 2/8 trang; xem từng trang ngắn và contact sheet dài. Tiêu đề không đứng riêng cuối trang, footer đánh số đúng; pdfplumber kiểm tra toàn bộ word bounding boxes nằm trong trang, không có chữ tràn |
-| Social image thật | ImageResponse tạo PNG 1200×630 có tên/chức danh/giới thiệu tiếng Việt; xem ảnh render; chưa publish trả 404 |
-| QR | Tạo PNG thật 480×480, metadata kích thước đúng, helper URL loại path/query/hash và credentials; chưa có URL không tạo QR. Chưa quét bằng điện thoại thật |
-| Chia sẻ UI | Copy/Web Share đúng URL public, thiếu URL dùng origin copy dự phòng; PDF lỗi không báo thành công, nút thử lại; QR có alt/download, trạng thái aria-live |
-| Browser QA | Chrome xem component DOM từ test: chia sẻ ở iframe 390×844; editor desktop mở thẻ EPU và trường mã/tên. Kiểm tra responsive một cột cho vùng triển khai hẹp, hai dòng mã/tên rõ ràng. Trang/screenshot QA không đưa vào ZIP |
-| Hành vi nền | Các kiểm tra autosave, local recovery, CAS, history/import/restore, private/public và Storage RLS của v1.3 tiếp tục đạt |
-| Preview offline | Tạo lại renderer/CSS/footer v1.4.0; không có Auth/PDF cloud trong preview offline |
+| `npm run build` | PASS production, TypeScript và các route nền PDF/history/sharing giữ đầy đủ |
+| Migration 005 | PASS PGlite: sau 001→002→003→004, rerun không rewrite document/history, capability 5 đúng owner; save schema 4; publish giữ grid/titles và gỡ tiêu đề của block ẩn khỏi public, revision giữ đầy đủ |
+| Layout normalization | PASS 8 block đúng một lần, span 1–12, NFC/titles/unknown key, legacy Maison, cấu hình độc lập, cross vùng không trùng/mất |
+| Renderer | PASS grid theo DOM đúng thứ tự 6/6/12, escape tiêu đề, không có action khi public hoặc chưa chọn, chỉ block active có thao tác |
+| Editor UI | PASS chọn/ẩn thao tác, ＋ thêm cuối và focus ô mới, mock vị trí cuộn kiểm tra không về đầu, rename/menu/undo, grid/span/nav/save, toggle mode, sort thời gian và pointer drag/cancel |
+| Chronology | PASS năm, range, ngày/tháng/ISO, tháng Anh/Việt, hiện tại; ngày sai không đoán; tăng/giảm ổn định, mục thiếu cuối, không mutate nguồn |
+| JSON/history/privacy | PASS roundtrip schema 4, layout 2 chế độ/width/title/period; schema cũ đọc được; diff phát hiện thay đổi; public bỏ tiêu đề ẩn, nháp giữ nguyên |
+| Hành vi nền | Các test autosave, CAS, local recovery, history/import/restore, Storage RLS, PDF/QR/OG đều tiếp tục đạt |
+| Browser desktop | Chrome xem renderer thật với fixture: Học vấn 6 cạnh công việc 6; triển khai 12 toàn hàng; title tùy chỉnh đúng, các block sau xuống hàng |
+| Browser mobile | Iframe 390×844; grid một cột, triển khai/timeline và chữ không tràn ngang sau sửa cấu hình track mobile. Browser QA dùng HTML render từ component/renderer, không phải kết nối Supabase thật |
+| PDF | Render thật normal 2 trang, long 8 trang và grid-data 2 trang. pdfplumber kiểm tra A4, đủ text/mốc cuối, footer và bounding boxes; grid PDF đúng thứ tự/tiêu đề và không có chứng chỉ bị ẩn. Xem render PNG mẫu grid |
+| Font / assets | Giữ WOFF2 tiếng Việt, TTF và OFL cho PDF; tracing fonts giữ cấu hình v1.4 |
+| Preview | Tạo lại HTML/CSS từ source hiện hành, footer 1.5.0. Không đóng gói trang QA/temp hoặc env thật |
 
-Log lệnh ở `TEST-RESULTS.txt`. Dependency PDF được khóa theo bộ đã kiểm tra vì phiên bản dàn trang mới đã bộc lộ lỗi footer/orphan heading trong QA; không bỏ overrides hoặc nâng đồng loạt mà chưa chạy lại kiểm tra PDF.
+Log: TEST-RESULTS.txt. Test UI/API mock Auth/Storage/publication; PGlite có Auth/Storage schema tối thiểu. Pointer drag được xác minh bằng event/DOM trong test, chưa kiểm thử thao tác kéo cảm ứng trên iPhone thật. Browser QA xác minh bố cục renderer và HTML component; không coi là nghiệm thu cloud.
 
-## Giới hạn xác minh
+Chưa có project Supabase, repository hoặc Vercel đích trong lần nâng cấp này; chưa push/deploy, chạy migration trên database thật, thử nhiều thiết bị/QR/Web Share vật lý hoặc đo tốc độ trên production. PDF tự động vẫn là A4 một cột, giữ nội dung/thứ tự/title; grid nhiều cột áp dụng cho web và in trình duyệt. Tùy chọn span rất hẹp có thể xuống nhiều dòng; đề xuất 6/12 hoặc 12/12 cho block dài.
 
-- Chưa có URL/key/project owner Supabase thật, repository hoặc Vercel đích cho lần nâng cấp này. Chưa push GitHub, deploy, chạy migration hoặc đo cold start trên tài khoản thật của Boss.
-- React/API test dùng mock Auth/Storage/publication; PGlite dùng schema Auth/Storage tối thiểu. Test engine PDF/OG/QR là thực, nhưng dữ liệu là fixture kiểm thử.
-- Browser QA xác minh bố cục component; chưa nghiệm thu luồng tải file trên iPhone, Web Share thực, quét QR từ thiết bị thứ hai hoặc preview Zalo/Facebook thật. Cache preview ngoài app phụ thuộc nền tảng.
-- PDF là mẫu A4 sáng một cột, nội dung tương ứng public, không sao chép pixel giao diện web. Chưa có gắn thẻ PDF/UA đầy đủ, tùy chọn nhiều template PDF hoặc mật khẩu.
-- Ảnh responsive được xử lý sau Storage RLS; chưa có tài khoản cloud thật để thử tải ảnh qua Function đã deploy. Các policy cũ đã có test PGlite.
-- PDF tự động chỉ xuất bản công khai; In bản nháp vẫn dùng trình duyệt. Nội dung dài hơn fixture cần Boss kiểm tra với hồ sơ thật sau deploy theo UPGRADE-v1.4.0.md.
-
-Giữ hai biến Supabase hiện tại, không thêm secret vào source. Portfolio vẫn là trang chờ; phiên bản kế tiếp là v2.0.0 theo ROADMAP.md.
+Sau deploy cần làm bảng nghiệm thu UPGRADE-v1.5.0.md. Không reset database hoặc thêm env; chưa triển khai Portfolio đầy đủ (v2.0.0).

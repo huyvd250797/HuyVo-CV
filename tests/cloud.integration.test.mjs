@@ -186,5 +186,22 @@ test('Postgres migration: explicit owner, RLS, atomic saves, published snapshots
   await as('authenticated',stranger);assert.equal(await scalar('select public.cv_schema_version() as value'),0);
   await as('anon');await assert.rejects(db.query('select public.cv_schema_version()'),/permission denied/);
  });
+ await t.test('Visual layout migration preserves existing records and public snapshots redact private titles',async()=>{
+  await as('postgres');const before=(await db.query('select content,version from public.cv_documents')).rows;
+  const revisionCount=(await db.query('select count(*) from public.cv_revisions')).rows[0].count;
+  const migration5=await readFile(new URL('../supabase/migrations/202610310005_visual_layout.sql',import.meta.url),'utf8');
+  await db.exec(migration5);await db.exec(migration5);
+  assert.deepEqual((await db.query('select content,version from public.cv_documents')).rows,before);
+  assert.equal((await db.query('select count(*) from public.cv_revisions')).rows[0].count,revisionCount);
+  await as('authenticated',owner);assert.equal(await scalar('select public.cv_schema_version() as value'),5);
+  const version=Number(before[0].version),value={...content,schemaVersion:4,layout:{mode:'grid',grid:{order:['education','experience','delivery'],spans:{education:6,experience:6,delivery:12}},hidden:['education'],titles:{education:'PRIVATE TITLE',experience:'Hành trình nghề nghiệp'}}};
+  const saved=await scalar('select public.save_cv_draft($1::jsonb,$2::bigint) as value',[JSON.stringify(value),version]);assert.equal(saved.content.schemaVersion,4);
+  const published=await scalar('select public.publish_cv($1::bigint) as value',[version+1]);
+  const snapshot=(await db.query('select content from public.cv_publications')).rows[0].content;
+  assert.equal(snapshot.layout.mode,'grid');assert.equal(snapshot.layout.grid.spans.delivery,12);assert.equal(snapshot.layout.titles.education,undefined);assert.equal(snapshot.layout.titles.experience,'Hành trình nghề nghiệp');
+  const full=(await db.query('select content from public.cv_revisions where id=$1',[published.revision_id])).rows[0].content;assert.equal(full.layout.titles.education,'PRIVATE TITLE');
+  await as('authenticated',stranger);assert.equal(await scalar('select public.cv_schema_version() as value'),0);
+  await as('anon');await assert.rejects(db.query('select content from public.cv_revisions'),/permission denied/);
+ });
  await db.close();
 });

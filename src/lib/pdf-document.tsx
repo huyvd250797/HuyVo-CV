@@ -3,7 +3,7 @@ import path from 'node:path';
 import {PDFDocument,StandardFonts,rgb} from 'pdf-lib';
 import {Document,Page,Text,View,Link,Image,Font,StyleSheet,renderToBuffer} from '@react-pdf/renderer';
 import type {Profile,SectionId} from './types';
-import {normalizeLayout,publicContent} from './layout.mjs';
+import {normalizeLayout,publicContent,sectionOrder,sectionTitle} from './layout.mjs';
 import {canonicalCvUrl} from './sharing.mjs';
 import {safeWebUrl,safeEmail,safePhone} from './render.mjs';
 const fonts=path.join(process.cwd(),'public/fonts/pdf');
@@ -28,7 +28,7 @@ const titles:Record<SectionId,string>={objective:'Mục tiêu nghề nghiệp',p
 export function CvPdf({profile,version,portrait,qr}:{profile:Profile;version:number;portrait?:Buffer;qr?:Buffer}){
  // Defence in depth: even a full private input cannot expose hidden fields in a public PDF.
  const p=publicContent(profile),layout=normalizeLayout(p.layout),hidden=new Set(layout.hidden),url=canonicalCvUrl(p.siteUrl);
- const order=[...layout.order.intro,...layout.order.aside,...layout.order.career,'projects'] as SectionId[];
+ const order=sectionOrder(layout);
  const body=(id:SectionId):React.ReactNode=>{
   switch(id){
    case 'objective':return p.objective?<Body>{p.objective}</Body>:null;
@@ -37,15 +37,15 @@ export function CvPdf({profile,version,portrait,qr}:{profile:Profile;version:num
    case 'skills':return p.skills.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={18}>{r.name}</Text>{r.description&&<Body>{r.description}</Body>}</View>);
    case 'certificates':return p.certificates.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={18}>{r.name}</Text><Text style={s.meta}>{[r.issuer,r.year].filter(Boolean).join(' | ')}</Text>{safeWebUrl(r.url||'')&&<Text style={s.body}><WebLink href={safeWebUrl(r.url||'')}>Xác minh: {r.url}</WebLink></Text>}</View>);
    case 'experience':return p.experience.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={28}>{r.role}</Text><Text style={s.meta}>{[r.company,r.period].filter(Boolean).join(' | ')}</Text>{r.summary&&<Body>{r.summary}</Body>}{r.highlights.map((line,n)=><Text style={s.bullet} key={n} orphans={2} widows={2}>- {line}</Text>)}</View>);
-   case 'delivery':return p.implementations.map((r,i)=><View key={i} style={s.entry}>{r.code&&<Text style={s.code} minPresenceAhead={25}>{r.code}</Text>}<Text style={s.entryTitle} minPresenceAhead={18}>{r.name}</Text>{r.description&&<Body>{r.description}</Body>}</View>);
+   case 'delivery':return p.implementations.map((r,i)=><View key={i} style={s.entry}>{r.code&&<Text style={s.code} minPresenceAhead={25}>{r.code}</Text>}<Text style={s.entryTitle} minPresenceAhead={18}>{r.name}</Text>{r.period&&<Text style={s.meta}>{r.period}</Text>}{r.description&&<Body>{r.description}</Body>}</View>);
    case 'projects':return p.projects.map((r,i)=><View key={i} style={s.entry}><Text style={s.entryTitle} minPresenceAhead={25}>{r.name}</Text><Text style={s.meta}>{[r.role,r.year].filter(Boolean).join(' | ')}</Text>{r.description&&<Body>{r.description}</Body>}{!!r.technologies.length&&<Body>Công nghệ: {r.technologies.join(', ')}</Body>}{[['Demo',r.demoUrl],['Mã nguồn',r.sourceUrl]].filter(([,href])=>safeWebUrl(href||'')).map(([label,href])=><Text style={s.body} key={label}><WebLink href={safeWebUrl(href||'')}>{label}: {href}</WebLink></Text>)}</View>);
   }
  };
  const nonempty=(id:SectionId)=>id==='personal'?!!(p.email||p.phone||p.address||p.website):id==='objective'?!!p.objective:(id==='delivery'?p.implementations:p[id as 'education']).length>0;
- return <Document title={`${p.name} - ${p.role}`} author={p.name} subject={`Hồ sơ công khai - phiên bản ${version}`} creator="Maison CV v1.4.0" language="vi-VN"><Page size="A4" style={s.page} wrap>
+ return <Document title={`${p.name} - ${p.role}`} author={p.name} subject={`Hồ sơ công khai - phiên bản ${version}`} creator="Maison CV v1.5.0" language="vi-VN"><Page size="A4" style={s.page} wrap>
   <Text style={s.top}>MAISON / HỒ SƠ NĂNG LỰC</Text>
   <View style={s.hero}><View style={s.heroCopy}><Text style={s.name} minPresenceAhead={30}>{p.name}</Text><Text style={s.role}>{p.role}</Text>{p.summary&&<Text style={s.summary} orphans={2} widows={2}>{p.summary}</Text>}</View>{portrait&&<Image src={{data:portrait,format:'jpg'}} style={s.photo}/>}</View>
-  {order.filter(id=>!hidden.has(id)&&nonempty(id)).map(id=><React.Fragment key={id}><Text style={s.heading} minPresenceAhead={65}>{titles[id]}</Text>{body(id)}</React.Fragment>)}
+  {order.filter(id=>!hidden.has(id)&&nonempty(id)).map(id=><React.Fragment key={id}><Text style={s.heading} minPresenceAhead={65}>{layout.titles[id]||titles[id]}</Text>{body(id)}</React.Fragment>)}
   {url&&<View style={s.qrRow} wrap={false}>{qr&&<Image src={{data:qr,format:'png'}} style={s.qr}/>}<View style={s.qrText}><Text>Hồ sơ online & Portfolio</Text><Link src={url} style={s.link}>{url}</Link><Text>Bản công khai v{version}. Quét QR để xem nội dung hiện hành.</Text><Link src={new URL('/portfolio',url).href} style={s.link}>Mở Portfolio</Link></View></View>}
 
  </Page></Document>;

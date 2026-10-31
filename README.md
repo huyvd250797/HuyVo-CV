@@ -1,20 +1,20 @@
-# Maison CV v1.4.0 — PDF & Professional Sharing
+# Maison CV v1.5.0 — Visual Layout Studio
 
 CV online theo thiết kế Maison Espresso, dành cho một chủ sở hữu. Có trình chỉnh sửa trên website, lưu nháp vào Supabase, xuất bản riêng và xem trên nhiều thiết bị. Vercel chạy website; Supabase lưu nội dung, tài khoản và ảnh.
 
 **Dùng website production hoàn toàn online, không cần mở localhost hay giữ PC chạy.** Trước lần dùng đầu cần cấu hình Supabase và Vercel theo phần dưới. ZIP không chứa database đang chạy, tài khoản thật hoặc secret của Boss.
 
 
-## Nâng cấp nhanh từ v1.3.0
+## Nâng cấp nhanh từ v1.4.0
 
-1. Giữ nguyên Supabase, owner, ảnh, lịch sử và hai biến Vercel hiện tại. Không reset database.
-2. Chạy **`supabase/migrations/202610310004_professional_sharing.sql`** trong SQL Editor. Script nâng capability API lên 4 và hàm lưu schema 3 cho các lần ghi mới, không ghi lại nội dung CV hoặc sửa các mốc lịch sử hiện có.
-3. Đưa source v1.4.0 vào repository đang dùng, deploy Vercel với Node.js 24.x rồi tải lại các tab quản trị cũ.
-4. Trong Kinh nghiệm triển khai, nhập **Mã đơn vị: EPU**, **Tên đơn vị đầy đủ: Trường Đại học Điện lực**. Lưu nháp rồi xuất bản để khách/PDF nhìn thấy hai dòng này. Dữ liệu cũ không có mã vẫn hiển thị tên đã lưu, không tự suy đoán tên trường.
-5. Trong Thông tin cá nhân, đặt **URL website CV** là địa chỉ production thật, ví dụ `https://YOUR_CV.vercel.app/`. Lưu và xuất bản lại để QR, canonical và ảnh xem trước dùng đúng tên miền. Không dùng URL `/admin`, đường dẫn có token hoặc URL deployment preview để gửi ứng tuyển.
-6. Mở CV công khai, thử **Tải CV PDF**, **Sao chép link**, **Chia sẻ** và tải QR. Xem `UPGRADE-v1.4.0.md` để nghiệm thu.
+1. Giữ database, owner, ảnh, lịch sử, URL CV và hai biến Supabase trên Vercel. Không reset database.
+2. Chạy **`supabase/migrations/202610310005_visual_layout.sql`** sau 004. Script nâng capability 5, hàm lưu schema nội dung 4 và loại tiêu đề của block ẩn khỏi public snapshot khi xuất bản. Không rewrite nháp/public/history đang có.
+3. Tích hợp source v1.5.0 vào repository, giữ Root Directory đúng thư mục có package.json, deploy Vercel rồi tải lại các tab `/admin` cũ.
+4. Bấm một block trong CV để hiện tay nắm kéo, nút lên/xuống và ＋; thêm dữ liệu mới sẽ nối cuối danh sách và tập trung đúng mục mới bên thanh phải. Mặc định không hiện thanh thao tác trên CV.
+5. Chọn **Bố cục CV → Lưới linh hoạt**, đặt độ rộng từng block từ 1 đến 12 và sắp thứ tự từ trên xuống. Hai block 6 cùng hàng; block 12 chiếm trọn hàng. Maison nguyên bản vẫn được giữ, có thể chuyển qua lại.
+6. Đổi Tiêu đề block hoặc tự sắp xếp danh sách theo thời gian ở bảng bên phải. Mọi thay đổi tự lưu nháp; chỉ cập nhật cho khách khi Boss xuất bản lại.
 
-Project mới: **001 → 002 → 003 → 004 → setup-owner.sql**. Đã v1.2: chạy **003 → 004**. Đã v1.1: chạy **002 → 003 → 004**. Không chạy migration cũ sau migration mới. Không cần thêm biến môi trường, API key PDF, Chromium hoặc dịch vụ tạo PDF bên ngoài.
+Project mới: **001 → 002 → 003 → 004 → 005 → setup-owner.sql**. Các project cũ chạy lần lượt các migration còn thiếu; đang v1.4 chỉ cần 005. Không thêm env hoặc dependency mới. Xem **`UPGRADE-v1.5.0.md`** để nâng cấp và nghiệm thu.
 
 ## 1. Chức năng của phiên bản này
 
@@ -46,6 +46,12 @@ Project mới: **001 → 002 → 003 → 004 → setup-owner.sql**. Đã v1.2: c
 - Trường Mã đơn vị riêng, hiển thị mã phía trên/tên đầy đủ phía dưới; theo cùng autosave, lịch sử, JSON và PDF.
 - Ảnh chân dung công khai có srcset và resize WebP sau kiểm tra quyền Storage; ảnh nhúng PDF/OG được giảm kích thước trên server.
 
+- Kéo thả block ngay trên CV bằng tay nắm, có nút lên/xuống thay thế; thao tác chỉ hiện khi chọn block và không xuất hiện trên CV công khai.
+- Đổi tiêu đề 8 block, tối đa 100 ký tự; đồng bộ menu chỉnh sửa, CV, history/JSON và tiêu đề PDF.
+- Thêm dữ liệu ngay bằng ＋ tại block, di chuyển từng dòng trực tiếp; mở đúng mục mới cuối bảng chỉnh sửa, không cuộn về đầu.
+- Tự sắp xếp theo thời gian tăng/giảm, theo bắt đầu/kết thúc cho giai đoạn; hỗ trợ năm, tháng/năm, ngày/tháng/năm, ISO, tháng tiếng Anh và hiện tại. Mục thiếu/ngày sai nằm cuối, thứ tự hòa được giữ ổn định.
+- Hai chế độ Maison nguyên bản và Lưới linh hoạt 12 phần, giữ cấu hình riêng. Grid đi theo thứ tự DOM từ trái sang phải/xuống hàng, mobile một cột. Độ rộng 1–12 cho từng block, 12 chiếm cả hàng.
+
 Autosave chỉ lưu **nháp**, không xuất bản. Lịch sử cloud là các mốc quan trọng, không ghi lại từng lần gõ/tự lưu. Hoàn tác 50 mốc vẫn chỉ trong phiên. Thiết bị khác cần mở/tải lại trang để đọc bản mới; chưa có cộng tác realtime.
 
 ## 2. Công nghệ và yêu cầu
@@ -73,11 +79,11 @@ Tài liệu: [Supabase + Next.js](https://supabase.com/docs/guides/getting-start
 
 1. Vào Supabase Dashboard, tạo project dùng cho CV.
 2. Mở **SQL Editor → New query**.
-3. Với project mới: mở `supabase/migrations/202610310001_cv_cloud.sql` trong source, sao chép toàn bộ và chạy, sau đó chạy `supabase/migrations/202610310002_flexible_editor.sql`, tiếp theo `supabase/migrations/202610310003_history_recovery.sql`, cuối cùng chạy `supabase/migrations/202610310004_professional_sharing.sql`. Đã v1.3 chỉ chạy 004; đã v1.2 chạy 003 rồi 004; đã v1.1 chạy 002 → 003 → 004.
+3. Với project mới: mở `supabase/migrations/202610310001_cv_cloud.sql` trong source, sao chép toàn bộ và chạy, sau đó chạy `supabase/migrations/202610310002_flexible_editor.sql`, tiếp theo `supabase/migrations/202610310003_history_recovery.sql`, sau đó chạy `supabase/migrations/202610310004_professional_sharing.sql` và cuối cùng `supabase/migrations/202610310005_visual_layout.sql`. Đã v1.4 chỉ chạy 005; đã v1.3 chạy 004 → 005; đã v1.2 chạy 003 → 004 → 005; đã v1.1 chạy 002 → 003 → 004 → 005.
 4. Kết quả: tạo các bảng, hàm lưu/xuất bản, RLS và private bucket `cv-assets`. Có thể chạy lại migration này; nó không seed CV hoặc chuyển quyền chủ sở hữu.
 5. Không đổi bucket thành public. Migration cho phép khách đọc đúng ảnh đang được snapshot công khai tham chiếu, còn ảnh nháp giữ riêng tư.
 
-Migration 002 nâng cấp editor; 003 thêm lịch sử/khôi phục; 004 nâng capability API để editor cũ không lưu mất trường Mã đơn vị mới. Không xóa/reset nội dung và không đổi owner. Migration không đọc/sửa các bảng có sẵn của app khác. Nên dùng project riêng nếu Boss muốn quản lý CV độc lập.
+Migration 002 nâng cấp editor; 003 thêm lịch sử/khôi phục; 004 thêm khả năng lưu mã đơn vị; 005 thêm layout/title mới và bảo vệ tiêu đề block ẩn khi xuất bản. Không xóa/reset nội dung và không đổi owner. Migration không đọc/sửa các bảng có sẵn của app khác. Nên dùng project riêng nếu Boss muốn quản lý CV độc lập.
 
 ### 3.2 Tạo và chỉ định tài khoản Boss
 
@@ -105,14 +111,14 @@ Hai biến này được phép có trong client bundle. Không có biến mật 
 
 ### 4.1 Đưa source lên GitHub
 
-Giải nén ZIP, mở thư mục `Maison-CV-v1.4.0` có `package.json`.
+Giải nén ZIP, mở thư mục `Maison-CV-v1.5.0` có `package.json`.
 
 Với repository mới, mở Terminal/PowerShell ở chính thư mục đó:
 
 ```sh
 git init
 git add .
-git commit -m "Maison CV v1.4.0 - PDF and Professional Sharing"
+git commit -m "Maison CV v1.5.0 - Visual Layout Studio"
 git branch -M main
 git remote add origin https://github.com/YOUR_OWNER/YOUR_REPOSITORY.git
 git push -u origin main
@@ -120,13 +126,13 @@ git push -u origin main
 
 Thay URL bằng repository thật của Boss. Không chạy `git init`/`remote add` lần nữa trong repo đã tồn tại. `.gitignore` loại `.env`, `.next`, `node_modules`, log và cấu hình Vercel cục bộ.
 
-Với repository đã có source trước đó: clone/fetch repo hiện tại, tích hợp source v1.4.0 vào đúng thư mục, giữ `.git` và `.env.local` cá nhân. Kiểm tra `git status`, commit rồi push. Nếu báo `fetch first`, chạy fetch/pull và xử lý khác biệt, không force push để ghi đè lịch sử.
+Với repository đã có source trước đó: clone/fetch repo hiện tại, tích hợp source v1.5.0 vào đúng thư mục, giữ `.git` và `.env.local` cá nhân. Kiểm tra `git status`, commit rồi push. Nếu báo `fetch first`, chạy fetch/pull và xử lý khác biệt, không force push để ghi đè lịch sử.
 
 ```sh
 git pull --rebase origin main
 git status
 git add .
-git commit -m "Upgrade Maison CV to v1.4.0"
+git commit -m "Upgrade Maison CV to v1.5.0"
 git push origin main
 ```
 
@@ -137,7 +143,7 @@ Nếu phát sinh conflict, giải quyết nội dung trước khi tiếp tục. 
 1. Vercel → **Add New → Project → Import Git Repository**.
 2. Chọn repository/branch đã push.
 3. Framework: **Next.js**.
-4. **Root Directory:** thư mục chứa `package.json`. Nếu đã push nội dung thư mục source vào root repo thì để mặc định. Nếu repo chứa nguyên thư mục `Maison-CV-v1.4.0`, chọn thư mục đó.
+4. **Root Directory:** thư mục chứa `package.json`. Nếu đã push nội dung thư mục source vào root repo thì để mặc định. Nếu repo chứa nguyên thư mục `Maison-CV-v1.5.0`, chọn thư mục đó.
 5. Node.js: **24.x**. `engines.node` trong package.json cũng đã đặt 24.x.
 6. Install Command: `npm ci`.
 7. Build Command: `npm run build`.
@@ -180,7 +186,11 @@ Các lần tự lưu và lưu thủ công chỉ sửa bản nháp. Khi gõ tiế
 
 **Khi có xung đột:** giữ bản đang soạn thành JSON nếu cần đối chiếu, sau đó chủ động tải bản mới nhất. Sau khi tải lại bản online mới nhất, mở Lịch sử → Nhập JSON để đối chiếu và chủ động nhập bản đã giữ nếu phù hợp. Không tự động ghi đè bản mới từ thiết bị khác.
 
-**Bố cục và ẩn/hiện:** chọn Bố cục CV. Kéo tay nắm ⋮⋮ hoặc dùng ↑/↓; giữ các nhóm khối đầu/cột trái/cột phải của Maison. Bỏ chọn một phần để ẩn; thông tin đầu trang và nút Mở Portfolio luôn giữ. Các mục lặp trong từng phần cũng có tay nắm và nút sắp xếp. Mục ẩn được giữ đầy đủ trong nháp; khi xuất bản lại, nội dung mục đó bị loại khỏi snapshot công khai, không chỉ ẩn bằng CSS. Trước khi xuất bản lại, khách vẫn thấy bản cũ.
+**Bố cục và ẩn/hiện:** chọn Bố cục CV. Maison nguyên bản giữ phong cách khung đầu/hai cột, đồng thời cho chuyển block giữa vùng bằng tay nắm trên CV. Lưới linh hoạt có thứ tự riêng và độ rộng 1–12. Thứ tự danh sách cấu hình và menu trái trùng thứ tự đọc trái sang phải/xuống hàng của grid, không dùng backfill để nhét block sau vào khoảng trống phía trước. Ở mobile grid thành một cột; desktop giữ tỷ lệ đã khai báo. Tắt block chỉ ẩn; nội dung nháp/history được giữ. Khi xuất bản, cả nội dung lẫn tiêu đề tùy chỉnh của phần ẩn bị loại khỏi snapshot công khai.
+
+**Thao tác trên block:** bấm vùng nội dung/tiêu đề của block; toolbar có ⋮⋮, ↑/↓ và ＋, các dòng có ↑/↓ riêng. Kéo bằng tay nắm để tránh xung đột với chọn chữ/nhập trực tiếp. Có tự cuộn khi kéo sát mép và hủy khi thả ngoài block; dùng các nút lên/xuống nếu thao tác cảm ứng chưa tiện. Bấm vùng trống trong CV hoặc Escape để ẩn thao tác. Xem trước và bản công khai không có toolbar. Với thông tin liên hệ/mục tiêu chỉ có một nội dung, ＋ mở bảng để bổ sung trường/văn bản; không tạo bản sao block.
+
+**Tiêu đề và thời gian:** mỗi bảng nội dung có Tiêu đề block; để rỗng sẽ dùng lại tiêu đề mặc định. Sắp xếp thời gian áp dụng cho học vấn, kinh nghiệm, chứng chỉ, dự án và thời gian triển khai tùy chọn. Kỹ năng không có trường thời gian nên dùng sắp xếp thủ công. Chọn tăng/giảm và mốc bắt đầu/kết thúc rồi bấm Tự động sắp xếp; không tự thay thứ tự chỉ vì mở bảng. Mục thiếu/sai ngày nằm cuối, không đoán ngày từ mô tả. Thao tác đổi thứ tự có thể hoàn tác.
 
 **Mất kết nối:** trạng thái phân biệt rõ chưa lưu online với bản được giữ trên thiết bị. Khi kết nối lại, app tiếp tục lưu nếu không có xung đột. Sau khi mở lại/đăng nhập, chọn Khôi phục bản trên thiết bị hoặc Dùng bản online. Nếu bản cục bộ dựa trên version cũ hơn cloud, app dừng tự lưu và yêu cầu đối chiếu. Bản cục bộ chỉ giữ dữ liệu CV dạng JSON, không giữ file upload chưa tải lên. Bản cục bộ nằm ở trình duyệt này, không tự đồng bộ sang thiết bị khác; được xóa khi đã lưu thành công hoặc đăng xuất chủ động bỏ thay đổi.
 
@@ -198,7 +208,7 @@ Các lần tự lưu và lưu thủ công chỉ sửa bản nháp. Khi gõ tiế
 
 **Xuất JSON:** xuất nháp đã lưu hoặc mốc đang xem. File chứa toàn bộ nội dung, bố cục, cả phần ẩn và đường dẫn ảnh; không chứa mật khẩu, token Auth, khóa kết nối hoặc file ảnh. JSON là bản sao nội dung, không phải bản backup toàn bộ project Supabase.
 
-**Nhập JSON:** chọn Lịch sử → Nhập JSON → Chọn file, tối đa 256 KB. Hỗ trợ envelope Maison `formatVersion: 1` và JSON hồ sơ cũ hợp lệ; chuẩn hóa về schema CV 3. File lỗi, liên kết không an toàn hoặc schema tương lai bị từ chối. Xem cảnh báo và khác biệt trước khi xác nhận. App giữ mốc Trước nhập và Đã nhập trong cùng transaction. Không tự xuất bản. Ảnh có đường dẫn thuộc owner/project nguồn chỉ dùng lại khi tồn tại và được truy cập trong project hiện tại; ảnh khác owner hoặc không còn sẽ bỏ đường dẫn và hiện cảnh báo để Boss chọn lại. Nếu ảnh/nội dung thay đổi sau lúc xem trước, cần chọn file lại để xác nhận bản mới.
+**Nhập JSON:** chọn Lịch sử → Nhập JSON → Chọn file, tối đa 256 KB. Hỗ trợ envelope Maison `formatVersion: 1` và JSON hồ sơ cũ hợp lệ; chuẩn hóa về schema CV 4. File lỗi, liên kết không an toàn hoặc schema tương lai bị từ chối. Xem cảnh báo và khác biệt trước khi xác nhận. App giữ mốc Trước nhập và Đã nhập trong cùng transaction. Không tự xuất bản. Ảnh có đường dẫn thuộc owner/project nguồn chỉ dùng lại khi tồn tại và được truy cập trong project hiện tại; ảnh khác owner hoặc không còn sẽ bỏ đường dẫn và hiện cảnh báo để Boss chọn lại. Nếu ảnh/nội dung thay đổi sau lúc xem trước, cần chọn file lại để xác nhận bản mới.
 
 **Sau nâng cấp:** chỉ có thể giữ nháp và bản công khai còn tồn tại lúc chạy 003; không tái tạo các lần lưu trước đó. Mốc công khai trước nâng cấp chỉ có nội dung đã công khai, không thể phục dựng phần từng bị ẩn. Mốc nháp trước nâng cấp giữ riêng nội dung nháp đầy đủ. Lịch sử không có chức năng sửa/xóa mốc hoặc tự dọn dung lượng trong phiên bản này. Ảnh được mốc tham chiếu giữ riêng tư; khách vẫn chỉ được xem ảnh của bản công khai hiện hành.
 
@@ -209,9 +219,9 @@ Khi đang mở Lịch sử, editor nền và autosave tạm dừng; nút Lưu nh
 ### PDF tự động
 
 - Ở CV công khai, chọn **Tải CV PDF**. Endpoint `/api/cv/pdf` chỉ đọc `cv_publications`, không đọc nháp và không nhận JSON profile từ khách. Có thể dùng trực tiếp liên kết này để tải. Nếu file lỗi, bộ nút chia sẻ phía cuối CV báo lỗi và cho thử lại; `/print` vẫn là phương án in dự phòng.
-- PDF dùng bản A4 sáng riêng cho gửi ứng tuyển: toàn bộ nội dung đang công khai, theo thứ tự các khối/cột, chuyển sang luồng một cột để tự ngắt nhiều trang. Không phải ảnh chụp hoặc bản sao pixel của giao diện web màu tối. Nội dung mục triển khai được mở đầy đủ trong PDF; không ẩn dưới accordion.
+- PDF dùng bản A4 sáng riêng cho gửi ứng tuyển: toàn bộ nội dung đang công khai, theo thứ tự các khối/cột, chuyển sang luồng một cột để tự ngắt nhiều trang. PDF tự động giữ thứ tự/tiêu đề/nội dung của bố cục đã chọn; tỷ lệ 12 phần áp dụng cho web và bản in trình duyệt, không thay mẫu PDF A4 một cột đã có. Không phải ảnh chụp hoặc bản sao pixel của giao diện web màu tối. Nội dung mục triển khai được mở đầy đủ trong PDF; không ẩn dưới accordion.
 - Font Noto Sans/Serif TTF được nhúng, chữ tiếng Việt có thể chọn/sao chép. Có liên kết email/điện thoại/website/dự án; nếu đã khai báo URL CV thì cuối PDF có QR, liên kết CV và Mở Portfolio.
-- Tên file dạng `CV-Vo-duc-Huy-v17.pdf`; `v17` là version nội dung đã xuất bản, khác version app v1.4.0. Số trang đánh sau khi dàn nội dung, tránh ảnh hưởng ngắt trang.
+- Tên file dạng `CV-Vo-duc-Huy-v17.pdf`; `v17` là version nội dung đã xuất bản, khác version app v1.5.0. Số trang đánh sau khi dàn nội dung, tránh ảnh hưởng ngắt trang.
 - Không tự tạo PDF nháp. Trong editor, **In bản nháp** vẫn in qua trình duyệt. **PDF & Chia sẻ CV** mở phần chia sẻ của bản đã xuất bản, không tự lưu/publish nháp.
 - PDF được tạo trong Node.js Function, không cần Chromium. Cache trong bộ nhớ tiến trình tối đa 4 bản theo hash toàn bộ nội dung + version; mỗi request vẫn đọc snapshot hiện hành trước. Không cache response trên CDN/client để tránh tiếp tục phục vụ nội dung vừa bị ẩn. Cache không phải lưu trữ file lâu dài.
 - File ảnh được resize trước khi nhúng; giới hạn PDF 4.000.000 byte để tránh trả file quá giới hạn response. Khi lỗi/tài nguyên quá lớn, thử lại hoặc dùng in trình duyệt. Không thêm dữ liệu vào Supabase khi tải PDF.
@@ -307,7 +317,7 @@ SITE_URL=https://YOUR_CV.vercel.app node scripts/smoke.mjs
 | `publish_cv` | Khóa/kiểm tra version rồi xuất bản snapshot, giữ mốc riêng tư đầy đủ rồi loại nội dung ẩn khỏi public snapshot trong cùng transaction |
 | `create_cv_checkpoint` | Khóa nháp, kiểm tra version, tạo mốc thủ công bất biến |
 | `apply_cv_recovery` | Giữ trước/sau khôi phục hoặc nhập JSON và lưu nháp mới atomically; không sửa publication |
-| `cv_schema_version` | Trả capability 4 cho owner; API yêu cầu migration 004. Schema nội dung CV là 3 |
+| `cv_schema_version` | Trả capability 5 cho owner; API yêu cầu migration 005. Schema nội dung CV là 4 |
 
 API owner xác thực token và gọi `cv_schema_version` (hàm này kiểm tra `is_cv_owner`). Quyền SELECT/INSERT/UPDATE/EXECUTE của database và Storage cũng được giới hạn, không dựa vào việc ẩn nút ở UI. Các hàm đặc quyền đặt search_path rỗng và tự kiểm tra owner. App không sử dụng service-role key ở runtime. Nội dung được kiểm tra và escape trước khi render; không nhận raw HTML để xuất bản.
 
@@ -317,7 +327,7 @@ Những ảnh đã từng công khai có thể đã được người xem tải 
 
 - Không reset database để cập nhật source. Giữ hai biến môi trường, owner và dữ liệu Supabase hiện có.
 - Trước migration tương lai, sao lưu nội dung của `cv_documents`, `cv_publications`, metadata và file Storage qua công cụ export/backup phù hợp của project. Mốc lịch sử giữ nội dung trong cùng database, không thay thế backup độc lập của database và file Storage. JSON xuất ra không bao gồm file ảnh.
-- Sau migration 004, API editor v1.3 yêu cầu capability 3 nên sẽ chặn chỉnh sửa. Không hạ capability, xóa bảng hoặc dùng editor cũ để lưu trường mới. Nếu cần, sửa/deploy bản vá v1.4 tương thích; public snapshot vẫn giữ riêng. Xem UPGRADE-v1.4.0.md.
+- Sau migration 005, API editor v1.4 yêu cầu capability 4 nên sẽ chặn chỉnh sửa. Không hạ capability hoặc dùng editor cũ để lưu layout mới. Nếu cần, sửa/deploy bản vá v1.5 tương thích; public snapshot vẫn giữ riêng. Xem UPGRADE-v1.5.0.md.
 - Migration lần này chỉ thêm các đối tượng của Maison CV. Các bản sau cần migration tăng dần và hướng dẫn riêng, không thay SQL bằng thao tác xóa bảng.
 - Khi đổi tên miền, cập nhật Auth callback, site URL trong editor và xuất bản lại.
 
@@ -331,7 +341,7 @@ Font normal/italic được đóng gói ở `public/fonts/`, kèm giấy phép O
 | --- | --- |
 | `/admin` hiển thị hướng dẫn kết nối | Thêm đúng hai biến môi trường, kiểm tra URL/key và redeploy |
 | Đăng nhập đúng nhưng báo chưa có quyền owner | So sánh User UID trong Authentication với `cv_owner.user_id`, chạy setup-owner cho đúng user |
-| Báo chưa hoàn tất schema/quyền database | Project mới chạy 001 → 002 → 003 → 004; đang v1.3 chỉ chạy 004; các bản cũ chạy lần lượt các migration còn thiếu. Kiểm tra error SQL; không tự tắt RLS |
+| Báo chưa hoàn tất schema/quyền database | Project mới chạy 001 → 002 → 003 → 004 → 005; đang v1.4 chỉ chạy 005; bản cũ chạy lần lượt migration còn thiếu. Kiểm tra error SQL; không tự tắt RLS |
 | `/` vẫn là trang đang hoàn thiện | Lưu nháp chưa đủ; hoàn thiện dữ liệu và bấm Xuất bản |
 | Không xuất bản được vì nội dung mẫu | Thay nội dung `[ ]`, điền tên mục đang trống hoặc xóa mục chưa dùng |
 | Lưu báo thiết bị khác đã cập nhật | Giữ bản đang soạn để đối chiếu, tải bản mới nhất, chỉnh lại rồi lưu |
@@ -349,6 +359,7 @@ Font normal/italic được đóng gói ở `public/fonts/`, kèm giấy phép O
 - `src/app/`: CV công khai, admin, print, Portfolio chờ, callback và API.
 - `src/components/HistoryPanel.tsx`: lịch sử, so sánh, xem CV, nhập/xuất JSON và xác nhận khôi phục.
 - `src/components/Editor.tsx`: editor và luồng Auth phía trình duyệt; `SortHandle.tsx`: sắp xếp bằng chuột/cảm ứng và nút lên/xuống.
+- `src/lib/layout.mjs`, `chronology.mjs`, `use-canvas-drag.ts`: hai bố cục, sắp xếp ngày và kéo block trực tiếp.
 - `src/lib/pdf-document.tsx`, `share-assets.ts`, `sharing.mjs`: mẫu PDF, ảnh/QR và metadata/link chia sẻ.
 - `src/lib/`: renderer Maison, layout, validation, hook autosave/khôi phục, client Supabase, API guard và đọc snapshot công khai.
 - `src/data/profile.json`: dữ liệu nền một lần; không phải nguồn dữ liệu live sau khi lưu online.

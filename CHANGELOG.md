@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.5.0 — Visual Layout Studio · 31/10/2026
+
+- Thêm tay nắm kéo block trực tiếp trên CV, di chuyển giữa vùng Maison hoặc thứ tự grid; hỗ trợ lên/xuống, pointer capture, tự cuộn và hủy kéo.
+- Chỉ hiện toolbar ＋/kéo/lên/xuống và mũi tên từng dòng khi chọn block; preview/public không chứa thao tác quản trị.
+- Đổi tiêu đề 8 block, đồng bộ menu, CV, JSON/history và tiêu đề PDF; tiêu đề rỗng quay về mặc định.
+- Thêm mới nối cuối danh sách, giữ thanh bên và focus đúng mục mới với preventScroll; không nhảy về đầu.
+- Sắp xếp thời gian tăng/giảm theo năm/giai đoạn, lựa chọn bắt đầu/kết thúc, giữ mục chưa có ngày hợp lệ cuối danh sách. Bổ sung thời gian triển khai tùy chọn; kỹ năng vẫn sắp xếp tay.
+- Maison nguyên bản và Lưới linh hoạt 12 phần giữ cấu hình riêng. Grid theo thứ tự trái sang phải/xuống hàng, 6+6 cùng hàng, 12 trọn hàng; mobile một cột. Menu editor theo thứ tự block.
+- Schema nội dung 4/capability 5, migration 005 không rewrite dữ liệu cũ. Publish loại cả tiêu đề của block ẩn; revision riêng tư giữ đầy đủ.
+- Giữ autosave/undo/CAS/khôi phục/PDF/QR. PDF tự động giữ thứ tự/tiêu đề theo layout, tiếp tục mẫu A4 một cột. Không thêm biến môi trường hoặc dependency.
+
+Đang v1.4: chạy `202610310005_visual_layout.sql`, deploy và tải lại tab admin. Xem `UPGRADE-v1.5.0.md`.
+
+
 ## v1.4.0 — PDF & Professional Sharing · 31/10/2026
 
 - Tải PDF A4 tự động từ snapshot public, không từ nháp. Font TTF nội bộ hỗ trợ tiếng Việt có thể chọn chữ; ngắt nhiều trang, footer/số trang, liên kết và QR cuối hồ sơ.

@@ -1,6 +1,6 @@
 # Maison CV — Roadmap
 
-Cập nhật 31/10/2026. v1.4.0 đã xây dựng source và kiểm tra trong môi trường phát triển. Chưa kết nối Supabase/Vercel thật của Boss, chưa push GitHub hoặc deploy production.
+Cập nhật 31/10/2026. v1.5.0 đã xây dựng source và kiểm tra trong môi trường phát triển. Chưa kết nối Supabase/Vercel thật của Boss, chưa push GitHub hoặc deploy production.
 
 | Phiên bản | Mục tiêu | Chức năng chính | Kỹ thuật và dữ liệu | Điều kiện hoàn thành | Trạng thái / phụ thuộc |
 | --- | --- | --- | --- | --- | --- |
@@ -9,6 +9,7 @@ Cập nhật 31/10/2026. v1.4.0 đã xây dựng source và kiểm tra trong mô
 | v1.2.0 — Flexible Editing & Autosave | Chỉnh nhanh, giảm thao tác lưu | Tự lưu nháp, trạng thái lưu, kéo sắp xếp, ẩn/hiện từng phần, hoàn tác trong phiên, preview desktop/mobile | Debounce, thứ tự/visibility, bản khôi phục cục bộ khi mất mạng; giữ chống ghi đè | Autosave không tự publish; di chuyển/ẩn mục không mất dữ liệu; nội dung dài không vỡ mobile | **Đã xây dựng và kiểm tra source; cần migration 002 và nghiệm thu cloud thật** |
 | v1.3.0 — History & Recovery | Khôi phục dữ liệu | Lịch sử publish, mốc lưu thủ công, xem/khôi phục, xuất/nhập JSON | Bảng revisions riêng tư, schema version, bảo toàn ảnh được mốc lưu tham chiếu | Khôi phục vào nháp, kiểm tra trước khi publish; import lỗi không ghi đè | **Đã xây dựng và kiểm tra source; cần migration 003 và nghiệm thu cloud thật** |
 | v1.4.0 — PDF & Professional Sharing | Gửi ứng tuyển thuận tiện | Tải PDF tự động, A4/ngắt trang, tên file theo hồ sơ, QR, metadata/ảnh chia sẻ, tối ưu ảnh/accessibility | Kiểm chứng engine PDF trên Vercel, cache theo published version | PDF tiếng Việt có thể chọn chữ, không cắt nội dung, khớp snapshot công khai; kiểm tra thiết bị thật | **Đã xây dựng và kiểm tra source; cần migration 004 và nghiệm thu Vercel/Supabase thật** |
+| v1.5.0 — Visual Layout Studio | Chỉnh trực tiếp & chủ động bố cục | Kéo block/dòng, thêm tại chỗ, tiêu đề riêng, xếp thời gian, Maison & Lưới linh hoạt 12 phần | Schema nội dung 4, capability 5, migration 005, DOM theo thứ tự; giữ history/undo/CAS | 6+6/12 đúng hàng; thêm không nhảy; phần ẩn không lộ tiêu đề; public chỉ đổi khi publish | **Đã xây dựng và kiểm tra source; cần migration 005 và nghiệm thu cloud thật** |
 | v2.0.0 — Portfolio | Giới thiệu năng lực chuyên sâu | Danh sách/chi tiết dự án, ảnh/video, bài toán/vai trò/giải pháp/kết quả, demo/GitHub, quản trị online | Schema dự án, media, nháp/publish, `/portfolio/[slug]` | Nút cuối CV mở Portfolio hoàn chỉnh; dự án cập nhật online | Xây sau CV và sau khi Boss xác nhận nội dung dự án |
 
 ## v1.1.0: kiểm tra thực tế sau cấu hình
@@ -51,6 +52,10 @@ Không có AI viết CV, nhiều người dùng đăng ký, marketplace mẫu ho
 - Node PDF không Chromium, font nội bộ; xử lý ảnh và responsive portrait giữ RLS; cache tiến trình giới hạn theo content hash.
 - Kiểm tra PDF thật 2/8 trang và OG PNG, test/API/UI/typecheck/build. Chưa deploy hoặc nghiệm thu cloud thật của Boss.
 
+## v1.5.0 đã triển khai
+
+Kéo block ngay trên CV và di chuyển từng dòng; chỉ hiện thao tác khi chọn block. Đổi tiêu đề, thêm mới vào đúng vị trí bên thanh phải, sắp xếp thời gian có tăng/giảm và bắt đầu/kết thúc. Bổ sung Maison nguyên bản và Lưới linh hoạt 12 phần với cấu hình độc lập; grid 6+6 chung hàng và 12 trọn hàng, mobile một cột. Layout/tiêu đề theo autosave, JSON và history; public loại tiêu đề phần ẩn. PDF giữ thứ tự/tiêu đề và tiếp tục A4 một cột. Migration 005, không reset hoặc thêm env.
+
 ## v2.0.0 — Portfolio (kế tiếp)
 
-Xây dựng danh sách/chi tiết dự án, ảnh/video, bối cảnh–vai trò–giải pháp–kết quả, demo/GitHub và quản trị online có nháp/xuất bản. Tạo `/portfolio/[slug]`, kết nối từ nút cuối CV và PDF. Nội dung kết quả dự án cần Boss cung cấp/xác nhận; không tự tạo thành tích. Chưa triển khai trong v1.4.0.
+Xây dựng danh sách/chi tiết dự án, ảnh/video, bối cảnh–vai trò–giải pháp–kết quả, demo/GitHub và quản trị online có nháp/xuất bản. Tạo `/portfolio/[slug]`, kết nối từ nút cuối CV và PDF. Nội dung kết quả dự án cần Boss cung cấp/xác nhận; không tự tạo thành tích. Chưa triển khai trong v1.5.0.

@@ -3,7 +3,7 @@ const groups = {
   education: ['school','degree','period','detail'],
   skills: ['name','description'],
   experience: ['role','company','period','summary','highlights'],
-  implementations: ['code','name','description'],
+  implementations: ['code','name','description','period'],
   projects: ['name','description','role','year','technologies','demoUrl','sourceUrl'],
   certificates: ['name','issuer','year','url'],
 };
@@ -14,7 +14,7 @@ export function validWebUrl(value) {
 export function validateCv(input, publishing = false) {
   const errors = [];
   if (!input || typeof input !== 'object' || Array.isArray(input)) return { errors: ['Dữ liệu CV không hợp lệ.'], data: null };
-  const data = { publication: 'draft', language: 'vi', cvFile: '', schemaVersion: 3 };
+  const data = { publication: 'draft', language: 'vi', cvFile: '', schemaVersion: 4 };
   function string(value, label, max = 6000) {
     if (typeof value !== 'string') { errors.push(`${label}: cần là văn bản.`); return ''; }
     if (value.length > max) errors.push(`${label}: tối đa ${max} ký tự.`);

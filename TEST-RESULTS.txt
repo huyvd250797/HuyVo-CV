@@ -1,114 +1,145 @@
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.4.0 test
+> maison-cv@1.5.0 test
 > npm run test:unit && npm run test:ui
 
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.4.0 test:unit
+> maison-cv@1.5.0 test:unit
 > node --test tests/*.test.mjs
 
 ▶ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images
-  ✔ No first-login ownership or automatic public seed (12.473582ms)
-  ✔ Owner can save first draft; duplicate seed and stale version are rejected (6.85699ms)
-  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (6.292018ms)
-  ✔ Draft images are private and storage writes require explicit owner (6.364576ms)
-  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (9.280879ms)
-  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (7.076626ms)
-  ✔ v1.3 captures the existing draft/public baseline exactly once (17.485545ms)
-  ✔ History and recovery RPCs are private and revision content is immutable to the browser (4.944012ms)
-  ✔ Manual checkpoints keep the complete draft without changing its version (4.629933ms)
-  ✔ Publication archives the full draft once per version while the public snapshot remains redacted (6.504134ms)
-  ✔ Restore creates a pre-change checkpoint and a new draft, without publishing or accepting a stale retry (7.60206ms)
-  ✔ Import preserves the previous saved draft atomically and leaves the publication untouched (2.626511ms)
-  ✔ Portraits referenced by private history cannot be deleted or read by anonymous visitors (5.414522ms)
-  ✔ Migration reruns preserve baselines and do not invent pre-upgrade states for a new project (21.535345ms)
-  ✔ Sharing capability migration is repeatable and keeps documents, publication, history and owner (10.230383ms)
-✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (1652.961896ms)
-✔ JSON backup round trips CV content, layout and schema without exporting credentials (4.202928ms)
-✔ Legacy JSON including decomposed Vietnamese is converted without changing source data (1.072767ms)
-✔ Malformed, unrelated and future-version backups are rejected before import (0.603869ms)
-✔ Import limits are measured in bytes and reject unsafe links and malformed rows (1.725549ms)
-✔ Comparisons identify contact, ordering and visibility changes, without mutating either profile (2.409177ms)
-✔ Semantically identical hidden sets and normalized Vietnamese do not create spurious differences (0.586934ms)
-✔ v1.1 records get the default layout; incomplete or duplicated order does not lose sections (1.93437ms)
-✔ Renderer reorders within columns and hides full sections while keeping the Portfolio entry (2.489076ms)
-✔ Hidden content is preserved in draft and removed from the public payload (0.436159ms)
-✔ Publish validates visible content and allows a deliberately hidden contact section (1.307296ms)
-✔ Vietnamese Unicode is composed consistently in saved content and rendering (0.341008ms)
-✔ Bundled serif fonts cover Vietnamese/Latin and do not depend on a remote font service (12.884394ms)
-✔ Preview routes serve real files with the correct content type, without opening a socket (13.504227ms)
-✔ Preview Portfolio aliases redirect to the correct static document (0.553795ms)
-✔ Preview does not serve source files or traversal outside public assets (1.475617ms)
-✔ Draft is honest about missing content and includes all six verified units (3.704266ms)
-✔ The final content section is the Portfolio entry, followed by footer (0.360026ms)
-✔ Published contact links use real, validated destinations (0.622547ms)
-✔ All content stays text; malicious URL schemes and attribute injection are rejected (0.592732ms)
-✔ Portrait and project links render only when configured (1.283892ms)
-✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.289741ms)
-✔ Content checks reject malformed data and identify unfinished release content (0.614655ms)
-✔ Unit code is optional in legacy profiles, bounded, NFC normalized, and preserved in JSON history (7.335212ms)
-✔ Implementation cards show separate escaped code/name lines and keep no-code legacy cards (2.14228ms)
-✔ Sharing URL accepts website origins only without credentials, fragments, tracking or admin paths (0.45699ms)
-✔ PDF filename is header safe and includes normalized profile name plus snapshot version (0.345675ms)
-✔ Social metadata uses published identity and snapshot image URL, without fabricating localhost (0.385093ms)
-✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (4.497506ms)
-✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (1.015372ms)
-✔ Image validation checks signatures instead of trusting extension or MIME type (0.251244ms)
-✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (5.832605ms)
-ℹ tests 47
+  ✔ No first-login ownership or automatic public seed (14.668869ms)
+  ✔ Owner can save first draft; duplicate seed and stale version are rejected (8.456737ms)
+  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (7.489856ms)
+  ✔ Draft images are private and storage writes require explicit owner (6.23693ms)
+  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (9.149388ms)
+  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (7.335556ms)
+  ✔ v1.3 captures the existing draft/public baseline exactly once (22.684559ms)
+  ✔ History and recovery RPCs are private and revision content is immutable to the browser (4.78686ms)
+  ✔ Manual checkpoints keep the complete draft without changing its version (4.297922ms)
+  ✔ Publication archives the full draft once per version while the public snapshot remains redacted (6.573461ms)
+  ✔ Restore creates a pre-change checkpoint and a new draft, without publishing or accepting a stale retry (8.901684ms)
+  ✔ Import preserves the previous saved draft atomically and leaves the publication untouched (3.96745ms)
+  ✔ Portraits referenced by private history cannot be deleted or read by anonymous visitors (5.796243ms)
+  ✔ Migration reruns preserve baselines and do not invent pre-upgrade states for a new project (27.084613ms)
+  ✔ Sharing capability migration is repeatable and keeps documents, publication, history and owner (19.19486ms)
+  ✔ Visual layout migration preserves existing records and public snapshots redact private titles (18.145217ms)
+✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (1829.683803ms)
+✔ JSON backup round trips CV content, layout and schema without exporting credentials (4.142765ms)
+✔ Legacy JSON including decomposed Vietnamese is converted without changing source data (0.530971ms)
+✔ Malformed, unrelated and future-version backups are rejected before import (0.635568ms)
+✔ Import limits are measured in bytes and reject unsafe links and malformed rows (2.249964ms)
+✔ Comparisons identify contact, ordering and visibility changes, without mutating either profile (3.041614ms)
+✔ Semantically identical hidden sets and normalized Vietnamese do not create spurious differences (0.661727ms)
+✔ v1.1 records get the default layout; incomplete or duplicated order does not lose sections (2.389121ms)
+✔ Renderer reorders within columns and hides full sections while keeping the Portfolio entry (2.97173ms)
+✔ Hidden content is preserved in draft and removed from the public payload (0.581667ms)
+✔ Publish validates visible content and allows a deliberately hidden contact section (4.755028ms)
+✔ Vietnamese Unicode is composed consistently in saved content and rendering (0.447226ms)
+✔ Bundled serif fonts cover Vietnamese/Latin and do not depend on a remote font service (14.48349ms)
+✔ Preview routes serve real files with the correct content type, without opening a socket (14.226155ms)
+✔ Preview Portfolio aliases redirect to the correct static document (0.446375ms)
+✔ Preview does not serve source files or traversal outside public assets (3.279098ms)
+✔ Draft is honest about missing content and includes all six verified units (4.831892ms)
+✔ The final content section is the Portfolio entry, followed by footer (0.841124ms)
+✔ Published contact links use real, validated destinations (3.707596ms)
+✔ All content stays text; malicious URL schemes and attribute injection are rejected (1.451454ms)
+✔ Portrait and project links render only when configured (0.639824ms)
+✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.357964ms)
+✔ Content checks reject malformed data and identify unfinished release content (0.89835ms)
+✔ Unit code is optional in legacy profiles, bounded, NFC normalized, and preserved in JSON history (7.442113ms)
+✔ Implementation cards show separate escaped code/name lines and keep no-code legacy cards (2.729939ms)
+✔ Sharing URL accepts website origins only without credentials, fragments, tracking or admin paths (0.427127ms)
+✔ PDF filename is header safe and includes normalized profile name plus snapshot version (0.408649ms)
+✔ Social metadata uses published identity and snapshot image URL, without fabricating localhost (0.366025ms)
+✔ Grid normalizes all blocks exactly once, bounded spans and escaped custom titles (2.697551ms)
+✔ Both layout configurations survive switching; Maison blocks can move across regions without duplicates (0.727234ms)
+✔ Public grid follows actual source order and 6/6/12 spans; admin tools appear only for active block (8.746442ms)
+✔ Custom titles/grid/time data round trip JSON and history, while hidden titles stay private (6.415258ms)
+✔ Chronology supports ranges, Vietnamese/English months and present without guessing invalid dates (1.466186ms)
+✔ Chronology is stable in both directions; missing dates remain last; source array is unchanged (0.794935ms)
+✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (3.997519ms)
+✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (1.19455ms)
+✔ Image validation checks signatures instead of trusting extension or MIME type (0.29507ms)
+✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (3.024469ms)
+ℹ tests 54
 ℹ suites 0
-ℹ pass 47
+ℹ pass 54
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1807.499259
+ℹ duration_ms 2006.133763
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.4.0 test:ui
+> maison-cv@1.5.0 test:ui
 > vitest run
 
 
- RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.4.0
+ RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.5.0
 
 
  Test Files  8 passed (8)
-      Tests  48 passed (48)
-   Start at  10:32:51
-   Duration  2.66s (tests 54%, environment 25%, import 13%, transform 7%, worker 1%)
+      Tests  55 passed (55)
+   Start at  11:18:40
+   Duration  3.63s (tests 59%, environment 26%, import 11%, transform 3%)
 
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.4.0 typecheck
+> maison-cv@1.5.0 typecheck
 > tsc --noEmit
 
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.4.0 build
+> maison-cv@1.5.0 build
 > next build --webpack
 
 ▲ Next.js 16.4.3 (webpack)
-✓ Running next.config.ts took 23ms
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
+✓ Running next.config.ts took 29ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 7.0s
+✓ Compiled successfully in 7.7s
   Running TypeScript ...
-  Finished TypeScript in 3.3s ...
+  Finished TypeScript in 3.7s ...
   Collecting page data using 8 workers ...
   Generating static pages using 8 workers (0/9) ...
   Generating static pages using 8 workers (2/9) 
   Generating static pages using 8 workers (4/9) 
   Generating static pages using 8 workers (6/9) 
-✓ Generating static pages using 8 workers (9/9) in 332ms
+✓ Generating static pages using 8 workers (9/9) in 206ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ○ /admin
+├ ƒ /api/admin/cv
+├ ƒ /api/admin/history
+├ ƒ /api/admin/history/[id]
+├ ƒ /api/admin/history/[id]/restore
+├ ƒ /api/admin/import
+├ ƒ /api/admin/publish
+├ ƒ /api/admin/upload
+├ ƒ /api/cv/pdf
+├ ƒ /api/media/[...path]
+├ ƒ /api/share/image
+├ ƒ /api/share/qr
+├ ○ /auth/callback
+├ ○ /icon.svg
+├ ƒ /portfolio
+├ ƒ /print
+├ ƒ /robots.txt
+└ ƒ /sitemap.xml
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.4.0 check
+> maison-cv@1.5.0 check
 > node scripts/check-content.mjs
 
 PENDING: At least one real contact method is needed
@@ -129,25 +160,3 @@ PENDING: profile.experience[0].highlights[0] contains a placeholder
 PENDING: profile.experience[0].highlights[1] contains a placeholder
 PENDING: Portrait has not been provided
 Content structure: PASS (draft; 17 content items pending).
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
-
-> maison-cv@1.4.0 test:cloud
-> node --test tests/cloud.integration.test.mjs
-
-▶ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images
-  ✔ No first-login ownership or automatic public seed (13.136485ms)
-  ✔ Owner can save first draft; duplicate seed and stale version are rejected (7.520341ms)
-  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (5.595053ms)
-  ✔ Draft images are private and storage writes require explicit owner (7.941238ms)
-  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (9.889779ms)
-  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (6.938535ms)
-  ✔ v1.3 captures the existing draft/public baseline exactly once (19.347055ms)
-  ✔ History and recovery RPCs are private and revision content is immutable to the browser (5.160866ms)
-  ✔ Manual checkpoints keep the complete draft without changing its version (4.887359ms)
-  ✔ Publication archives the full draft once per version while the public snapshot remains redacted (6.862671ms)
-  ✔ Restore creates a pre-change checkpoint and a new draft, without publishing or accepting a stale retry (8.566729ms)
-  ✔ Import preserves the previous saved draft atomically and leaves the publication untouched (2.523589ms)
-  ✔ Portraits referenced by private history cannot be deleted or read by anonymous visitors (5.13647ms)
-  ✔ Migration reruns preserve baselines and do not invent pre-upgrade states for a new project (21.971314ms)
-  ✔ Sharing capability migration is repeatable and keeps documents, publication, history and owner (19.394707ms)
-✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (1790.34112ms)
