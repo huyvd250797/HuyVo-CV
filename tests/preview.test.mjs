@@ -7,7 +7,7 @@ async function request(url) {
   return response;
 }
 test('Preview routes serve real files with the correct content type, without opening a socket', async () => {
-  for (const [route, type] of [['/', 'text/html'], ['/index.html', 'text/html'], ['/portfolio.html', 'text/html'], ['/styles.css', 'text/css'], ['/public/og-image.png', 'image/png']]) {
+  for (const [route, type] of [['/', 'text/html'], ['/index.html', 'text/html'], ['/portfolio.html', 'text/html'], ['/styles.css', 'text/css'], ['/public/og-image.png', 'image/png'], ['/public/fonts/noto-serif-vietnamese-400-normal.woff2','font/woff2']]) {
     const response = await request(route);
     assert.equal(response.status, 200, route);
     assert(response.headers['Content-Type'].includes(type), route);

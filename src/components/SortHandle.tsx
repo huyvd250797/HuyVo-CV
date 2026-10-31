@@ -1,0 +1,9 @@
+'use client';
+import { useRef,useState } from 'react';
+export function SortHandle({group,index,count,label,onMove}:{group:string;index:number;count:number;label:string;onMove:(from:number,to:number)=>void}) {
+ const target=useRef(index);const start=useRef(false);const highlighted=useRef<HTMLElement|null>(null);const [dragging,setDragging]=useState(false);
+ return <div className="sort-controls"><button type="button" className={`drag-handle ${dragging?'dragging':''}`} aria-label={`Kéo sắp xếp ${label}`} title="Kéo để đổi thứ tự" onPointerDown={e=>{if(e.button!==0)return;e.preventDefault();target.current=index;start.current=true;setDragging(true);e.currentTarget.setPointerCapture(e.pointerId);}}
+  onPointerMove={e=>{if(!start.current)return;const row=document.elementFromPoint(e.clientX,e.clientY)?.closest<HTMLElement>('[data-sortable-group]');if(row?.dataset.sortableGroup===group){target.current=Number(row.dataset.sortableIndex);highlighted.current?.classList.remove('drop-target');highlighted.current=row;row.classList.add('drop-target');}const pane=e.currentTarget.closest('.panel-fields');if(pane){const rect=pane.getBoundingClientRect();if(e.clientY>rect.bottom-40)pane.scrollTop+=15;else if(e.clientY<rect.top+40)pane.scrollTop-=15;}}}
+  onPointerUp={e=>{if(!start.current)return;start.current=false;setDragging(false);highlighted.current?.classList.remove('drop-target');if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);onMove(index,target.current);}}
+  onPointerCancel={()=>{start.current=false;setDragging(false);highlighted.current?.classList.remove('drop-target');}}>⋮⋮</button><span><button type="button" aria-label={`Đưa ${label} lên`} disabled={index===0} onClick={()=>onMove(index,index-1)}>↑</button><button type="button" aria-label={`Đưa ${label} xuống`} disabled={index===count-1} onClick={()=>onMove(index,index+1)}>↓</button></span></div>;
+}

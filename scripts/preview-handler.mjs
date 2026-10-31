@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const mapping = { '/': 'preview/index.html', '/index.html': 'preview/index.html', '/portfolio.html': 'preview/portfolio.html', '/styles.css': 'preview/styles.css' };
-const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.pdf': 'application/pdf', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
+const types = { '.woff2':'font/woff2', '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.pdf': 'application/pdf', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
 export async function handlePreviewRequest(req, res) {
   try {
     const requested = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);

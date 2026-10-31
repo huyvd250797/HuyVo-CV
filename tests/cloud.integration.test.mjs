@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 const migration=await readFile(new URL('../supabase/migrations/202610310001_cv_cloud.sql',import.meta.url),'utf8');
+const upgrade=await readFile(new URL('../supabase/migrations/202610310002_flexible_editor.sql',import.meta.url),'utf8');
 const owner='11111111-1111-4111-8111-111111111111', stranger='22222222-2222-4222-8222-222222222222';
 
 test('Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images',async t=>{
@@ -22,7 +23,7 @@ test('Postgres migration: explicit owner, RLS, atomic saves, published snapshots
   create function storage.foldername(text) returns text[] language sql immutable as $$ select string_to_array($1,'/') $$;
   insert into auth.users values ('${owner}'),('${stranger}');
  `);
- await db.exec(migration); await db.exec(migration);
+ await db.exec(migration); await db.exec(migration);await db.exec(upgrade);await db.exec(upgrade);
  async function as(role,user='') {await db.exec(`reset role;select set_config('request.jwt.claim.sub','${user}',false);set role ${role};`);}
  async function scalar(query,args=[]) {return (await db.query(query,args)).rows[0]?.value;}
  const content={name:'Tên kiểm thử',role:'IT PM / BA',email:'test@example.com',phone:'',portrait:`/api/media/${owner}/33333333-3333-4333-8333-333333333333.png`,publication:'draft'};
@@ -80,6 +81,21 @@ test('Postgres migration: explicit owner, RLS, atomic saves, published snapshots
   assert.deepEqual((await db.query('select name from storage.objects')).rows.map(r=>r.name),[imagePath]);
   await as('authenticated',owner);await db.query('select public.publish_cv(3)');
   await as('anon');assert.deepEqual((await db.query('select name from storage.objects')).rows.map(r=>r.name),[otherPath]);
+ });
+ await t.test('v1.2 publication removes hidden content, preserving the full private draft and layout',async()=>{
+  await as('authenticated',owner);
+  assert.equal(await scalar('select public.cv_schema_version() as value'),2);
+  const hidden={...content,layout:{order:{aside:['certificates','skills','education']},hidden:['personal','objective','education','skills','certificates','experience','delivery','projects']},objective:'PRIVATE OBJECTIVE',education:[{school:'PRIVATE SCHOOL'}],skills:[{name:'PRIVATE SKILL'}],experience:[{company:'PRIVATE COMPANY'}],certificates:[{name:'PRIVATE CERTIFICATE'}],implementations:[{name:'PRIVATE UNIT'}],projects:[{name:'PRIVATE PROJECT'}]};
+  await db.query('select public.save_cv_draft($1::jsonb,3)',[JSON.stringify(hidden)]);
+  await db.query('select public.publish_cv(4)');
+  assert.equal((await db.query('select content from public.cv_documents')).rows[0].content.email,'test@example.com');
+  assert.equal((await db.query('select content from public.cv_documents')).rows[0].content.schemaVersion,2);
+  await as('anon');const p=(await db.query('select content from public.cv_publications')).rows[0].content;
+  for(const key of ['email','phone','website','address','objective'])assert.equal(p[key],'');
+  for(const key of ['education','skills','certificates','experience','implementations','projects'])assert.deepEqual(p[key],[]);
+  assert.deepEqual(p.layout.order.aside,['certificates','skills','education']);
+  await assert.rejects(db.query('select public.cv_schema_version()'),/permission denied/);
+  await as('authenticated',stranger);assert.equal(await scalar('select public.cv_schema_version() as value'),0);
  });
  await db.close();
 });

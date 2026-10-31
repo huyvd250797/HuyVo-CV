@@ -9,9 +9,9 @@ export async function ownerContext(request: Request) {
   const db = serverCloud(token);
   const { data: { user }, error } = await db.auth.getUser(token);
   if (error || !user) throw new ApiError(401,'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-  const owner = await db.rpc('is_cv_owner');
-  if (owner.error) throw new ApiError(503,'Chưa hoàn tất schema hoặc quyền database. Kiểm tra migration.');
-  if (!owner.data) throw new ApiError(403,'Tài khoản này chưa được cấp quyền chủ sở hữu CV.');
+  const owner = await db.rpc('cv_schema_version');
+  if (owner.error) throw new ApiError(503,'Cần chạy migration v1.2.0 (002) trong Supabase trước khi chỉnh sửa.');
+  if (Number(owner.data)!==2) throw new ApiError(403,'Tài khoản này chưa được cấp quyền chủ sở hữu CV.');
   return { db, user };
 }
 export function failure(error: unknown) {

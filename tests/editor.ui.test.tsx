@@ -9,6 +9,7 @@ const fixture:Profile={publication:'draft',language:'vi',name:'Tên kiểm thử
 const session={access_token:'qa-token-not-a-real-credential',user:{id:'11111111-1111-4111-8111-111111111111',email:'test@example.com'}};
 let remote:any;let publication:any;let stateChange:any;let rejectSave=false;
 beforeEach(()=>{
+ window.localStorage.clear();
  remote={content:structuredClone(fixture),version:1,updated_at:'2026-10-31T10:00:00Z'};publication=null;rejectSave=false;
  mocks.client={auth:{getSession:vi.fn(async()=>({data:{session}})),onAuthStateChange:vi.fn((cb:any)=>{stateChange=cb;return {data:{subscription:{unsubscribe:vi.fn()}}};}),signOut:vi.fn(async()=>stateChange('SIGNED_OUT',null))}};
  vi.stubGlobal('fetch',vi.fn(async(url:string,options:any={})=>{
@@ -112,4 +113,30 @@ test('Signing out this device uses local scope and returns to login',async()=>{
  fireEvent.click(screen.getByRole('button',{name:'Đăng xuất'}));
  await screen.findByLabelText('Email tài khoản');
  expect(mocks.client.auth.signOut).toHaveBeenCalledWith({scope:'local'});
+});
+test('Owner can hide sections, reorder the left column, undo and select a mobile preview',async()=>{
+ render(<Editor/>);await screen.findByLabelText('Họ và tên');
+ fireEvent.click(screen.getByRole('button',{name:/Bố cục CV/}));
+ fireEvent.click(screen.getByRole('checkbox',{name:'Kỹ năng'}));
+ expect(document.querySelector('.editor-preview #skills')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Đưa Chứng chỉ lên'}));
+ fireEvent.click(screen.getByRole('button',{name:'Đưa Chứng chỉ lên'}));
+ const blocks=Array.from(document.querySelectorAll('.editor-preview .resume-aside>section')).map(x=>x.id);
+ expect(blocks).toEqual(['certificates','education']);
+ fireEvent.click(screen.getByRole('button',{name:'Hoàn tác'}));
+ fireEvent.click(screen.getByRole('button',{name:'Hoàn tác'}));
+ fireEvent.click(screen.getByRole('button',{name:'Hoàn tác'}));
+ expect(document.querySelector('.editor-preview #skills')).not.toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Mobile · 390px'}));
+ expect(document.querySelector('.editor-app')?.classList.contains('mobile-preview-mode')).toBe(true);
+});
+test('Collection ordering updates preview and is saved with the draft',async()=>{
+ remote.content.skills=[{name:'Kỹ năng A',description:''},{name:'Kỹ năng B',description:''}];
+ render(<Editor/>);await screen.findByLabelText('Họ và tên');
+ fireEvent.click(screen.getByRole('button',{name:/04.*Kỹ năng/}));
+ fireEvent.click(screen.getByRole('button',{name:'Đưa Kỹ năng 2 lên'}));
+ expect(document.querySelector('.editor-preview .skill h3')?.textContent).toBe('Kỹ năng B');
+ fireEvent.click(screen.getAllByRole('button',{name:'Lưu nháp'})[0]);
+ await screen.findByText('Đã lưu nháp online. Khách vẫn thấy bản đã xuất bản.');
+ expect(remote.content.skills[0].name).toBe('Kỹ năng B');
 });

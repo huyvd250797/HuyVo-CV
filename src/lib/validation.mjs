@@ -1,3 +1,4 @@
+import { normalizeLayout,publicContent } from './layout.mjs';
 const groups = {
   education: ['school','degree','period','detail'],
   skills: ['name','description'],
@@ -13,11 +14,11 @@ export function validWebUrl(value) {
 export function validateCv(input, publishing = false) {
   const errors = [];
   if (!input || typeof input !== 'object' || Array.isArray(input)) return { errors: ['Dữ liệu CV không hợp lệ.'], data: null };
-  const data = { publication: 'draft', language: 'vi', cvFile: '', schemaVersion: 1 };
+  const data = { publication: 'draft', language: 'vi', cvFile: '', schemaVersion: 2 };
   function string(value, label, max = 6000) {
     if (typeof value !== 'string') { errors.push(`${label}: cần là văn bản.`); return ''; }
     if (value.length > max) errors.push(`${label}: tối đa ${max} ký tự.`);
-    return value.trim();
+    return value.normalize('NFC').trim();
   }
   for (const field of fields) data[field] = string(input[field] ?? '', field, ['summary','objective'].includes(field) ? 6000 : 500);
   if (data.email && !/^[^\s<>"'@?&#]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(data.email)) errors.push('Email không hợp lệ.');
@@ -41,16 +42,18 @@ export function validateCv(input, publishing = false) {
       return row;
     });
   }
+  data.layout=normalizeLayout(input.layout);
   if (new TextEncoder().encode(JSON.stringify(data)).byteLength > 180000) errors.push('Nội dung CV quá dài. Vui lòng rút gọn.');
   if (publishing) {
+    const visible=publicContent(data);
     if (!data.name || /\[.*\]/.test(data.name)) errors.push('Điền họ và tên trước khi xuất bản.');
     if (!data.role || /\[.*\]/.test(data.role)) errors.push('Điền vị trí công việc trước khi xuất bản.');
-    if (!data.email && !data.phone) errors.push('Cần ít nhất email hoặc số điện thoại để liên hệ.');
+    if (!data.layout.hidden.includes('personal') && !data.email && !data.phone) errors.push('Cần ít nhất email hoặc số điện thoại để liên hệ.');
     for (const [group,required] of Object.entries({education:['school'],skills:['name'],certificates:['name'],experience:['role','company'],implementations:['name'],projects:['name']})) {
-      data[group].forEach((item,index)=>{if(required.some(key=>!item[key]))errors.push(`${group} ${index+1}: điền tên mục hoặc xóa mục đang để trống.`);});
+      visible[group].forEach((item,index)=>{if(required.some(key=>!item[key]))errors.push(`${group} ${index+1}: điền tên mục hoặc xóa mục đang để trống.`);});
     }
     const hasPlaceholder = value => typeof value === 'string' ? /\[[^\]]+\]/.test(value) : Array.isArray(value) ? value.some(hasPlaceholder) : value && typeof value === 'object' ? Object.values(value).some(hasPlaceholder) : false;
-    if (hasPlaceholder(data)) errors.push('CV còn nội dung mẫu trong dấu [ ]. Hãy thay hoặc xóa các mục chưa dùng.');
+    if (hasPlaceholder(visible)) errors.push('CV còn nội dung mẫu trong dấu [ ]. Hãy thay hoặc xóa các mục chưa dùng.');
   }
   return { errors, data };
 }

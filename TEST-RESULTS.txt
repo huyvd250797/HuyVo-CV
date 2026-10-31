@@ -1,51 +1,57 @@
 
-> maison-cv@1.1.0 test
+> maison-cv@1.2.0 test
 > npm run test:unit && npm run test:ui
 
 
-> maison-cv@1.1.0 test:unit
+> maison-cv@1.2.0 test:unit
 > node --test tests/*.test.mjs
 
 ▶ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images
-  ✔ No first-login ownership or automatic public seed (20.033782ms)
-  ✔ Owner can save first draft; duplicate seed and stale version are rejected (14.829392ms)
-  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (9.347903ms)
-  ✔ Draft images are private and storage writes require explicit owner (14.560419ms)
-  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (13.347084ms)
-✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (2851.014913ms)
-✔ Preview routes serve real files with the correct content type, without opening a socket (14.24274ms)
-✔ Preview Portfolio aliases redirect to the correct static document (0.90768ms)
-✔ Preview does not serve source files or traversal outside public assets (5.379381ms)
-✔ Draft is honest about missing content and includes all six verified units (4.780643ms)
-✔ The final content section is the Portfolio entry, followed by footer (0.608917ms)
-✔ Published contact links use real, validated destinations (0.756043ms)
-✔ All content stays text; malicious URL schemes and attribute injection are rejected (0.75799ms)
-✔ Portrait and project links render only when configured (0.550671ms)
-✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.270818ms)
-✔ Content checks reject malformed data and identify unfinished release content (2.490266ms)
-✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (6.061206ms)
-✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (1.508971ms)
-✔ Image validation checks signatures instead of trusting extension or MIME type (0.460333ms)
-✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (2.852579ms)
-ℹ tests 20
+  ✔ No first-login ownership or automatic public seed (18.825214ms)
+  ✔ Owner can save first draft; duplicate seed and stale version are rejected (13.19667ms)
+  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (9.593829ms)
+  ✔ Draft images are private and storage writes require explicit owner (9.758335ms)
+  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (15.729169ms)
+  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (9.762061ms)
+✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (2494.112446ms)
+✔ v1.1 records get the default layout; incomplete or duplicated order does not lose sections (4.137158ms)
+✔ Renderer reorders within columns and hides full sections while keeping the Portfolio entry (3.850619ms)
+✔ Hidden content is preserved in draft and removed from the public payload (0.588902ms)
+✔ Publish validates visible content and allows a deliberately hidden contact section (2.223509ms)
+✔ Vietnamese Unicode is composed consistently in saved content and rendering (0.937771ms)
+✔ Bundled serif fonts cover Vietnamese/Latin and do not depend on a remote font service (32.577119ms)
+✔ Preview routes serve real files with the correct content type, without opening a socket (12.45154ms)
+✔ Preview Portfolio aliases redirect to the correct static document (0.706691ms)
+✔ Preview does not serve source files or traversal outside public assets (2.001301ms)
+✔ Draft is honest about missing content and includes all six verified units (4.336042ms)
+✔ The final content section is the Portfolio entry, followed by footer (0.711762ms)
+✔ Published contact links use real, validated destinations (0.883867ms)
+✔ All content stays text; malicious URL schemes and attribute injection are rejected (1.457234ms)
+✔ Portrait and project links render only when configured (2.223392ms)
+✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.425663ms)
+✔ Content checks reject malformed data and identify unfinished release content (1.482994ms)
+✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (9.061397ms)
+✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (0.902855ms)
+✔ Image validation checks signatures instead of trusting extension or MIME type (0.221392ms)
+✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (3.629473ms)
+ℹ tests 27
 ℹ suites 0
-ℹ pass 20
+ℹ pass 27
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 3097.886866
+ℹ duration_ms 2704.032943
 
-
-> maison-cv@1.1.0 test:ui
+> maison-cv@1.2.0 test:ui
 > vitest run
 
 
- RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.1.0
+ RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.2.0
 
 
- Test Files  1 passed (1)
-      Tests  8 passed (8)
-   Start at  18:24:07
-   Duration  3.45s (environment 47%, tests 42%, import 6%, transform 4%)
+ Test Files  2 passed (2)
+      Tests  18 passed (18)
+   Start at  19:32:33
+   Duration  3.13s (tests 57%, environment 33%, import 5%, transform 4%)
 

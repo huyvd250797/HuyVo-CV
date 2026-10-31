@@ -1,34 +1,32 @@
-# Kiểm chứng Maison CV v1.1.0
+# Kiểm chứng Maison CV v1.2.0
 
-Ngày: 31/10/2026. Môi trường Node.js 24.22.1 / npm 11.9.0. Source nâng từ ZIP v1.0.0 do Boss cung cấp.
+Ngày: 31/10/2026. Nền nâng cấp: source v1.1.0 đã bàn giao trong cuộc trò chuyện. Runtime kiểm tra Node.js 24.22.1, Next.js 16.4.3 / Webpack; dependency nền được giữ nguyên, bổ sung Fontsource Noto Serif 5.3.0 để lấy asset font.
 
-## Đã chạy
+## Đã xác minh
 
-| Kiểm tra | Kết quả / phạm vi |
+| Hạng mục | Kết quả |
 | --- | --- |
-| `npm ci` với lockfile thật | PASS, cài lại dependency thành công |
-| `npm test` | PASS: 20 kiểm tra Node/Postgres, gồm các subtest RLS; 8 kiểm tra React UI. Tổng 28 |
+| Cài dependency và package-lock.json | PASS; version app và lockfile cùng 1.2.0, dependency khớp; không có env thật trong ZIP |
+| `npm test` | PASS: 27 kiểm tra Node/renderer/validation/Postgres, gồm subtest; 18 kiểm tra React/editor/autosave. Tổng 45 |
 | `npm run typecheck` | PASS |
-| `npm run check` | PASS cấu trúc JSON nền; 17 thông tin nền còn thiếu/placeholder được báo PENDING theo dữ liệu đầu vào |
-| `npm run build` | PASS production Next.js 16.4.3 / Webpack, gồm các route CV/admin/API/print/Portfolio/Auth callback |
-| Renderer | Kiểm tra escape HTML, chặn URL nguy hiểm, không xuất hooks chỉnh sửa ra CV công khai, nút Portfolio cuối CV và link print hiện hành |
-| PostgreSQL/PGlite | Chạy migration hai lần; không cấp owner cho user đăng nhập đầu; owner lưu nháp; version cũ bị chặn; khách không đọc nháp; tài khoản khác không sửa; snapshot tách khỏi nháp; ảnh nháp private; chỉ ảnh được publication hiện hành tham chiếu đọc công khai |
-| React UI/jsdom | Mock ranh giới Auth/API: chỉnh form, inline editing, lưu, xác nhận publish, nạp lại phiên, xử lý conflict không mất nội dung, thêm/xóa mục, preview chỉ đọc và thông báo đăng nhập lỗi và đăng xuất riêng thiết bị |
-| Browser QA | Trang công khai chờ và hướng dẫn cấu hình `/admin`; kiểm tra hình thức editor desktop và khung 390 px từ DOM của component test. Bản render QA dùng dữ liệu giả và được loại khỏi ZIP |
+| `npm run check` | PASS cấu trúc dữ liệu nền; 17 mục PENDING là placeholder của source cũ, không phải dữ liệu Supabase của Boss |
+| `npm run build` | PASS build production bằng Webpack |
+| Migration | Chạy 001, chạy 002 và lặp lại 002 trên Postgres nhúng PGlite; giữ RLS/owner, CAS, ảnh private, snapshot tách riêng; metadata layout được giữ; nội dung bị ẩn chỉ gỡ ở public snapshot, không gỡ khỏi nháp |
+| Autosave | Debounce; không gọi publish; vẫn giữ chữ gõ khi request trước đang chạy; lượt kế tiếp dùng version mới; tạm dừng trong IME; offline/online và cache theo owner |
+| Xung đột/khôi phục | Không tự ghi đè; giữ bản cục bộ; bản khôi phục có base version cũ tiếp tục bị chặn cả sau khi mở lại, không tự đổi base version để vượt kiểm tra |
+| Editor | Inline, form, thêm/xóa/sắp xếp mục bằng nút, ẩn/hiện, đổi thứ tự cột, hoàn tác/làm lại, preview mobile, đăng nhập lỗi/đăng xuất phạm vi local |
+| Font | Kiểm tra file WOFF2, Unicode ranges Vietnamese/Latin/Latin mở rộng, giấy phép kèm; chuẩn hóa NFC; font được phục vụ từ public/fonts, không dùng Google Fonts runtime |
+| Browser QA | Xem bản render component với dữ liệu kiểm thử trên desktop và khung mobile 390px; kiểm tra các cụm “Hồ sơ của bạn”, “Chăm chút từng chi tiết”, “Chưa xuất bản” đã liền dấu. Không lưu các trang/screenshot QA vào ZIP |
+| Offline preview | Tạo lại từ renderer/CSS hiện hành; đường dẫn font tương đối và MIME font/woff2 đã kiểm tra |
 
-Log test đầy đủ ở `TEST-RESULTS.txt`.
+Log ở `TEST-RESULTS.txt`; quá trình build cũng chạy TypeScript. Browser QA dùng DOM từ component test, không phải xác nhận kết nối Supabase thật.
 
-## Chưa xác minh trên tài khoản thật
+## Giới hạn xác minh và trạng thái triển khai
 
-- Chưa có URL/key Supabase và owner của Boss để kiểm tra Auth/Storage/PostgREST production thực tế.
-- Auth/API trong component test được mock. PGlite dùng schema Auth/Storage tối thiểu, không thay cho Supabase Auth/Storage service.
-- Chưa chạy browser E2E đăng nhập/lưu/upload/publish trên Supabase thật hoặc trên hai thiết bị vật lý.
-- Chưa kiểm tra email SMTP/khôi phục thực, PDF với nội dung cá nhân hoàn chỉnh, Safari/iPhone thật hoặc các giới hạn tài khoản hosting.
-- Chưa chạy `check:release` vì cần project đã cấu hình và có bản xuất bản thật.
-- Chưa push GitHub, chưa deploy Vercel production, chưa kết nối tự deploy vào repository của Boss.
+- Lần này chưa có URL/key/owner của Supabase thật hoặc repository/Vercel đích để thực hiện nghiệm thu cloud, push hay deploy bản v1.2.0.
+- Auth/API trong React test được mock; PGlite dùng schema Auth/Storage tối thiểu, không thay thế service Supabase thật.
+- Chưa kiểm tra kéo bằng cảm ứng trên thiết bị vật lý, Windows/iPhone/Safari thật, SMTP khôi phục hoặc PDF với CV cá nhân đầy đủ. Các nút lên/xuống là cách sắp xếp thay thế dùng được bằng bàn phím.
+- Chưa chạy `check:release` trên project thật. Sau khi chạy migration 002 và deploy, cần kiểm tra autosave, hai thiết bị cùng sửa, quyền đọc nháp, xuất bản, upload và in theo `UPGRADE-v1.2.0.md`.
+- Giữ nguyên dữ liệu/owner/ảnh và hai biến Vercel hiện tại; không reset DB. Mục đã ẩn chỉ biến mất khỏi bản công khai sau khi xuất bản lại.
 
-Build thành công và test giả lập không có nghĩa database hoặc deployment cá nhân đã được cấu hình. README cung cấp các bước thiết lập một lần và danh sách nghiệm thu thực tế. Không có secret/tài khoản thật trong source.
-
-## Tương thích build
-
-Một lần build lại bằng Turbopack gặp lỗi panic nội bộ. Lệnh build cuối dùng `next build --webpack`, bỏ cache build cũ và kiểm tra lại. Dev cũng dùng Webpack. Không thay đổi cơ chế lưu dữ liệu hay quyền truy cập để xử lý lỗi này.
+Bản này có hoàn tác tạm trong phiên và khôi phục cục bộ, chưa có lịch sử phiên bản trên cloud của v1.3.0.

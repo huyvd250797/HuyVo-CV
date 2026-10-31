@@ -8,5 +8,5 @@ await mkdir(path.join(root, 'preview'), { recursive: true });
 const options = { homeHref: 'index.html', portfolioHref: 'portfolio.html', assetPrefix: '../public' };
 await writeFile(path.join(root, 'preview/index.html'), renderDocument(profile, 'cv', options));
 await writeFile(path.join(root, 'preview/portfolio.html'), renderDocument(profile, 'portfolio', options));
-await copyFile(path.join(root, 'src/app/globals.css'), path.join(root, 'preview/styles.css'));
+await writeFile(path.join(root, 'preview/styles.css'), (await readFile(path.join(root, 'src/app/globals.css'),'utf8')).replaceAll("'/fonts/","'../public/fonts/"));
 console.log('Offline review updated: preview/index.html and preview/portfolio.html');

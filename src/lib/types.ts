@@ -1,8 +1,10 @@
+export type SectionId = 'objective'|'personal'|'education'|'skills'|'certificates'|'experience'|'delivery'|'projects';
+export type CvLayout = { order:Record<'intro'|'aside'|'career',SectionId[]>; hidden:SectionId[] };
 export type Education = { school: string; degree: string; period: string; detail: string };
 export type Skill = { name: string; description: string };
 export type Experience = { role: string; company: string; period: string; summary: string; highlights: string[] };
 export type Implementation = { name: string; description: string };
 export type Project = { name: string; description: string; role: string; year: string; technologies: string[]; demoUrl?: string; sourceUrl?: string };
 export type Certificate = { name: string; issuer: string; year: string; url?: string };
-export type Profile = { schemaVersion?: number; publication: 'draft' | 'published'; language: string; name: string; role: string; siteUrl: string; summary: string; objective: string; email: string; phone: string; website: string; address: string; portrait: string; portraitAlt: string; cvFile: string; education: Education[]; skills: Skill[]; experience: Experience[]; implementations: Implementation[]; projects: Project[]; certificates: Certificate[] };
+export type Profile = { schemaVersion?: number; layout?: CvLayout; publication: 'draft' | 'published'; language: string; name: string; role: string; siteUrl: string; summary: string; objective: string; email: string; phone: string; website: string; address: string; portrait: string; portraitAlt: string; cvFile: string; education: Education[]; skills: Skill[]; experience: Experience[]; implementations: Implementation[]; projects: Project[]; certificates: Certificate[] };
 export type RenderOptions = { homeHref?: string; portfolioHref?: string; editing?: boolean; printHref?: string; assetPrefix?: string };

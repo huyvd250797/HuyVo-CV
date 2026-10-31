@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.2.0 — Flexible Editing & Autosave · 31/10/2026
+
+- Tự lưu nháp sau khoảng 1,2 giây ngừng nhập; gom yêu cầu và giữ nội dung gõ thêm trong lúc request trước đang chạy.
+- Cập nhật inline editor ngay khi nhập, giữ con trỏ khi autosave; chờ kết thúc gõ tổ hợp IME trước khi lưu.
+- Trạng thái lưu phân biệt online/offline/lỗi/xung đột; không tự publish; xung đột khóa tự lưu thay vì ghi đè.
+- Giữ bản nháp chưa lưu cục bộ theo project và user, cho chọn khôi phục; dừng lưu khi bản khôi phục dựa trên version cloud cũ.
+- Thêm Bố cục CV: sắp xếp trong từng khối/cột, ẩn/hiện các phần, tự đánh lại số thứ tự trên CV; sắp xếp từng mục lặp qua kéo chuột/cảm ứng hoặc nút lên/xuống.
+- Hoàn tác/làm lại tối đa 50 mốc trong phiên; preview Desktop/Mobile 390 px.
+- Thay font tiêu đề bằng Noto Serif tự phục vụ, đúng bộ Latin/Latin mở rộng/Vietnamese; đóng gói normal/italic cùng OFL. Chuẩn hóa NFC, giữ nguyên khoảng trắng giữa các từ.
+- Ẩn mục không xóa nháp; hàm publish gỡ nội dung ẩn khỏi snapshot công khai trong transaction.
+- Migration `202610310002_flexible_editor.sql` nâng cấp hàm, không reset/seed dữ liệu hoặc đổi owner; API kiểm tra migration trước khi cho chỉnh sửa.
+- Giữ hai biến Supabase trên Vercel; không thêm secret vào source.
+
+### Nâng cấp
+
+Project đã v1.1.0 chỉ chạy migration 002 rồi deploy source mới; project mới chạy 001 → 002 → setup-owner. Xem `UPGRADE-v1.2.0.md`. Tải lại các tab quản trị cũ. Bản công khai tiếp tục giữ nguyên đến khi Boss xuất bản lại.
+
 ## v1.1.0 — Online Editor & Cloud Save · 31/10/2026
 
 - Giữ thiết kế Maison Espresso; bổ sung CV Studio cho desktop và mobile.
