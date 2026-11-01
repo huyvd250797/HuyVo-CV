@@ -1,3 +1,4 @@
+import {groupLabels,fieldLabels,contentFieldLabel} from './content-labels.mjs';
 import { NextResponse } from 'next/server';
 import { cloudConfig, serverCloud } from './cloud';
 export class ApiError extends Error { constructor(public status: number, message: string) { super(message); } }
@@ -10,7 +11,7 @@ export async function ownerContext(request: Request) {
   const { data: { user }, error } = await db.auth.getUser(token);
   if (error || !user) throw new ApiError(401,'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
   const owner = await db.rpc('cv_schema_version');
-  if (owner.error || (Number(owner.data)!==0 && Number(owner.data)!==6)) throw new ApiError(503,'Cần chạy migration v1.6.0 (006) trong Supabase trước khi chỉnh sửa.');
+  if (owner.error || (Number(owner.data)!==0 && Number(owner.data)!==7)) throw new ApiError(503,'Cần chạy migration v1.7.0 (007) trong Supabase trước khi chỉnh sửa.');
   if (Number(owner.data)===0) throw new ApiError(403,'Tài khoản này chưa được cấp quyền chủ sở hữu CV.');
   return { db, user };
 }
@@ -27,7 +28,11 @@ export async function readJson(request: Request,limit=600000) {
 export function dbFailure(error: { code?: string; message?: string }) {
   if (error.code === '40001' || error.message?.includes('CV_CONFLICT')) throw new ApiError(409,'CV đã được cập nhật ở thiết bị khác. Giữ bản đang soạn để đối chiếu hoặc tải bản mới nhất.');
   if (error.code === 'P0002') throw new ApiError(404,'Không tìm thấy mốc lưu này.');
-  if (error.code === '22023') throw new ApiError(422,'Thông tin hoặc cấu trúc dữ liệu không hợp lệ.');
+  if(error.code==='22023'&&error.message?.startsWith('EN_TRANSLATION_MISSING')){
+    const path=error.message.split(':')[1]?.trim().split(/\s*\/\s*/)||[];const [group,row,field]=path;
+    throw new ApiError(422,`Tiếng Anh → ${groupLabels[group as keyof typeof groupLabels]||fieldLabels[group as keyof typeof fieldLabels]||'Nội dung bản dịch'}${row?' → Mục '+row.replace('row ',''):''}${field?' → Thiếu “'+contentFieldLabel(group,field)+'”':''}. Bổ sung nội dung tương ứng với tiếng Việt, lưu nháp rồi xuất bản lại.`);
+  }
+  if (error.code === '22023') throw new ApiError(422,'Database chưa chấp nhận nội dung vừa gửi. Kiểm tra tên, chức danh, thông tin liên hệ và lựa chọn ngôn ngữ xuất bản; tải lại editor sau khi chạy migration 007 rồi thử lại.');
   if (error.code === '42501') throw new ApiError(403,'Bạn không có quyền thực hiện thao tác này.');
   throw new ApiError(503,'Không thể lưu dữ liệu. Kiểm tra kết nối và migration Supabase rồi thử lại.');
 }

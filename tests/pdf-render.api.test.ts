@@ -37,3 +37,13 @@ test('PDF language requests use isolated font objects and concurrent generation 
  expect(Font.getFont({fontFamily:'MaisonSerif'}).data===font).toBe(false);
  for(const bytes of [first,second,third])expect(bytes.subarray(0,5).toString()).toBe('%PDF-');
 },30000);
+
+test('App Showcase PDF contains the public cover and localized summary, and excludes hidden app content',async()=>{
+ const cover=await sharp(Buffer.from('<svg width="640" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="640" height="400" fill="#eee7db"/><rect x="30" y="30" width="580" height="340" rx="15" fill="#fffdf9"/><text x="70" y="100" font-size="32" fill="#665035">FINZARO / TEST FIXTURE</text><rect x="70" y="140" width="200" height="150" rx="12" fill="#9ead86"/><rect x="300" y="140" width="260" height="150" rx="12" fill="#d0b08a"/></svg>')).jpeg().toBuffer();
+ const profile={...p,projects:[{...p.projects[0],id:'finzaro',name:'Finzaro',cover:'/fixture.jpg',coverAlt:'Màn hình tổng quan',platform:'Web',status:'live' as const,featured:true},{...p.projects[0],id:'hidden',name:'PRIVATE_APP_SHOULD_NOT_APPEAR',hidden:true}]};
+ const bytes=await renderCvPdf(profile,40,undefined,undefined,{}, {finzaro:cover});expect(bytes.length).toBeGreaterThan(20000);
+ if(process.env.PDF_QA_DIR){await mkdir(process.env.PDF_QA_DIR,{recursive:true});await writeFile(`${process.env.PDF_QA_DIR}/showcase.pdf`,bytes);await writeFile(`${process.env.PDF_QA_DIR}/cover.jpg`,cover);}
+ const english={...profile,language:'en',projects:[{...profile.projects[0],description:'Manage personal finances across devices.',role:'Analysis and development',coverAlt:'Dashboard'}]};
+ const englishBytes=await renderCvPdf(english,41,undefined,undefined,{}, {finzaro:cover});
+ if(process.env.PDF_QA_DIR)await writeFile(`${process.env.PDF_QA_DIR}/showcase-en.pdf`,englishBytes);
+},30000);

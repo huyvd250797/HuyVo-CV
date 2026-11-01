@@ -1,21 +1,21 @@
-# Kiểm chứng Maison CV v1.6.0 — Bilingual CV
+# Kiểm chứng Maison CV v1.7.0 — App Showcase
 
-31/10/2026. Source nền: ZIP v1.5.0 Boss đính kèm; SHA-256 `423fe6e172ea095dc9e5af4300e0c7ec093676dc1d421566aeee2542b1f4ef66`. Node 24.22.1, Next 16.4.3 Webpack, React 19.3.1. Giữ dependencies và các font gốc; package/lock/backup/footer cùng v1.6.0.
+Ngày 31/10/2026. Nền nâng cấp là ZIP `v1.6.0 — Bilingual CV.zip` Boss đính kèm, SHA-256 `19f6256efef0e9ad78b11a4e1479ad5fe2c1710a2e965824d856e14d3c3c9a0d`. Source nâng cấp trực tiếp từ ZIP này, giữ chuẩn thiếu bản dịch EN bị chặn xuất bản. Node 24.22.1, Next 16.4.3 Webpack, React 19.3.1; không thêm hoặc nâng dependency.
 
-| Hạng mục | Kiểm chứng |
+| Hạng mục | Bằng chứng / phạm vi |
 | --- | --- |
-| `npm test` | **132 PASS, 0 FAIL**: 60 Node (gồm PGlite subtest) + 72 Vitest. Test PDF với font gốc và editor sau chỉnh sửa cuối cũng PASS. |
-| Unit / integration | PostgreSQL PGlite chạy migration 001→006, chạy lại 006; dữ liệu/owner/baseline cũ giữ nguyên; capability 6. VI publication loại translations; EN draft/logo không công khai; publish EN giữ VI, publish VI giữ EN; Tất cả cập nhật cùng transaction, EN lỗi rollback cả VI; private preferences/owner-only history delete; delete giữ nháp/public. |
-| Bilingual data | Tạo bộ EN độc lập, giữ ID; sửa VI/EN không ghi đè; thiếu nội dung EN bị chặn trước publish; backup/diff có cả hai bộ; schema tương lai bị chặn; ngày/tháng/Present đúng EN. |
-| Public / API | Không fallback EN chưa publish sang nháp/VI; switch chỉ có khi cả hai publication tồn tại; PDF/QR/print/canonical theo ngôn ngữ. Favicon dùng API branding với fallback asset nội bộ, tránh icon.svg file-based ghi đè. |
-| Editor UI | Đổi VI/EN giữ nội dung chưa lưu; Auto Save tắt ngừng timer, Save thủ công hoạt động; double click, bấm ngoài, ✓, Escape; đúng field bên phải; bottom ＋ thêm item; kéo đổi chỗ và reduced motion; giữ grid/Maison, thời gian, undo/recovery/CAS. |
-| History UI / API | Xóa một có xác nhận; Xóa tất cả bắt buộc DELETE; không gọi apply/recovery hoặc publish khi xóa. Kiểm tra quyền và UUID ở API, RPC kiểm tra owner. |
-| PDF thật | VI thường 2 trang, VI dài 8 trang, EN đủ nhóm 2 trang, grid-data 2 trang. A4, logo bên trái mã/tên, QR/link EN, tiêu đề/thời gian EN. Xem PNG và trích xuất text kiểm tra đầy đủ tiêu đề và không có control glyph. |
-| PDF font isolation | Phát hiện và sửa lỗi reuse fontkit giữa nhiều PDF gây mất glyph EN. Hàng đợi render và nạp font mới mỗi document; test nhiều bản và lời gọi đồng thời. Không thay đổi file TTF gốc. |
-| Browser | Chrome xem HTML thực từ renderer/component: CV EN, switch, nhãn/date, tên tiếng Việt có dấu, settings/toolbar/branding controls. HTML fixture không phải session cloud thật. Các thao tác được kiểm tra bằng UI tests; không coi snapshot HTML là nghiệm thu lưu cloud. |
-| TypeScript / build | Typecheck và Next production build; generated route types được kiểm tra trong build. Admin dynamic để logo mới xuất hiện sau Lưu cài đặt, không chờ redeploy. |
-| Content / preview | Content check cấu trúc; dữ liệu nền vẫn draft/placeholder, không thay dữ liệu cloud thật. Preview HTML/CSS tạo lại, footer 1.6.0; không chứa tài khoản/secret hoặc trang QA. |
+| Test tự động | 150 PASS, 0 FAIL: 69 Node tests (gồm subtests Postgres) + 81 Vitest UI/API/PDF. Kết quả chạy cuối trong TEST-RESULTS.txt. |
+| Migration 007 | Chạy 001→007 trên Postgres nhúng PGlite; chạy lại 007 giữ nguyên nháp/public cũ/owner; capability 7, schema nội dung 6 khi lưu. Không kết nối project Supabase thật. |
+| Snapshot / RLS | Khách không đọc ảnh bìa/gallery nháp hoặc ảnh của app ẩn; đúng media trong publication trở nên công khai; gỡ app khỏi cả publication thu hồi quyền đọc hiện tại; history giữ file khỏi xóa thông thường. |
+| Bản dịch / transaction | Mô tả triển khai EN vẫn bắt buộc khi VI có; lỗi nêu rõ EPU/tên đơn vị/trường, nhận diện theo ID dù đổi thứ tự. Thiếu toàn bộ mục EN hoặc thiếu dòng kết quả đều bị chặn. EN lỗi khi publish All không đổi publication nào; publish EN giữ snapshot VI; CAS chặn version cũ. |
+| Editor | Nút Sửa mở ngôn ngữ/block/dòng và focus đúng trường, kể cả block đó đang được chọn. Ảnh/link đồng bộ theo ID; alt/mô tả riêng. Bổ sung app từ VI chỉ thêm ID thiếu, không ghi đè mô tả EN. Nổi bật/ẩn, reorder gallery, làm ảnh bìa và xóa ảnh được kiểm tra qua UI. |
+| Upload API | Kiểm tra một WebP thật; từ chối file hỏng/chữ ký ảnh giả trước khi gọi Storage. UI nhận lỗi rõ và giữ nháp. Auth/API/Storage của UI/API tests được mock. |
+| Trình duyệt thật | Chromium 153 chạy component Editor qua harness React, API/Auth fixture: chọn file → zoom/vị trí → canvas WebP 1280×800 → upload → sửa alt → lưu nháp thủ công. Desktop 1600×1000/mobile 390×844 không lỗi JavaScript hoặc tràn ngang. Không phải đăng nhập Supabase thật. |
+| Render web | HTML từ cùng renderer: desktop 1440px, mobile 390px; card/bìa/gallery/caption rõ, mở gallery bằng native details. Đã xem PNG và kiểm tra không tràn ngang. Điều chỉnh tương phản khu hướng dẫn/ảnh trong panel sáng của editor. |
+| PDF VI/EN | Render PDF thật với ảnh bìa app và nội dung tóm tắt, trạng thái/nền tảng/link. Xem PNG trang chứa app và trích xuất text; không có app ẩn, tiêu đề/thời gian/đường link theo ngôn ngữ, glyph đầy đủ. Giữ các test PDF dài và cách ly font khi render liên tiếp/đồng thời. Gallery không in toàn bộ; mẫu A4 một cột, không mô tả là đã khớp Grid. |
+| JSON / history | Schema cũ được chuẩn hóa về 6; media, ID, flag, caption được giữ qua backup/import; diff hiện đường dẫn và alt, không chỉ [object Object]; media sai owner/không còn file bị loại có cảnh báo khi nhập. |
+| Build / nội dung | TypeScript, Next production build, content structure và tạo lại preview đạt. PENDING trong content check là dữ liệu mẫu chưa điền của profile.json, không phải CV cloud bị lỗi. |
 
-Log đầy đủ và kết quả cuối: `TEST-RESULTS.txt`. Auth/Storage/đăng nhập trong UI/API được mock; PGlite dùng schema Auth/Storage tối thiểu để kiểm tra quyền và RPC. Chưa có kết nối Supabase/Vercel/repository thật của Boss nên chưa chạy migration production, push hoặc deploy, kiểm tra email Auth, thiết bị vật lý, QR scan/Web Share trên điện thoại.
+Không có secret/tài khoản sản xuất trong ZIP. Không đóng gói node_modules, .next, cache, bản harness, ảnh kiểm thử trình duyệt hoặc file .env.local. Source gồm lockfile, 7 migration, README/CHANGELOG/ROADMAP, UPGRADE-v1.7.0.md và tests.
 
-PDF tiếp tục mẫu A4 một cột, giữ thứ tự/tiêu đề của public theo ngôn ngữ. Lưới nhiều cột dùng trên web/in trình duyệt. EN cần Boss điền nội dung dịch từ hồ sơ thật; không tự dịch dữ liệu cloud chưa cung cấp. Thực hiện checklist `UPGRADE-v1.6.0.md` sau deploy. Bước tiếp theo là v1.7 App Showcase.
+Chưa push GitHub, deploy Vercel, chạy migration vào Supabase thật, nghiệm thu thiết bị vật lý hoặc link PDF/QR thật của Boss. Checklist nghiệm thu ở UPGRADE-v1.7.0.md. Bản kế tiếp: **v1.8.0 — CV Presentation & PDF**.

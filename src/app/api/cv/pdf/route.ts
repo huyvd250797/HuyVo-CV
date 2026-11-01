@@ -1,7 +1,7 @@
 import {createHash} from 'node:crypto';
 import {loadPublicCv} from '@/lib/public-profile';
 import {renderCvPdf} from '@/lib/pdf-document';
-import {publicPortrait,profileQr,unitLogos} from '@/lib/share-assets';
+import {publicPortrait,profileQr,unitLogos,appCovers} from '@/lib/share-assets';
 import {pdfFilename} from '@/lib/sharing.mjs';
 export const runtime='nodejs';export const dynamic='force-dynamic';export const maxDuration=60;
 const cache=new Map<string,Promise<Buffer>>();
@@ -13,7 +13,7 @@ export async function GET(request:Request){
   const key=createHash('sha256').update(JSON.stringify([version,profile])).digest('hex');
   if(!cache.has(key)){
    if(cache.size>=4)cache.delete(cache.keys().next().value!);
-   const pending=(async()=>{const [portrait,qr,logos]=await Promise.all([publicPortrait(profile),profileQr(profile),unitLogos(profile)]);const pdf=await renderCvPdf(profile,version,portrait,qr,logos);if(pdf.length>4_000_000)throw new Error('PDF_TOO_LARGE');return pdf;})();
+   const pending=(async()=>{const [portrait,qr,logos,covers]=await Promise.all([publicPortrait(profile),profileQr(profile),unitLogos(profile),appCovers(profile)]);const pdf=await renderCvPdf(profile,version,portrait,qr,logos,covers);if(pdf.length>4_000_000)throw new Error('PDF_TOO_LARGE');return pdf;})();
    cache.set(key,pending);pending.catch(()=>{if(cache.get(key)===pending)cache.delete(key);});
   }
   const pdf=await cache.get(key)!;

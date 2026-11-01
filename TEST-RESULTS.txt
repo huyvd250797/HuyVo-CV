@@ -1,162 +1,181 @@
-Maison CV v1.6.0 — 2026-10-31
-Source verification. No production deployment or live Supabase mutation.
+Maison CV v1.7.0 — App Showcase
+Ngày kiểm tra: 31/10/2026
+Node 24.22.1; Auth/API UI dùng fixture; PGlite là Postgres nhúng, không phải cloud thật.
 
+=== AUTOMATED TESTS ===
 
-=== FULL TEST SUITE ===
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
-
-> maison-cv@1.6.0 test
+> maison-cv@1.7.0 test
 > npm run test:unit && npm run test:ui
 
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.6.0 test:unit
+> maison-cv@1.7.0 test:unit
 > node --test tests/*.test.mjs
 
-✔ English starts with independent content and defaults; editing either language preserves the other (1.59986ms)
-✔ English publication requires its content while Vietnamese publication can precede it (2.458191ms)
-✔ Bilingual backup, row identity, optional logos and English differences survive round trip (7.747978ms)
-✔ English dates, public headings, action labels and share links use the selected locale (6.018526ms)
-✔ Selected blocks expose a bottom add action; public CV has no editing actions (1.686148ms)
+✔ English starts with independent content and defaults; editing either language preserves the other (1.748884ms)
+✔ English publication requires its content while Vietnamese publication can precede it (2.847859ms)
+✔ Bilingual backup, row identity, optional logos and English differences survive round trip (8.185948ms)
+✔ English dates, public headings, action labels and share links use the selected locale (7.575398ms)
+✔ Selected blocks expose a bottom add action; public CV has no editing actions (1.618077ms)
 ▶ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images
-  ✔ No first-login ownership or automatic public seed (14.616538ms)
-  ✔ Owner can save first draft; duplicate seed and stale version are rejected (11.487739ms)
-  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (7.440512ms)
-  ✔ Draft images are private and storage writes require explicit owner (7.175607ms)
-  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (10.220642ms)
-  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (8.048216ms)
-  ✔ v1.3 captures the existing draft/public baseline exactly once (21.381784ms)
-  ✔ History and recovery RPCs are private and revision content is immutable to the browser (4.573111ms)
-  ✔ Manual checkpoints keep the complete draft without changing its version (4.162489ms)
-  ✔ Publication archives the full draft once per version while the public snapshot remains redacted (6.965524ms)
-  ✔ Restore creates a pre-change checkpoint and a new draft, without publishing or accepting a stale retry (10.207231ms)
-  ✔ Import preserves the previous saved draft atomically and leaves the publication untouched (3.026668ms)
-  ✔ Portraits referenced by private history cannot be deleted or read by anonymous visitors (5.350729ms)
-  ✔ Migration reruns preserve baselines and do not invent pre-upgrade states for a new project (21.786147ms)
-  ✔ Sharing capability migration is repeatable and keeps documents, publication, history and owner (37.953935ms)
-  ✔ Visual layout migration preserves existing records and public snapshots redact private titles (23.410591ms)
-  ✔ Bilingual publication, branding, optional logos and history deletion remain isolated (84.636866ms)
-✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (1948.409373ms)
-✔ JSON backup round trips CV content, layout and schema without exporting credentials (3.815082ms)
-✔ Legacy JSON including decomposed Vietnamese is converted without changing source data (0.469776ms)
-✔ Malformed, unrelated and future-version backups are rejected before import (0.53311ms)
-✔ Import limits are measured in bytes and reject unsafe links and malformed rows (4.052634ms)
-✔ Comparisons identify contact, ordering and visibility changes, without mutating either profile (2.177355ms)
-✔ Semantically identical hidden sets and normalized Vietnamese do not create spurious differences (0.918581ms)
-✔ v1.1 records get the default layout; incomplete or duplicated order does not lose sections (1.552169ms)
-✔ Renderer reorders within columns and hides full sections while keeping the Portfolio entry (3.627514ms)
-✔ Hidden content is preserved in draft and removed from the public payload (0.537286ms)
-✔ Publish validates visible content and allows a deliberately hidden contact section (1.770292ms)
-✔ Vietnamese Unicode is composed consistently in saved content and rendering (2.655754ms)
-✔ Bundled serif fonts cover Vietnamese/Latin and do not depend on a remote font service (16.015895ms)
-✔ Preview routes serve real files with the correct content type, without opening a socket (11.861412ms)
-✔ Preview Portfolio aliases redirect to the correct static document (0.582873ms)
-✔ Preview does not serve source files or traversal outside public assets (2.889761ms)
-✔ Draft is honest about missing content and includes all six verified units (5.464145ms)
-✔ The final content section is the Portfolio entry, followed by footer (0.901807ms)
-✔ Published contact links use real, validated destinations (1.924321ms)
-✔ All content stays text; malicious URL schemes and attribute injection are rejected (2.050447ms)
-✔ Portrait and project links render only when configured (0.534702ms)
-✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.292994ms)
-✔ Content checks reject malformed data and identify unfinished release content (0.978289ms)
-✔ Unit code is optional in legacy profiles, bounded, NFC normalized, and preserved in JSON history (14.585962ms)
-✔ Implementation cards show separate escaped code/name lines and keep no-code legacy cards (5.37681ms)
-✔ Sharing URL accepts website origins only without credentials, fragments, tracking or admin paths (0.407784ms)
-✔ PDF filename is header safe and includes normalized profile name plus snapshot version (0.496596ms)
-✔ Social metadata uses published identity and snapshot image URL, without fabricating localhost (0.463987ms)
-✔ Grid normalizes all blocks exactly once, bounded spans and escaped custom titles (2.651708ms)
-✔ Both layout configurations survive switching; Maison blocks can move across regions without duplicates (0.825072ms)
-✔ Public grid follows actual source order and 6/6/12 spans; admin tools appear only for active block (9.777555ms)
-✔ Custom titles/grid/time data round trip JSON and history, while hidden titles stay private (3.449561ms)
-✔ Chronology supports ranges, Vietnamese/English months and present without guessing invalid dates (1.015414ms)
-✔ Chronology is stable in both directions; missing dates remain last; source array is unchanged (0.463848ms)
-✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (4.519485ms)
-✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (2.43715ms)
-✔ Image validation checks signatures instead of trusting extension or MIME type (0.322678ms)
-✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (3.835131ms)
-ℹ tests 60
+  ✔ No first-login ownership or automatic public seed (14.652251ms)
+  ✔ Owner can save first draft; duplicate seed and stale version are rejected (8.128008ms)
+  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (7.465019ms)
+  ✔ Draft images are private and storage writes require explicit owner (6.488628ms)
+  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (9.080945ms)
+  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (6.810183ms)
+  ✔ v1.3 captures the existing draft/public baseline exactly once (19.73507ms)
+  ✔ History and recovery RPCs are private and revision content is immutable to the browser (4.656678ms)
+  ✔ Manual checkpoints keep the complete draft without changing its version (5.298625ms)
+  ✔ Publication archives the full draft once per version while the public snapshot remains redacted (9.62832ms)
+  ✔ Restore creates a pre-change checkpoint and a new draft, without publishing or accepting a stale retry (7.620844ms)
+  ✔ Import preserves the previous saved draft atomically and leaves the publication untouched (2.996846ms)
+  ✔ Portraits referenced by private history cannot be deleted or read by anonymous visitors (6.414587ms)
+  ✔ Migration reruns preserve baselines and do not invent pre-upgrade states for a new project (23.978214ms)
+  ✔ Sharing capability migration is repeatable and keeps documents, publication, history and owner (22.461334ms)
+  ✔ Visual layout migration preserves existing records and public snapshots redact private titles (14.321022ms)
+  ✔ Bilingual publication, branding, optional logos and history deletion remain isolated (58.391889ms)
+  ✔ App Showcase migration preserves data, hides private app assets and checks English parity atomically (36.415658ms)
+✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (2053.884188ms)
+✔ JSON backup round trips CV content, layout and schema without exporting credentials (8.347291ms)
+✔ Legacy JSON including decomposed Vietnamese is converted without changing source data (0.784912ms)
+✔ Malformed, unrelated and future-version backups are rejected before import (3.389805ms)
+✔ Import limits are measured in bytes and reject unsafe links and malformed rows (10.925003ms)
+✔ Comparisons identify contact, ordering and visibility changes, without mutating either profile (5.682327ms)
+✔ Semantically identical hidden sets and normalized Vietnamese do not create spurious differences (1.894793ms)
+✔ v1.1 records get the default layout; incomplete or duplicated order does not lose sections (2.241015ms)
+✔ Renderer reorders within columns and hides full sections while keeping the Portfolio entry (3.167521ms)
+✔ Hidden content is preserved in draft and removed from the public payload (0.530108ms)
+✔ Publish validates visible content and allows a deliberately hidden contact section (1.788814ms)
+✔ Vietnamese Unicode is composed consistently in saved content and rendering (0.441595ms)
+✔ Bundled serif fonts cover Vietnamese/Latin and do not depend on a remote font service (17.917278ms)
+✔ Preview routes serve real files with the correct content type, without opening a socket (10.348475ms)
+✔ Preview Portfolio aliases redirect to the correct static document (0.589718ms)
+✔ Preview does not serve source files or traversal outside public assets (3.315843ms)
+✔ Draft is honest about missing content and includes all six verified units (5.213242ms)
+✔ The final content section is the Portfolio entry, followed by footer (2.223168ms)
+✔ Published contact links use real, validated destinations (1.343433ms)
+✔ All content stays text; malicious URL schemes and attribute injection are rejected (2.071359ms)
+✔ Portrait and project links render only when configured (0.739383ms)
+✔ Portfolio placeholder has useful return and contact links, without an API dependency (0.434665ms)
+✔ Content checks reject malformed data and identify unfinished release content (1.059606ms)
+✔ Unit code is optional in legacy profiles, bounded, NFC normalized, and preserved in JSON history (5.763099ms)
+✔ Implementation cards show separate escaped code/name lines and keep no-code legacy cards (3.307651ms)
+✔ Sharing URL accepts website origins only without credentials, fragments, tracking or admin paths (0.672322ms)
+✔ PDF filename is header safe and includes normalized profile name plus snapshot version (0.436377ms)
+✔ Social metadata uses published identity and snapshot image URL, without fabricating localhost (0.773926ms)
+✔ Older projects receive compatible defaults; showcase fields round-trip JSON and history differences (7.151179ms)
+✔ Reject unsafe covers/gallery, too many images, duplicate IDs and invalid app options (2.151089ms)
+✔ Assets and links update across locales by stable ID while descriptions and alt text remain independent (0.841357ms)
+✔ Missing English implementation descriptions stay required with named, navigable errors after reordering (2.035275ms)
+✔ Completely missing English rows and partially translated bullet lists cannot be published (1.439037ms)
+✔ Completing app inventory preserves translations and adds only missing VI IDs with blank translation copy (0.789539ms)
+✔ Publication strips hidden apps including media; renderer remains escaped and gallery keyboard accessible (3.193469ms)
+✔ Published app pictures require descriptive text in either locale (0.636909ms)
+✔ Grid normalizes all blocks exactly once, bounded spans and escaped custom titles (2.735119ms)
+✔ Both layout configurations survive switching; Maison blocks can move across regions without duplicates (0.698302ms)
+✔ Public grid follows actual source order and 6/6/12 spans; admin tools appear only for active block (7.570992ms)
+✔ Custom titles/grid/time data round trip JSON and history, while hidden titles stay private (4.759668ms)
+✔ Chronology supports ranges, Vietnamese/English months and present without guessing invalid dates (1.217413ms)
+✔ Chronology is stable in both directions; missing dates remain last; source array is unchanged (0.554134ms)
+✔ Draft supports incomplete content; public snapshot blocks placeholders and missing contacts (4.221177ms)
+✔ Input validation rejects oversized arrays, malformed rows, data URLs and unsafe links (1.190954ms)
+✔ Image validation checks signatures instead of trusting extension or MIME type (0.216366ms)
+✔ Editor hooks are opt-in; public rendering remains escaped and links to current print route (2.778855ms)
+ℹ tests 69
 ℹ suites 0
-ℹ pass 60
+ℹ pass 69
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 2118.370839
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+ℹ duration_ms 2314.289894
 
-> maison-cv@1.6.0 test:ui
+> maison-cv@1.7.0 test:ui
 > vitest run
 
 
- RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.6.0
+ RUN  v5.0.5 /workspace/scratch/f95125167c57/app-showcase-work/Maison-CV-v1.7.0
 
 
- Test Files  12 passed (12)
-      Tests  72 passed (72)
-   Start at  12:34:17
-   Duration  6.81s (tests 65%, environment 22%, import 10%, transform 3%)
+ Test Files  14 passed (14)
+      Tests  81 passed (81)
+   Start at  16:43:02
+   Duration  7.08s (tests 64%, environment 22%, import 10%, transform 3%, worker 1%)
 
-    Isolate  12 workers spawned · ~506ms startup each (spawn + environment, per file)
-             at least ~362ms faster with isolate: false — reuses workers across files instead of one per file
+    Isolate  14 workers spawned · ~538ms startup each (spawn + environment, per file)
+             at least ~538ms faster with isolate: false — reuses workers across files instead of one per file
 
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+EXIT: 0
 
 === TYPECHECK ===
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.6.0 typecheck
+> maison-cv@1.7.0 typecheck
 > tsc --noEmit
 
-
-=== FINAL EDITOR CHECK AFTER PUBLICATION SUMMARY CHANGE ===
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
- RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.6.0
+EXIT: 0
+
+=== PRODUCTION BUILD ===
+
+> maison-cv@1.7.0 build
+> next build --webpack
+
+▲ Next.js 16.4.3 (webpack)
+✓ Running next.config.ts took 55ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.9s
+  Running TypeScript ...
+  Finished TypeScript in 4.2s ...
+  Collecting page data using 8 workers ...
+  Generating static pages using 8 workers (0/8) ...
+  Generating static pages using 8 workers (2/8) 
+  Generating static pages using 8 workers (4/8) 
+  Generating static pages using 8 workers (6/8) 
+✓ Generating static pages using 8 workers (8/8) in 199ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /[lang]
+├ ƒ /admin
+├ ƒ /api/admin/cv
+├ ƒ /api/admin/history
+├ ƒ /api/admin/history/[id]
+├ ƒ /api/admin/history/[id]/restore
+├ ƒ /api/admin/import
+├ ƒ /api/admin/publish
+├ ƒ /api/admin/settings
+├ ƒ /api/admin/upload
+├ ƒ /api/branding/icon
+├ ƒ /api/cv/pdf
+├ ƒ /api/media/[...path]
+├ ƒ /api/share/image
+├ ƒ /api/share/qr
+├ ○ /auth/callback
+├ ƒ /portfolio
+├ ƒ /print
+├ ƒ /robots.txt
+└ ƒ /sitemap.xml
 
 
- Test Files  1 passed (1)
-      Tests  21 passed (21)
-   Start at  12:35:30
-   Duration  7.02s (tests 85%, environment 9%, import 4%, transform 3%)
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
 
-
-=== ADDITIVE DATABASE MIGRATION ===
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.6.0 test:cloud
-> node --test tests/cloud.integration.test.mjs
-
-▶ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images
-  ✔ No first-login ownership or automatic public seed (12.821174ms)
-  ✔ Owner can save first draft; duplicate seed and stale version are rejected (8.273005ms)
-  ✔ Anonymous cannot read drafts or claim ownership; other signed-in user sees no draft (6.689798ms)
-  ✔ Draft images are private and storage writes require explicit owner (6.581897ms)
-  ✔ Only published snapshot and referenced portrait become public; drafts remain isolated (9.988829ms)
-  ✔ v1.2 publication removes hidden content, preserving the full private draft and layout (8.160197ms)
-  ✔ v1.3 captures the existing draft/public baseline exactly once (24.906724ms)
-  ✔ History and recovery RPCs are private and revision content is immutable to the browser (6.276653ms)
-  ✔ Manual checkpoints keep the complete draft without changing its version (4.612396ms)
-  ✔ Publication archives the full draft once per version while the public snapshot remains redacted (6.377313ms)
-  ✔ Restore creates a pre-change checkpoint and a new draft, without publishing or accepting a stale retry (8.269058ms)
-  ✔ Import preserves the previous saved draft atomically and leaves the publication untouched (3.552578ms)
-  ✔ Portraits referenced by private history cannot be deleted or read by anonymous visitors (6.318435ms)
-  ✔ Migration reruns preserve baselines and do not invent pre-upgrade states for a new project (20.900821ms)
-  ✔ Sharing capability migration is repeatable and keeps documents, publication, history and owner (19.727715ms)
-  ✔ Visual layout migration preserves existing records and public snapshots redact private titles (21.513663ms)
-  ✔ Bilingual publication, branding, optional logos and history deletion remain isolated (58.54882ms)
-✔ Postgres migration: explicit owner, RLS, atomic saves, published snapshots and private images (1882.553268ms)
-ℹ tests 18
-ℹ suites 0
-ℹ pass 18
-ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 2030.538522
+EXIT: 0
 
 === CONTENT STRUCTURE ===
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> maison-cv@1.6.0 check
+> maison-cv@1.7.0 check
 > node scripts/check-content.mjs
 
 PENDING: At least one real contact method is needed
@@ -177,37 +196,6 @@ PENDING: profile.experience[0].highlights[0] contains a placeholder
 PENDING: profile.experience[0].highlights[1] contains a placeholder
 PENDING: Portrait has not been provided
 Content structure: PASS (draft; 17 content items pending).
-
-=== OFFLINE PREVIEW ===
-Offline review updated: preview/index.html and preview/portfolio.html
-
-=== PRODUCTION BUILD ===
-npm run build / next build --webpack: PASS, exit 0.
-Compiled successfully; TypeScript PASS; page data/static pages generated; build traces complete.
-Routes include /[lang], /api/admin/settings, /api/branding/icon and existing CV/history/PDF/sharing routes.
-Admin server-rendered dynamically for current branding. No auto icon.svg metadata route.
-Font and default favicon outputFileTracingIncludes verified in NFT manifests.
-
-=== PDF / BROWSER QA ===
-Real PDF: VI 2 pages, VI long 8 pages, EN 2 pages, grid-data 2 pages. A4.
-English text extraction contains all 8 section headings, English dates and /en QR link; no control glyphs after font-isolation fix.
-Visual PNG review: both EN pages; VI first page; optional uniform logo left of code/name, text/QR/footer inside A4.
-Chrome: renderer EN headings/actions/dates/switch and settings/toolbar inspected from component/renderer HTML fixtures.
-Fixtures are QA data, not live cloud sessions; omitted from source ZIP.
-
-FINAL TEST COUNT: 60 Node (including PGlite subtests) + 72 Vitest = 132 PASS, 0 FAIL.
-Live Auth/email, real Supabase Storage, Vercel deployment and physical devices still require the checklist in UPGRADE-v1.6.0.md.
-
-=== ORIGINAL FONT FINAL CHECK ===
 npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
- RUN  v5.0.5 /workspace/scratch/f95125167c57/Maison-CV-v1.6.0
-
-
- Test Files  1 passed (1)
-      Tests  4 passed (4)
-   Start at  12:36:46
-   Duration  2.31s (tests 82%, import 16%, transform 2%)
-
-
-Original NotoSerif TTF SHA-256 c8f669ceb2c9c60ccf55198b305e08a997ffca79a38cc7eeb551e643cbe66505 verified against v1.5 input ZIP. English final PDF text extraction: all headings, zero control glyphs.
+EXIT: 0

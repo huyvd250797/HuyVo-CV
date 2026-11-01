@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.7.0 — App Showcase · 31/10/2026
+
+- Mở rộng sản phẩm hiện có thành App Showcase: ảnh bìa, tối đa 8 ảnh gallery/app, mô tả ảnh, nền tảng, trạng thái, nổi bật và ẩn từng app. Giữ thứ tự thủ công, sắp xếp năm, inline edit, undo và cả Maison/Grid.
+- Cắt ảnh tại trình duyệt bằng zoom/vị trí, tạo WebP 1280×800; kiểm tra JPG/PNG/WebP <=3 MB, <=25 MP trước khi nhận file vào Storage.
+- Đồng bộ ảnh/thứ tự ảnh và demo/source giữa nháp VI/EN theo ID; giữ nội dung và alt text mỗi ngôn ngữ. Bổ sung mục/app từ VI chỉ thêm ID thiếu, giữ nội dung EN cũ.
+- Giữ chuẩn VI có thì EN phải đầy đủ khi xuất bản. Lỗi dùng tên phần/đơn vị/app/trường, có nút Sửa mở và focus đúng ô. Bắt cả mục bị thiếu hoàn toàn và danh sách kết quả mới dịch một phần. Nháp vẫn lưu được khi đang biên tập.
+- API trả địa chỉ lỗi có cấu trúc; publish Tất cả kiểm tra mọi ngôn ngữ trước mutation, PostgreSQL kiểm tra bổ sung và rollback transaction khi EN thiếu dữ liệu.
+- Snapshot công khai bỏ app ẩn cùng media. RLS media hiểu bìa/gallery trong nháp, hai publication và history; import loại ảnh sai owner/mất file; backup và diff giữ media mới.
+- PDF VI/EN có ảnh bìa/tóm tắt app, trạng thái/nền tảng và demo/source; bỏ app ẩn. Gallery giữ trên web, PDF tiếp tục A4 một cột.
+- Migration 007 không rewrite nội dung/snapshot cũ; capability 7, schema nội dung 6. Không thêm env/dependency; tên ZIP theo yêu cầu: `v1.7.0 — App Showcase.zip`.
+- Chưa push/deploy hoặc nghiệm thu Supabase/Vercel thật. Tiếp theo v1.8.0 — CV Presentation & PDF.
+
 ## v1.6.0 — Bilingual CV · 31/10/2026
 
 - Bộ nội dung VI/EN độc lập trong cùng nháp/version; sửa và khôi phục không ghi đè ngôn ngữ còn lại. EN có tiêu đề/UI và định dạng thời gian riêng; nhập bản dịch chuyên môn trước khi xuất bản.

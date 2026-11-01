@@ -1,4 +1,4 @@
-import type {Profile,Locale} from './types';
+import type {Profile,Locale,PublicationIssue} from './types';
 export const languages:Locale[];
 export const languageName:Record<Locale,string>;
 export const englishTitles:Record<string,string>;
@@ -10,3 +10,7 @@ export function createEnglishProfile(profile:Profile):Profile;
 export function formatPeriod(value:string,language:string):string;
 export function englishGaps(bundle:Profile):string[];
 export function mediaPaths(profile:Profile):string[];
+
+export function englishIssues(bundle:Profile):PublicationIssue[];
+
+export function completeEnglishSection(bundle:Profile,group:string):Profile;

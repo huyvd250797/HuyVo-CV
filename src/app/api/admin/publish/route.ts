@@ -9,7 +9,8 @@ export async function POST(request: Request) {
     if (draft.error) dbFailure(draft.error);
     if (Number(draft.data?.version) !== body.expectedVersion) throw new ApiError(409,'Bản nháp đã thay đổi trên thiết bị khác. Hãy tải lại để kiểm tra.');
     const languages=body.languages??['vi'];if(!Array.isArray(languages)||!languages.length||languages.length>2||languages.some((l:unknown)=>!['vi','en'].includes(l as string)))throw new ApiError(422,'Chọn ngôn ngữ xuất bản.');
-    for(const language of new Set(languages)){const parsed=validatePublication(draft.data?.content,language as 'vi'|'en');if(parsed.errors.length)return json({error:parsed.errors.join('\n')},422);}
+    const reports=[...new Set(languages)].map(language=>validatePublication(draft.data?.content,language as 'vi'|'en'));
+    const errors=reports.flatMap(report=>report.errors);if(errors.length)return json({error:errors.join('\n'),issues:reports.flatMap(report=>report.issues)},422);
     const { data, error } = await db.rpc('publish_cv',{ p_expected_version:body.expectedVersion,p_languages:[...new Set(languages)] });
     if (error) dbFailure(error);
     return json({ publication:data });

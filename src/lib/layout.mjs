@@ -33,6 +33,7 @@ export function publicContent(profile){
  const data=structuredClone(profile);data.layout=normalizeLayout(data.layout);
  const fields={objective:['objective'],personal:['email','phone','website','address'],education:['education'],skills:['skills'],certificates:['certificates'],experience:['experience'],delivery:['implementations'],projects:['projects']};
  for(const id of data.layout.hidden){for(const key of fields[id])data[key]=Array.isArray(data[key])?[]:'';delete data.layout.titles[id];}
+ data.projects=(data.projects||[]).filter(row=>!row.hidden);
  return {...data,publication:'published',cvFile:''};
 }
 export function moveItem(items,from,to){if(from===to||from<0||to<0||from>=items.length||to>=items.length)return items;const result=[...items];const [item]=result.splice(from,1);result.splice(to,0,item);return result;}

@@ -4,14 +4,14 @@ import seed from '../src/data/profile.json';
 const mocks=vi.hoisted(()=>({load:vi.fn(),render:vi.fn(),portrait:vi.fn(),qr:vi.fn(),logos:vi.fn()}));
 vi.mock('../src/lib/public-profile',()=>({loadPublicCv:mocks.load}));
 vi.mock('../src/lib/pdf-document',()=>({renderCvPdf:mocks.render}));
-vi.mock('../src/lib/share-assets',()=>({publicPortrait:mocks.portrait,profileQr:mocks.qr,unitLogos:mocks.logos}));
+vi.mock('../src/lib/share-assets',()=>({publicPortrait:mocks.portrait,profileQr:mocks.qr,unitLogos:mocks.logos,appCovers:async()=>({})}));
 import {GET as pdf} from '../src/app/api/cv/pdf/route';
 import {GET as qr} from '../src/app/api/share/qr/route';
 const profile={...seed,publication:'published' as const,name:'Võ Đức Huy',siteUrl:'https://cv.example.com/'};
 beforeEach(()=>{vi.clearAllMocks();mocks.load.mockResolvedValue({profile,version:17,status:'ready'});mocks.render.mockResolvedValue(Buffer.from('%PDF-1.7\nTEST'));mocks.portrait.mockResolvedValue(undefined);mocks.logos.mockResolvedValue({});mocks.qr.mockResolvedValue(Buffer.from('PNG'));});
 afterEach(()=>vi.restoreAllMocks());
 test('Public PDF returns attachment from publication only and avoids client/CDN caching',async()=>{
- const r=await pdf(new Request('https://cv.example.com/api/cv/pdf'));expect(r.status).toBe(200);expect(r.headers.get('Content-Type')).toBe('application/pdf');expect(r.headers.get('Content-Disposition')).toContain('CV-Vo-duc-Huy-v17-VI.pdf');expect(r.headers.get('X-CV-Version')).toBe('17');expect(r.headers.get('Cache-Control')).toBe('no-store');expect(mocks.render).toHaveBeenCalledWith(profile,17,undefined,expect.any(Buffer),{});
+ const r=await pdf(new Request('https://cv.example.com/api/cv/pdf'));expect(r.status).toBe(200);expect(r.headers.get('Content-Type')).toBe('application/pdf');expect(r.headers.get('Content-Disposition')).toContain('CV-Vo-duc-Huy-v17-VI.pdf');expect(r.headers.get('X-CV-Version')).toBe('17');expect(r.headers.get('Cache-Control')).toBe('no-store');expect(mocks.render).toHaveBeenCalledWith(profile,17,undefined,expect.any(Buffer),{},{});
 });
 test('Changed published content at same version gets a new PDF, so cache cannot serve an old snapshot',async()=>{
  mocks.load.mockResolvedValue({profile:{...profile,name:'Tên sau cập nhật'},version:17,status:'ready'});const r=await pdf(new Request('https://cv.example.com/api/cv/pdf'));expect(r.status).toBe(200);expect(mocks.render.mock.calls[0][0].name).toBe('Tên sau cập nhật');

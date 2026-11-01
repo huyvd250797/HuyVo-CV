@@ -22,7 +22,7 @@ test('Public grid follows actual source order and 6/6/12 spans; admin tools appe
 });
 test('Custom titles/grid/time data round trip JSON and history, while hidden titles stay private',()=>{
  const p={...seed,implementations:[{code:'EPU',name:'Trường Đại học Điện lực',period:'2021 - hiện tại',description:'Phạm vi'}],layout:{mode:'grid',grid:{order:['education','experience','delivery'],spans:{education:6,experience:6,delivery:12}},hidden:['skills'],titles:{skills:'PRIVATE SKILL TITLE',education:'Nền tảng học tập'}}};
- const parsed=parseBackup(makeBackup(p,20));assert.deepEqual(parsed.errors,[]);assert.equal(parsed.data.schemaVersion,5);assert.equal(parsed.data.layout.grid.spans.delivery,12);assert.equal(parsed.data.implementations[0].period,'2021 - hiện tại');assert.equal(parsed.data.layout.titles.education,'Nền tảng học tập');
+ const parsed=parseBackup(makeBackup(p,20));assert.deepEqual(parsed.errors,[]);assert.equal(parsed.data.schemaVersion,6);assert.equal(parsed.data.layout.grid.spans.delivery,12);assert.equal(parsed.data.implementations[0].period,'2021 - hiện tại');assert.equal(parsed.data.layout.titles.education,'Nền tảng học tập');
  const published=publicContent(parsed.data);assert(!('skills' in published.layout.titles));assert.equal(parsed.data.layout.titles.skills,'PRIVATE SKILL TITLE');assert(diffProfiles(seed,p).some(row=>row.key==='layout'));
 });
 test('Chronology supports ranges, Vietnamese/English months and present without guessing invalid dates',()=>{
